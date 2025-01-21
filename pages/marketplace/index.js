@@ -47,7 +47,7 @@ export default function Home({setIsLoading, currentUser}) {
 
         if (response != null && response.status == 200)
         {
-            setCategories(response.data.categories);
+            setCategories(response.data.filters);
             setProducts(response.data.products);
             setPageLength(response.data.pageSize)
             setTotal(response.data.total);
@@ -55,7 +55,6 @@ export default function Home({setIsLoading, currentUser}) {
 
         setIsLoading(false);
     }
-
 
     useEffect(() => {
 
@@ -75,12 +74,12 @@ export default function Home({setIsLoading, currentUser}) {
                         return (
                             <Accordion key={index} defaultExpanded={according.expanded} sx={{ boxShadow: 'none' }}>
                                 <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header" sx={{fontWeight:"bold"}}>
-                                    {according.name}
+                                    {according.category}
                                 </AccordionSummary>
                                 <Box sx={{paddingLeft:2, paddingRight:3}}>
 
                                     <Stack>
-                                        {according.filters.map((filterOption, index) => {
+                                        {according.options.map((filterOption, index) => {
                                             return (
                                                 <Box key={index}>
                                                     <Stack direction="row"
@@ -93,18 +92,18 @@ export default function Home({setIsLoading, currentUser}) {
                                                                 {
                                                                     addToFilter({
                                                                         category: according.name,
-                                                                        option: filterOption.name
+                                                                        option: filterOption
                                                                     })
                                                                 }
                                                                 else
                                                                 {
-                                                                    removeFromFilter(according.name, filterOption.name);
+                                                                    removeFromFilter(according.name, filterOption);
                                                                 }
                                                                 //alert("clicked: " + filterOption.name + " from " + according.name)
-                                                            }} />} label={filterOption.name} />
+                                                            }} />} label={filterOption} />
                                                         </Box>
                                                         <Box sx={{fontSize:12}}>
-                                                            {filterOption.available}
+                                                            {/* {filterOption.available} */}
                                                         </Box>
                                                     </Stack>
                                                 </Box>
