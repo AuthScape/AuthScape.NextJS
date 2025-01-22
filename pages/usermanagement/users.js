@@ -25,6 +25,8 @@ export default function Users({}) {
                 }}
                 onAccountCreated={(user) => {
                     alert(user.firstName + " " + user.lastName + " " + user.email);
+
+                    return null;
                 }}
             />
         </Box>
