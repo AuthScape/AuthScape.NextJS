@@ -69,12 +69,12 @@ export default function RecipeReviewCard({product}) {
           <ShareIcon />
         </IconButton>
       </Stack>
-      
+
       <CardMedia
         component="img"
         height="194"
-        image="https://mui.com/static/images/cards/paella.jpg"
-        alt="Paella dish"
+        image={product.photo}
+        alt={product.name}
       />
 
       <CardContent>

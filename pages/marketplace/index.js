@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {apiService} from 'authscape';
-import { Checkbox, TextField, Paper, Typography, Box, Stack } from '@mui/material';
+import { Checkbox, TextField, Paper, Typography, Box, Stack, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Card from '../../components/marketplace/card';
 import Pagination from '@mui/material/Pagination';
+import { backgroundColor, boxShadow, paddingBottom, paddingRight, paddingTop } from '@xstyled/styled-components';
 
 export default function Home({setIsLoading, currentUser}) {
 
@@ -16,10 +17,9 @@ export default function Home({setIsLoading, currentUser}) {
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
     const [pageLength, setPageLength] = useState(0);
-
     const [filters, setFilters] = useState([]);
-    
 
+    const [lastFilterSelected, setLastFilterSelected] = useState(null);
 
     const addToFilter = (newFilter) => { 
         setFilters(prevFilters => [...prevFilters, newFilter]);
@@ -39,10 +39,12 @@ export default function Home({setIsLoading, currentUser}) {
 
         setIsLoading(true);
 
+
         const response = await apiService().post("/Marketplace/Search", {
             pageNumber: page,
-            pageSize: 10,
-            searchParamFilters: filters
+            pageSize: 12,
+            searchParamFilters: filters,
+            lastFilterSelected: lastFilterSelected
         });
 
         if (response != null && response.status == 200)
@@ -51,6 +53,12 @@ export default function Home({setIsLoading, currentUser}) {
             setProducts(response.data.products);
             setPageLength(response.data.pageSize)
             setTotal(response.data.total);
+
+            window.scroll({
+                top: 0,
+                left: 0,
+                behavior: 'smooth' // Optional for smooth scrolling
+            });
         }
 
         setIsLoading(false);
@@ -60,16 +68,49 @@ export default function Home({setIsLoading, currentUser}) {
 
         fetchData();
 
-    }, [page, pageLength, filters]);
+    }, [page, filters]);
+
+
+    useEffect(() => {
+
+        setPage(1);
+
+    }, [filters]);
 
 
     return (
         <Box>
-            <Box sx={{paddingLeft:2, fontSize:18}}>
-                {total} Found
+            <Box sx={{paddingLeft:2, fontSize:16, boxShadow:"0 0 1px #ddd", borderBottom: "1px solid #ccc", backgroundColor:"white", paddingTop:1, paddingBottom:1}}>
+                <Grid container spacing={2}>
+                    <Grid size={10}>
+                        <Box sx={{paddingTop:0}}>
+                            {page} - {products != null && (products.length * page)} of {total} Results
+                        </Box>
+                    </Grid>
+                    <Grid size={2}>
+                        {/* <FormControl fullWidth sx={{paddingRight:1}}>
+                            <InputLabel id="demo-simple-select-label">Age</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                //value={age}
+                                label="Age"
+                                onChange={() => {
+                                    
+                                }}>
+                                <MenuItem value={10}>Alpha</MenuItem>
+                                <MenuItem value={20}>Twenty</MenuItem>
+                                <MenuItem value={30}>Thirty</MenuItem>
+                            </Select>
+                        </FormControl> */}
+                    </Grid>
+                </Grid>
             </Box>
-            <Grid container spacing={2}>
+            
+
+            <Grid container spacing={2} sx={{paddingTop:2, backgroundColor:"#"}}>
                 <Grid size={2}>
+                    {/* {JSON.stringify(filters)} */}
                     {categories != null && categories.map((according, index) => {
                         return (
                             <Accordion key={index} defaultExpanded={according.expanded} sx={{ boxShadow: 'none' }}>
@@ -86,20 +127,25 @@ export default function Home({setIsLoading, currentUser}) {
                                                         spacing={1}
                                                         sx={{justifyContent: "space-between", alignItems: "center"}}>
                                                         <Box>
-                                                            <FormControlLabel control={<Checkbox defaultChecked={false} onChange={(event) => {
+                                                            <FormControlLabel control={<Checkbox defaultChecked={according.category ==  false} onChange={(event) => {
 
                                                                 if (event.target.checked)
                                                                 {
+                                                                    setLastFilterSelected({
+                                                                        category: according.category,
+                                                                        option: filterOption
+                                                                    });
+
                                                                     addToFilter({
-                                                                        category: according.name,
+                                                                        category: according.category,
                                                                         option: filterOption
                                                                     })
                                                                 }
                                                                 else
                                                                 {
-                                                                    removeFromFilter(according.name, filterOption);
+                                                                    removeFromFilter(according.category, filterOption);
                                                                 }
-                                                                //alert("clicked: " + filterOption.name + " from " + according.name)
+
                                                             }} />} label={filterOption} />
                                                         </Box>
                                                         <Box sx={{fontSize:12}}>
