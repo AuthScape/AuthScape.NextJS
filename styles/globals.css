@@ -385,3 +385,7 @@ a {
 }
 
 /* .gjs-pn-buttons div[title="Open Blocks"] */
+
+.MuiDataGrid-row {
+  cursor: pointer;
+}
