@@ -144,8 +144,9 @@ export default function PortalLayout({children, currentUser, pageProps}) {
             {name: "Datasources", href:"/mapping/Datasources" },
           ]},
 
-          {name: "Web Editor", icon: <MapRoundedIcon/>, subnav: [
-            {name: "Pages", href:"/editor/1" },
+          {name: "Content Management", icon: <MapRoundedIcon/>, subnav: [
+            {name: "Pages", href:"/contentManagement" },
+            {name: "Example Page", href:"/contentManagement/1" },
           ]},
 
           {name: "Wallet", icon: <MapRoundedIcon/>, subnav: [
