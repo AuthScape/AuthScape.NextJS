@@ -52,6 +52,8 @@ export default function RecipeReviewCard({product}) {
   return (
     <Card sx={{ maxWidth: 345, position:"relative", border: "1px solid lightgray" }}>
 
+      {JSON.stringify(product)}
+
       <Stack 
         direction="row"
         spacing={0}
@@ -73,7 +75,7 @@ export default function RecipeReviewCard({product}) {
       <CardMedia
         component="img"
         height="194"
-        image={product.photo}
+        image={product.mainPhoto}
         alt={product.name}
       />
 
