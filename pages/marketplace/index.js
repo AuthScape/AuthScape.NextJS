@@ -166,9 +166,17 @@ export default function Home({setIsLoading, currentUser}) {
                     <Box sx={{paddingBottom:2}}>
                         <Grid container spacing={2}>
                             {products != null && products.map((product, index) => {
+
+                                let productData = {};
+
+                                for (let index = 0; index < product.length; index++) {
+                                    const element = product[index];
+                                    productData[element.name] = element.value;
+                                }
+
                                 return (
                                 <Grid size={3} key={index}>
-                                    <Card product={product} />
+                                    <Card product={productData} />
                                 </Grid>
                                 )
                             })}
