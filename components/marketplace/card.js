@@ -14,7 +14,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { background, border, paddingTop, position, textDecoration, width } from '@xstyled/styled-components';
+import { background, border, cursor, objectFit, paddingTop, position, textDecoration, width } from '@xstyled/styled-components';
 import { Button, Stack } from '@mui/material';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 
@@ -50,7 +50,7 @@ export default function RecipeReviewCard({product}) {
   };
 
   return (
-    <Card sx={{ maxWidth: 345, position:"relative", border: "1px solid lightgray" }}>
+    <Card sx={{ maxWidth: 345, position:"relative", border: "1px solid lightgray", cursor:"pointer" }}>
 
       {JSON.stringify(product)}
 
@@ -75,24 +75,26 @@ export default function RecipeReviewCard({product}) {
       <CardMedia
         component="img"
         height="194"
-        image={product.mainPhoto}
+        sx={{objectFit:"contain"}}
+        image={product.MainPhoto}
         alt={product.name}
       />
 
       <CardContent>
 
         <Typography variant="h5">
-          {product.name}
+          {product.Name}
+        </Typography>
+        <Typography variant="h5">
+          {product.BrandName}
         </Typography>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          This impressive paella is a perfect party dish and a fun meal to cook
-          together with your guests. Add 1 cup of frozen peas along with the mussels,
-          if you like.
+          {product.Description}
         </Typography>
 
 
-        <Stack direction="row" spacing={2} sx={{paddingTop:2}}>
+        {/* <Stack direction="row" spacing={2} sx={{paddingTop:2}}>
           <Typography variant="h6" gutterBottom sx={{textDecoration:"line-through"}}>
             $45.66
           </Typography>
@@ -100,13 +102,13 @@ export default function RecipeReviewCard({product}) {
           <Typography variant="h6" gutterBottom>
             $45.66
           </Typography>
-        </Stack>
+        </Stack>*/}
 
         <Typography variant="h6" gutterBottom sx={{paddingTop:2}}>
-            Qty: 300
-        </Typography>
+            {product.Category} | {product.ParentCategory}
+        </Typography> 
 
-        <Button variant="contained" sx={{width:"100%", marginTop:2}}>Add To Cart</Button>
+        {/* <Button variant="contained" sx={{width:"100%", marginTop:2}}>Add To Cart</Button> */}
 
       </CardContent>
       
