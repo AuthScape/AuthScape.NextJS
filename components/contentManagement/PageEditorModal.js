@@ -26,7 +26,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const PageEditorModal = ({ isOpen, handleClose }) => {
   const [page, setPage] = useState({});
   const [config, setConfig] = useState({});
-  const [data, setData] = useState({});
+  const [contentData, setContentData] = useState({});
 
   const fetchPageDetail = async () => {
     try {
@@ -42,7 +42,7 @@ const PageEditorModal = ({ isOpen, handleClose }) => {
         console.log("Parsed Data:", JSON.parse(pageContent));
         setPage(response.data);
         setConfig(JSON.parse(pageTemplateConfig));
-        setData(JSON.parse(pageContent));
+        setContentData(JSON.parse(pageContent));
       }
     } catch (error) {
       console.error("Error fetching or parsing page data:", error);
@@ -50,15 +50,17 @@ const PageEditorModal = ({ isOpen, handleClose }) => {
   };
 
   useEffect(() => {
-    if(isOpen){
+    if (isOpen) {
       fetchPageDetail();
     }
-
   }, [isOpen]);
 
   const save = (data) => {
     setData(data);
   };
+
+  const initialData = {};
+
   return (
     <Dialog
       fullScreen
@@ -91,11 +93,14 @@ const PageEditorModal = ({ isOpen, handleClose }) => {
         }}
       >
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          {config && data ? (
-           //<Typography>I am ready</Typography>
-           <Puck className={"Puck"} config={config} data={data} onPublish={save} />
+          {config && contentData ? (
+            <Puck
+              className={"Puck"}
+              config={config}
+              data={contentData}
+              onPublish={save}
+            />
           ) : (
-
             <Typography>Loading...</Typography>
           )}
         </Box>

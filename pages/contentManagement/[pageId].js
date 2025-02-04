@@ -88,8 +88,9 @@ const WebsiteBuilder = ({loadedUser, showNavigationBar}) => {
   
   // Save the data to your database
   const save = (data) => {};
-
+ console.log(JSON.stringify(config))
   return (
+
       <Puck className={"Puck"} config={config} data={initialData} onPublish={save} />
   );
 }
