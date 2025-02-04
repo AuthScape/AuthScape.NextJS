@@ -124,29 +124,29 @@ export default function Home({setIsLoading, currentUser}) {
                                             return (
                                                 <Box key={index}>
                                                     <Stack direction="row"
-                                                        spacing={1}
-                                                        sx={{justifyContent: "space-between", alignItems: "center"}}>
+                                                        spacing={0}
+                                                        sx={{alignItems: "center"}}>
                                                         <Box>
-                                                            <FormControlLabel control={<Checkbox defaultChecked={according.category ==  false} onChange={(event) => {
+                                                            <FormControlLabel control={<Checkbox defaultChecked={according.category == false} onChange={(event) => {
 
                                                                 if (event.target.checked)
                                                                 {
                                                                     setLastFilterSelected({
                                                                         category: according.category,
-                                                                        option: filterOption
+                                                                        option: filterOption.name
                                                                     });
 
                                                                     addToFilter({
                                                                         category: according.category,
-                                                                        option: filterOption
+                                                                        option: filterOption.name
                                                                     })
                                                                 }
                                                                 else
                                                                 {
-                                                                    removeFromFilter(according.category, filterOption);
+                                                                    removeFromFilter(according.category, filterOption.name);
                                                                 }
 
-                                                            }} />} label={filterOption} />
+                                                            }} />} label={filterOption.name} />
                                                         </Box>
                                                         <Box sx={{fontSize:12}}>
                                                             {/* {filterOption.available} */}
@@ -160,7 +160,7 @@ export default function Home({setIsLoading, currentUser}) {
                                 </Box>
                             </Accordion>
                         )
-                    })}                    
+                    })}
                 </Grid>
                 <Grid size={10}>
                     <Box sx={{paddingBottom:2}}>
