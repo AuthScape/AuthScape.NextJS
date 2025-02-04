@@ -80,9 +80,6 @@ const WebsiteBuilder = ({loadedUser, showNavigationBar}) => {
           </Box>;
         },
       },
-      
-
-
     },
   };
   

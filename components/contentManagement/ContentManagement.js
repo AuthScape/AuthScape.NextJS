@@ -18,17 +18,15 @@ import {
 } from "@mui/material";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import ArchiveIcon from "@mui/icons-material/Archive";
+import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
-import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import SearchIcon from "@mui/icons-material/Search";
 import { DataGrid } from "@mui/x-data-grid";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import { apiService } from "authscape";
 import dayjs from "dayjs";
 import CreatePageModal from "./CreatePageModal";
+import PageEditorModal from "./PageEditorModal";
 
 const ContentManagement = ({}) => {
   const refDataGrid = useRef(null);
@@ -44,22 +42,114 @@ const ContentManagement = ({}) => {
     initialPaginationModel
   );
   const [pageList, setPageList] = useState([]);
-  const [pageTemplates, setPageTemplates] = useState([]);
-  const [pageTypes, setPageTypes] = useState([]);
-  const [chipState, setChipState] = useState({});
+  const [chipState, setChipState] = useState([]);
   const [ui, setUI] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(null);
   const [rowCount, setRowCount] = useState(0);
-
   const totalPages = Math.ceil(rowCount / initialPaginationModel.length);
 
-  const columns = [];
+  const columns = [
+    {
+      field: "title",
+      headerName: "Title",
+      flex: 1,
+      height: 200,
+    },
+
+    {
+      field: "templateTitle",
+      headerName: "Page Template",
+      flex: 1,
+      height: 200,
+    },
+    {
+      field: "typeTitle",
+      headerName: "Page Type",
+      flex: 1,
+      height: 200,
+    },
+    {
+      field: "description",
+      headerName: "Description",
+      flex: 1,
+      height: 200,
+      renderCell: (params) => (
+        <Tooltip title={params.value} arrow>
+          <span
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "block",
+              maxWidth: "100%",
+              cursor: "pointer",
+            }}
+          >
+            {params.value}
+          </span>
+        </Tooltip>
+      ),
+    },
+    {
+      field: "lastUpdated",
+      headerName: "Last Update",
+      flex: 1,
+      height: 200,
+      valueGetter: (params) => {
+        return `${dayjs(params).format("ddd, DD MMM YYYY")}`;
+      },
+    },
+    {
+      field: "actions",
+      type: "actions",
+      width: 100,
+      headerName: "Actions",
+      cellClassName: "actions",
+      getActions: ({ id, row }) => {
+        const actions = [
+          <GridActionsCellItem
+            key={`edit-${id}`}
+            icon={
+              <Tooltip title="Edit" arrow>
+                <EditIcon color="warning" />
+              </Tooltip>
+            }
+            label="Edit"
+            onClick={() => {
+              setIsEditorOpen(id);
+            }}
+          />,
+          <GridActionsCellItem
+            key={`delete-${id}`}
+            icon={
+              <Tooltip title="Delete" arrow>
+                <DeleteIcon color="error" />
+              </Tooltip>
+            }
+            label="Delete"
+            onClick={async () => {
+              let response = await apiService().post(
+                "/ContentManagement/RemovePage?pageId=" + id
+              );
+              if (response != null && response.status === 200) {
+                alert("success");
+                reloadUI();
+              } else {
+                alert("failed");
+              }
+            }}
+          />,
+        ];
+        return actions;
+      },
+    },
+  ];
 
   const debounce = (callback, delay) => {
     let timerId;
     const helperFunction = (...args) => {
       clearTimeout(timerId);
-
       timerId = setTimeout(() => {
         callback.apply(this, args);
       }, delay);
@@ -73,16 +163,13 @@ const ContentManagement = ({}) => {
   };
 
   const fetchPageList = async () => {
-    let response = await apiService().post("", paginationModel);
+    let response = await apiService().post(
+      "/ContentManagement/GetPages",
+      paginationModel
+    );
     if (response != null && response.status == 200) {
       setPageList(response.data.data);
       setRowCount(response.data.recordsTotal);
-    }
-  };
-
-  const fetchPageTemplates = async () => {
-    let response = await apiService().get("");
-    if (response != null && response.status == 200) {
     }
   };
 
@@ -90,17 +177,17 @@ const ContentManagement = ({}) => {
     try {
       let response = await apiService().get("/ContentManagement/GetPageTypes");
       if (response && response.status === 200) {
-        setPageTypes(response.data);
-        const chipModel = response.data.reduce((acc, type) => {
-          acc[type.title] = {
-            id: type.id,
-            variant: "outlined",
-            color: "default",
-          };
-          return acc;
-        }, {});
-
-        setChipState(chipModel);
+        if (chipState.length == 0) {
+          const chipModel = response.data.reduce((acc, type) => {
+            acc[type.title] = {
+              id: type.id,
+              variant: "outlined",
+              color: "default",
+            };
+            return acc;
+          }, {});
+          setChipState(chipModel);
+        }
       }
     } catch (error) {
       console.error("Error fetching page types:", error);
@@ -108,15 +195,15 @@ const ContentManagement = ({}) => {
   };
 
   useEffect(() => {
+    fetchPageList();
     fetchPageTypes();
-  }, []);
+  }, [ui, paginationModel]);
 
   const handleChipClick = (label) => {
     setChipState((prev) => {
       const newVariant =
         prev[label].variant === "outlined" ? "filled" : "outlined";
       const newColor = prev[label].color === "default" ? "primary" : "default";
-
       const updatedChipState = {
         ...prev,
         [label]: {
@@ -125,7 +212,6 @@ const ContentManagement = ({}) => {
           color: newColor,
         },
       };
-
       const activeFilters = Object.values(updatedChipState)
         .filter((value) => value.variant === "filled")
         .map((value) => value.id);
@@ -135,7 +221,6 @@ const ContentManagement = ({}) => {
         chipFilters: activeFilters,
         offset: 1,
       }));
-
       return updatedChipState;
     });
   };
@@ -197,7 +282,7 @@ const ContentManagement = ({}) => {
               flexWrap: "wrap",
               gap: 1,
               flexGrow: 1,
-              order: { xs: 2, md: 1 },
+              order: 1,
             }}
           >
             {Object.keys(chipState).map((label) => (
@@ -268,12 +353,14 @@ const ContentManagement = ({}) => {
           mt={1}
         >
           <DataGrid
+            disableRowSelectionOnClick
+            disableColumnSelector
+            disableSelectionOnClick
             columns={columns}
             rows={pageList}
             pageSize={8}
             rowsPerPage={[8]}
             ref={refDataGrid}
-            disableSelectionOnClick
             disableColumnFilter
             disableColumnSort
             disableColumnMenu
@@ -328,7 +415,14 @@ const ContentManagement = ({}) => {
           reloadUI();
           setPaginationModel(initialPaginationModel);
         }}
-        pageTypes={pageTypes}
+      />
+      <PageEditorModal
+        isOpen={isEditorOpen}
+        handleClose={() => {
+          setIsEditorOpen(null);
+          reloadUI();
+          setPaginationModel(initialPaginationModel);
+        }}
       />
     </Container>
   );

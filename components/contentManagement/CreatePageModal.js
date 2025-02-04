@@ -9,9 +9,7 @@ import {
   Dialog,
   Slide,
   Button,
-  Select,
   Box,
-  MenuItem,
   Autocomplete,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -19,10 +17,10 @@ import { useForm, Controller } from "react-hook-form";
 import { apiService } from "authscape";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="down" ref={ref} {...props} />;
+  return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
+const CreatePageModal = ({ isOpen, handleClose }) => {
   const [templates, setTemplates] = useState([]);
   const initialData = {
     title: "",
@@ -48,34 +46,39 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
 
   const {
     reset,
+    watch,
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
     setValue,
   } = useForm({
     defaultValues: initialData,
     mode: "onChange",
   });
 
+  const watchedFields = watch(["title", "description"]);
+  const templateId = watch("templateId");
+  const isFormValid =
+    watchedFields.every((field) => field?.trim() !== "") && templateId;
+
   const onSave = async (pageParam) => {
-    const { title, pageType, description } = pageParam;
-
-    const param = { title, pageType, description };
-
-    try {
-      const response = await apiService().post(
-        "/WhiteLabel/CreateNewPage",
-        param
-      );
-      if (response?.status === 200) {
-        alert("success");
-        handleClose();
-        reset();
-      } else {
-        alert("failed");
-      }
-    } catch (error) {
-      alert("error");
+    event.preventDefault();
+    const { title, templateId, description } = pageParam;
+    const param = {
+      title: title,
+      id: templateId,
+      description: description,
+    };
+    const response = await apiService().post(
+      "/ContentManagement/CreateNewPage",
+      param
+    );
+    if (response != null && response.status === 200) {
+      alert("success");
+      handleClose();
+      reset();
+    } else {
+      alert("failed");
     }
   };
 
@@ -116,6 +119,7 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
                 <>
                   <Typography variant="subtitle2">Page Title</Typography>
                   <TextField
+                    size="small"
                     {...field}
                     fullWidth
                     error={!!errors.title}
@@ -132,21 +136,24 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
                 <>
                   <Typography variant="subtitle2">Template</Typography>
                   <Autocomplete
-                    options={templates.sort(
-                      (a, b) => -b.firstLetter.localeCompare(a.firstLetter)
+                    fullWidth
+                    disableClearable
+                    options={templates.sort((a, b) =>
+                      a.typeTitle.localeCompare(b.typeTitle)
                     )}
-                    groupBy={(option) => option.firstLetter}
+                    groupBy={(option) => option.typeTitle}
                     getOptionLabel={(option) => option.title}
-                    sx={{ width: 300 }}
+                    onChange={(_, data) => {
+                      if (data != null && data.id != null) {
+                        setValue("templateId", data.id);
+                      }
+                    }}
                     renderInput={(params) => (
-                      <TextField {...params} label="With categories" />
+                      <TextField {...params} fullWidth size="small" />
                     )}
-                    renderGroup={(params) => (
-                      <li key={params.key}>
-                        <GroupHeader>{params.group}</GroupHeader>
-                        <GroupItems>{params.children}</GroupItems>
-                      </li>
-                    )}
+                    isOptionEqualToValue={(option, value) =>
+                      option.id === value.id
+                    }
                   />
                 </>
               )}
@@ -167,7 +174,7 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
               type="submit"
               variant="contained"
               sx={{ marginRight: 1 }}
-              disabled={!isValid}
+              disabled={!isFormValid}
             >
               {`Create New Page`}
             </Button>
