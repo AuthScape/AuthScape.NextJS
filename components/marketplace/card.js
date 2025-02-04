@@ -14,7 +14,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { background, border, cursor, objectFit, paddingTop, position, textDecoration, width } from '@xstyled/styled-components';
+import { background, border, cursor, height, objectFit, paddingTop, position, textDecoration, width } from '@xstyled/styled-components';
 import { Button, Stack } from '@mui/material';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 
@@ -50,9 +50,9 @@ export default function RecipeReviewCard({product}) {
   };
 
   return (
-    <Card sx={{ maxWidth: 345, position:"relative", border: "1px solid lightgray", cursor:"pointer" }}>
+    <Card sx={{ maxWidth: 345, position:"relative", border: "1px solid lightgray", cursor:"pointer", height: "100%" }}>
 
-      {JSON.stringify(product)}
+      {/* {JSON.stringify(product)} */}
 
       <Stack 
         direction="row"
@@ -86,7 +86,7 @@ export default function RecipeReviewCard({product}) {
           {product.Name}
         </Typography>
         <Typography variant="h5">
-          {product.BrandName}
+          {product["Brand Name"]}
         </Typography>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
