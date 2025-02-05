@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Stack,
   TextField,
@@ -13,7 +13,6 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import InputAdornment from "@mui/material/InputAdornment";
 import CloseIcon from "@mui/icons-material/Close";
 import { useForm, Controller } from "react-hook-form";
 import { apiService } from "authscape";

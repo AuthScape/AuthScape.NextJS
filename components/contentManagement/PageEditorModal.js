@@ -12,11 +12,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const PageEditorModal = ({ config, isOpen, handleClose }) => {
   const [page, setPage] = useState({});
   const initialData = {
-    root: {
-      props: {},
-    },
     content: [],
-    zones: {},
+    root: {},
   };
   const [contentData, setContentData] = useState(initialData);
 
@@ -40,7 +37,7 @@ const PageEditorModal = ({ config, isOpen, handleClose }) => {
   const save = async (data) => {
     const contentParam = {
       pageId: page.id,
-      content: JSON.stringify(data),
+      content: JSON.stringify({ data }),
     };
     let response = await apiService().post(
       `/ContentManagement/UpdatePageContent`,
