@@ -1,0 +1,228 @@
+import React, { useEffect, useState } from "react";
+import {
+  Stack,
+  TextField,
+  Typography,
+  IconButton,
+  DialogTitle,
+  DialogContent,
+  Dialog,
+  Slide,
+  Button,
+  Box,
+  Select,
+  MenuItem,
+} from "@mui/material";
+import InputAdornment from "@mui/material/InputAdornment";
+import CloseIcon from "@mui/icons-material/Close";
+import { useForm, Controller } from "react-hook-form";
+import { apiService } from "authscape";
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
+  const isEditing = typeof isOpen !== "boolean";
+
+  const initialData = {
+    title: "",
+    pageTypeId: null,
+    description: "",
+    recursion: null,
+  };
+
+  const {
+    reset,
+    watch,
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm({
+    defaultValues: initialData,
+    mode: "onChange",
+  });
+
+  useEffect(() => {
+    if (isEditing) {
+      setValue("title", isOpen.title);
+      setValue("pageTypeId", isOpen.pageTypeId);
+      setValue("description", isOpen.description);
+      setValue("recursion", isOpen.recursion);
+    } else {
+      reset();
+    }
+  }, [isEditing, isOpen, reset, setValue]);
+
+  const watchedFields = watch(["title", "description"]);
+  const pageTypeId = watch("pageTypeId");
+  const recursion = watch("recursion");
+
+  const selectedPageType = pageTypes.find((type) => type.id === pageTypeId);
+  const isRecursive = selectedPageType?.isRecursive || false;
+
+  const isFormValid =
+    watchedFields.every((field) => field?.trim() !== "") &&
+    pageTypeId &&
+    (!isRecursive || (isRecursive && recursion));
+
+  const onSave = async (pageParam) => {
+    event.preventDefault();
+    const { title, pageTypeId, description, recursion } = pageParam;
+    const param = {
+      pageId: isEditing ? isOpen.id : null,
+      title: title,
+      pageTypeId: pageTypeId,
+      description: description,
+      recursion: recursion,
+    };
+
+    const apiEndpoint = isEditing
+      ? `/ContentManagement/UpdatePage`
+      : "/ContentManagement/CreateNewPage";
+
+    const response = await apiService().post(apiEndpoint, param);
+
+    if (response != null && response.status === 200) {
+      alert("success");
+      handleClose();
+      reset();
+    } else {
+      alert("failed");
+    }
+  };
+
+  return (
+    <Dialog
+      fullWidth
+      maxWidth="md"
+      open={isOpen}
+      onClose={handleClose}
+      TransitionComponent={Transition}
+      PaperProps={{
+        sx: { borderRadius: 3 },
+      }}
+    >
+      <DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={handleClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 6,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+        <Typography variant="h3">
+          {isEditing ? "Update Page" : "Create New Page"}
+        </Typography>
+      </DialogTitle>
+      <DialogContent sx={{ paddingBottom: 2 }}>
+        <form onSubmit={handleSubmit(onSave)}>
+          <Stack spacing={1}>
+            <Controller
+              name="title"
+              control={control}
+              rules={{ required: "Title is required" }}
+              render={({ field }) => (
+                <>
+                  <Typography variant="subtitle2">Page Title</Typography>
+                  <TextField
+                    size="small"
+                    {...field}
+                    fullWidth
+                    error={!!errors.title}
+                    helperText={errors.title?.message || ""}
+                  />
+                </>
+              )}
+            />
+            <Controller
+              name="pageTypeId"
+              control={control}
+              rules={{ required: "Template is required" }}
+              render={({ field }) => (
+                <>
+                  <Typography variant="subtitle2">Page Type</Typography>
+                  <Select
+                    {...field}
+                    size="small"
+                    value={field.value || ""}
+                    onChange={(event) => {
+                      const selectedType = pageTypes.find(
+                        (type) => type.id === event.target.value
+                      );
+                      field.onChange(event.target.value);
+                      setValue("isRecursive", selectedType.isRecursive);
+                      if (!selectedType.isRecursive) {
+                        setValue("recursion", null);
+                      }
+                    }}
+                  >
+                    {pageTypes.map((type) => (
+                      <MenuItem key={type.id} value={type.id}>
+                        {type.title}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </>
+              )}
+            />
+            {isRecursive && (
+              <Controller
+                name="recursion"
+                control={control}
+                rules={{
+                  required: "Recursion is required",
+                  min: { value: 1, message: "Recursion must be at least one" },
+                }}
+                render={({ field }) => (
+                  <>
+                    <Typography variant="subtitle2">Recursion Day</Typography>
+                    <TextField
+                      size="small"
+                      type="number"
+                      {...field}
+                      fullWidth
+                      error={!!errors.recursion}
+                      helperText={errors.recursion?.message || ""}
+                    />
+                  </>
+                )}
+              />
+            )}
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <Typography variant="subtitle2">Page Description</Typography>
+                  <TextField {...field} multiline rows={5} fullWidth />
+                </>
+              )}
+            />
+          </Stack>
+          <Box mt={2} display="flex" justifyContent="flex-end">
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{ marginRight: 1 }}
+              disabled={!isFormValid}
+            >
+              {isEditing ? "Update Page" : "Create New Page"}
+            </Button>
+            <Button variant="outlined" onClick={handleClose}>
+              Cancel
+            </Button>
+          </Box>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default CreatePageModal;
