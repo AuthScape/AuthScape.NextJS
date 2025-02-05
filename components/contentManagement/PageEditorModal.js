@@ -1,23 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {
-  Stack,
-  TextField,
-  Typography,
-  IconButton,
-  DialogTitle,
-  DialogContent,
-  Dialog,
-  Slide,
-  Button,
-  Select,
-  Box,
-  MenuItem,
-  Autocomplete,
-} from "@mui/material";
+import { IconButton, DialogContent, Dialog, Slide, Box } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useForm, Controller } from "react-hook-form";
 import { apiService } from "authscape";
 import { Puck } from "@measured/puck";
+import "@measured/puck/puck.css";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
@@ -45,7 +31,6 @@ const PageEditorModal = ({ config, isOpen, handleClose }) => {
       }
     }
   };
-
   useEffect(() => {
     if (isOpen) {
       fetchPageDetail();
@@ -100,12 +85,7 @@ const PageEditorModal = ({ config, isOpen, handleClose }) => {
         }}
       >
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          <Puck
-            className={"Puck"}
-            config={config}
-            data={contentData}
-            onPublish={save}
-          />
+          <Puck config={config} data={contentData} onPublish={save} />
         </Box>
       </DialogContent>
     </Dialog>
