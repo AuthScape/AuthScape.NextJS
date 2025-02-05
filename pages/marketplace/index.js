@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {apiService} from 'authscape';
-import { Checkbox, TextField, Paper, Typography, Box, Stack, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Checkbox, TextField, Paper, Typography, Box, Stack, FormControl, InputLabel, Select, MenuItem, Breadcrumbs } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
+import MuiAccordion from '@mui/material/Accordion';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Card from '../../components/marketplace/card';
 import Pagination from '@mui/material/Pagination';
-import { backgroundColor, boxShadow, paddingBottom, paddingRight, paddingTop } from '@xstyled/styled-components';
+import { styled } from '@mui/material/styles';
+import Link from '@mui/material/Link';
 
-export default function Home({setIsLoading, currentUser}) {
+export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, smoothScrollEnable = true, currentUser}) {
 
     const [categories, setCategories] = useState(null);
     const [products, setProducts] = useState(null);
@@ -31,6 +32,18 @@ export default function Home({setIsLoading, currentUser}) {
           ));          
     }
 
+    const Accordion = styled((props) => (
+        <MuiAccordion disableGutters elevation={0} square {...props} />
+      ))(({ theme }) => ({
+        // border: `1px solid ${theme.palette.divider}`,
+        '&:not(:last-child)': {
+          borderBottom: 0,
+        },
+        '&::before': {
+          display: 'none',
+        },
+    }));
+
     const handleChange = (event, value) => {
       setPage(value);
     };
@@ -39,12 +52,12 @@ export default function Home({setIsLoading, currentUser}) {
 
         setIsLoading(true);
 
-
         const response = await apiService().post("/Marketplace/Search", {
             pageNumber: page,
-            pageSize: 12,
+            pageSize: pageSize,
             searchParamFilters: filters,
-            lastFilterSelected: lastFilterSelected
+            lastFilterSelected: lastFilterSelected,
+            categoryFilters: categories
         });
 
         if (response != null && response.status == 200)
@@ -54,11 +67,14 @@ export default function Home({setIsLoading, currentUser}) {
             setPageLength(response.data.pageSize)
             setTotal(response.data.total);
 
-            window.scroll({
-                top: 0,
-                left: 0,
-                behavior: 'smooth' // Optional for smooth scrolling
-            });
+            if (smoothScrollEnable)
+            {
+                window.scroll({
+                    top: 0,
+                    left: 0,
+                    behavior: 'smooth' // Optional for smooth scrolling
+                });
+            }
         }
 
         setIsLoading(false);
@@ -80,45 +96,42 @@ export default function Home({setIsLoading, currentUser}) {
 
     return (
         <Box>
-            <Box sx={{paddingLeft:2, fontSize:16, boxShadow:"0 0 1px #ddd", borderBottom: "1px solid #ccc", backgroundColor:"white", paddingTop:1, paddingBottom:1}}>
+            <Box sx={{paddingLeft:2, fontSize:16, paddingTop:1, paddingBottom:1}}>
                 <Grid container spacing={2}>
                     <Grid size={10}>
                         <Box sx={{paddingTop:0}}>
-                            {page} - {products != null && (products.length * page)} of {total} Results
+                            <Breadcrumbs separator=">" aria-label="breadcrumb">
+                                <Link underline="hover" color="inherit" href="/" >
+                                    All Categories
+                                </Link>
+                                <Link
+                                    underline="hover"
+                                    color="inherit"
+                                    href="/material-ui/getting-started/installation/"
+                                >
+                                    Tables
+                                </Link>
+                                <Typography sx={{ color: "gray" }}>Lounge Chair</Typography>
+                            </Breadcrumbs>
                         </Box>
                     </Grid>
                     <Grid size={2}>
-                        {/* <FormControl fullWidth sx={{paddingRight:1}}>
-                            <InputLabel id="demo-simple-select-label">Age</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                //value={age}
-                                label="Age"
-                                onChange={() => {
-                                    
-                                }}>
-                                <MenuItem value={10}>Alpha</MenuItem>
-                                <MenuItem value={20}>Twenty</MenuItem>
-                                <MenuItem value={30}>Thirty</MenuItem>
-                            </Select>
-                        </FormControl> */}
+                        <Box sx={{textAlign:"right"}}>
+                            {page} - {products != null && (products.length * page)} of {total} Results
+                        </Box>
                     </Grid>
                 </Grid>
             </Box>
             
-
             <Grid container spacing={2} sx={{paddingTop:2, backgroundColor:"#"}}>
                 <Grid size={2}>
-                    {/* {JSON.stringify(filters)} */}
                     {categories != null && categories.map((according, index) => {
                         return (
-                            <Accordion key={index} defaultExpanded={according.expanded} sx={{ boxShadow: 'none' }}>
-                                <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header" sx={{fontWeight:"bold"}}>
+                            <Accordion key={index} defaultExpanded={according.expanded} sx={{ boxShadow: 'none', fontSize:14, margin: 0 }}>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header" sx={{fontSize:16, marginTop:0, marginBottom: 0, borderTop:"1px solid #e0e0e0", marginLeft: -1, marginBottom:0}}>
                                     {according.category}
                                 </AccordionSummary>
-                                <Box sx={{paddingLeft:2, paddingRight:3}}>
-
+                                <Box sx={{marginTop:0, marginLeft:1, marginBottom:2}}>
                                     <Stack>
                                         {according.options.map((filterOption, index) => {
                                             return (
@@ -127,36 +140,46 @@ export default function Home({setIsLoading, currentUser}) {
                                                         spacing={0}
                                                         sx={{alignItems: "center"}}>
                                                         <Box>
-                                                            <FormControlLabel control={<Checkbox defaultChecked={according.category == false} onChange={(event) => {
 
-                                                                if (event.target.checked)
-                                                                {
-                                                                    setLastFilterSelected({
-                                                                        category: according.category,
-                                                                        option: filterOption.name
-                                                                    });
+                                                        <FormControlLabel
+                                                            control={
+                                                                <Checkbox
+                                                                size="small"
+                                                                sx={{padding:0.8, color:"lightgray"}}
+                                                                checked={filters.some(f => 
+                                                                    f.category === according.category && 
+                                                                    f.option === filterOption.name
+                                                                )}
+                                                                onChange={(event) => {
+                                                                    if (event.target.checked)
+                                                                        {
+                                                                            setLastFilterSelected({
+                                                                                category: according.category,
+                                                                                option: filterOption.name
+                                                                            });
+        
+                                                                            addToFilter({
+                                                                                category: according.category,
+                                                                                option: filterOption.name
+                                                                            })
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            removeFromFilter(according.category, filterOption.name);
+                                                                        }
+                                                                }} 
+                                                                />
+                                                            }
+                                                            label={<Typography sx={{fontSize:14}}>{filterOption.name}</Typography>} 
+                                                            />
 
-                                                                    addToFilter({
-                                                                        category: according.category,
-                                                                        option: filterOption.name
-                                                                    })
-                                                                }
-                                                                else
-                                                                {
-                                                                    removeFromFilter(according.category, filterOption.name);
-                                                                }
-
-                                                            }} />} label={filterOption.name} />
-                                                        </Box>
-                                                        <Box sx={{fontSize:12}}>
-                                                            {/* {filterOption.available} */}
                                                         </Box>
                                                     </Stack>
                                                 </Box>
                                             )
-                                        })}
+                                        })
+                                    }
                                     </Stack>
-                                
                                 </Box>
                             </Accordion>
                         )
@@ -180,7 +203,6 @@ export default function Home({setIsLoading, currentUser}) {
                                 </Grid>
                                 )
                             })}
-
                             
                         </Grid>
                     </Box>
