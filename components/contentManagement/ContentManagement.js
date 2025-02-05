@@ -26,12 +26,13 @@ import { GridActionsCellItem } from "@mui/x-data-grid";
 import { apiService } from "authscape";
 import dayjs from "dayjs";
 import BuildIcon from "@mui/icons-material/Build";
+
 import CreatePageModal from "./CreatePageModal";
 import PageEditorModal from "./PageEditorModal";
+import ConfirmationModal from "../confirmationModal";
 
 const ContentManagement = ({ config }) => {
   const refDataGrid = useRef(null);
-
   const initialPaginationModel = {
     offset: 1,
     length: 8,
@@ -43,6 +44,7 @@ const ContentManagement = ({ config }) => {
   const [paginationModel, setPaginationModel] = useState(
     initialPaginationModel
   );
+  const [showConfirmDeletePage, setShowConfirmDeletePage] = useState(null);
   const [pageList, setPageList] = useState([]);
   const [chipState, setChipState] = useState([]);
   const [ui, setUI] = useState(false);
@@ -149,15 +151,7 @@ const ContentManagement = ({ config }) => {
             }
             label="Delete"
             onClick={async () => {
-              let response = await apiService().post(
-                "/ContentManagement/RemovePage?pageId=" + id
-              );
-              if (response != null && response.status === 200) {
-                alert("success");
-                reloadUI();
-              } else {
-                alert("failed");
-              }
+              setShowConfirmDeletePage(id);
             }}
           />,
         ];
@@ -441,6 +435,28 @@ const ContentManagement = ({ config }) => {
           reloadUI();
           setPaginationModel(initialPaginationModel);
         }}
+      />
+      <ConfirmationModal
+        title={"Are you sure you want to remove this page?"}
+        description={
+          "When this page is removed it will not be able to be recovered."
+        }
+        okTitle={"Yes"}
+        cancelTitle={"Cancel"}
+        cancelClicked={() => {
+          setShowConfirmDeletePage(null);
+        }}
+        okClicked={async () => {
+          let response = await apiService().post(
+            "/ContentManagement/RemovePage?pageId=" + showConfirmDeletePage
+          );
+          if (response != null && response.status === 200) {
+            reloadUI();
+          } else {
+          }
+          setShowConfirmDeletePage(null);
+        }}
+        open={showConfirmDeletePage != null ? true : false}
       />
     </Container>
   );
