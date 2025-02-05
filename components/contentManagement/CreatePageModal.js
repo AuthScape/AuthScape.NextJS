@@ -10,8 +10,10 @@ import {
   Slide,
   Button,
   Box,
-  Autocomplete,
+  Select,
+  MenuItem,
 } from "@mui/material";
+import InputAdornment from "@mui/material/InputAdornment";
 import CloseIcon from "@mui/icons-material/Close";
 import { useForm, Controller } from "react-hook-form";
 import { apiService } from "authscape";
@@ -20,29 +22,15 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const CreatePageModal = ({ isOpen, handleClose }) => {
-  const [templates, setTemplates] = useState([]);
+const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
+  const isEditing = typeof isOpen !== "boolean";
+
   const initialData = {
     title: "",
-    templateId: null,
+    pageTypeId: null,
     description: "",
+    recursion: null,
   };
-
-  const fetchPageTemplates = async () => {
-    let response = await apiService().get(
-      "/ContentManagement/GetPageTemplateSelector"
-    );
-    if (response != null && response.status == 200) {
-      setTemplates(response.data);
-    }
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchPageTemplates();
-      reset();
-    }
-  }, [isOpen]);
 
   const {
     reset,
@@ -56,23 +44,46 @@ const CreatePageModal = ({ isOpen, handleClose }) => {
     mode: "onChange",
   });
 
+  useEffect(() => {
+    if (isEditing) {
+      setValue("title", isOpen.title);
+      setValue("pageTypeId", isOpen.pageTypeId);
+      setValue("description", isOpen.description);
+      setValue("recursion", isOpen.recursion);
+    } else {
+      reset();
+    }
+  }, [isEditing, isOpen, reset, setValue]);
+
   const watchedFields = watch(["title", "description"]);
-  const templateId = watch("templateId");
+  const pageTypeId = watch("pageTypeId");
+  const recursion = watch("recursion");
+
+  const selectedPageType = pageTypes.find((type) => type.id === pageTypeId);
+  const isRecursive = selectedPageType?.isRecursive || false;
+
   const isFormValid =
-    watchedFields.every((field) => field?.trim() !== "") && templateId;
+    watchedFields.every((field) => field?.trim() !== "") &&
+    pageTypeId &&
+    (!isRecursive || (isRecursive && recursion));
 
   const onSave = async (pageParam) => {
     event.preventDefault();
-    const { title, templateId, description } = pageParam;
+    const { title, pageTypeId, description, recursion } = pageParam;
     const param = {
+      pageId: isEditing ? isOpen.id : null,
       title: title,
-      id: templateId,
+      pageTypeId: pageTypeId,
       description: description,
+      recursion: recursion,
     };
-    const response = await apiService().post(
-      "/ContentManagement/CreateNewPage",
-      param
-    );
+
+    const apiEndpoint = isEditing
+      ? `/ContentManagement/UpdatePage`
+      : "/ContentManagement/CreateNewPage";
+
+    const response = await apiService().post(apiEndpoint, param);
+
     if (response != null && response.status === 200) {
       alert("success");
       handleClose();
@@ -106,7 +117,9 @@ const CreatePageModal = ({ isOpen, handleClose }) => {
         >
           <CloseIcon />
         </IconButton>
-        <Typography variant="h3">{`Create New Page`}</Typography>
+        <Typography variant="h3">
+          {isEditing ? "Update Page" : "Create New Page"}
+        </Typography>
       </DialogTitle>
       <DialogContent sx={{ paddingBottom: 2 }}>
         <form onSubmit={handleSubmit(onSave)}>
@@ -129,35 +142,59 @@ const CreatePageModal = ({ isOpen, handleClose }) => {
               )}
             />
             <Controller
-              name="templateId"
+              name="pageTypeId"
               control={control}
               rules={{ required: "Template is required" }}
               render={({ field }) => (
                 <>
-                  <Typography variant="subtitle2">Template</Typography>
-                  <Autocomplete
-                    fullWidth
-                    disableClearable
-                    options={templates.sort((a, b) =>
-                      a.typeTitle.localeCompare(b.typeTitle)
-                    )}
-                    groupBy={(option) => option.typeTitle}
-                    getOptionLabel={(option) => option.title}
-                    onChange={(_, data) => {
-                      if (data != null && data.id != null) {
-                        setValue("templateId", data.id);
+                  <Typography variant="subtitle2">Page Type</Typography>
+                  <Select
+                    {...field}
+                    size="small"
+                    value={field.value || ""}
+                    onChange={(event) => {
+                      const selectedType = pageTypes.find(
+                        (type) => type.id === event.target.value
+                      );
+                      field.onChange(event.target.value);
+                      setValue("isRecursive", selectedType.isRecursive);
+                      if (!selectedType.isRecursive) {
+                        setValue("recursion", null);
                       }
                     }}
-                    renderInput={(params) => (
-                      <TextField {...params} fullWidth size="small" />
-                    )}
-                    isOptionEqualToValue={(option, value) =>
-                      option.id === value.id
-                    }
-                  />
+                  >
+                    {pageTypes.map((type) => (
+                      <MenuItem key={type.id} value={type.id}>
+                        {type.title}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 </>
               )}
             />
+            {isRecursive && (
+              <Controller
+                name="recursion"
+                control={control}
+                rules={{
+                  required: "Recursion is required",
+                  min: { value: 1, message: "Recursion must be at least one" },
+                }}
+                render={({ field }) => (
+                  <>
+                    <Typography variant="subtitle2">Recursion Day</Typography>
+                    <TextField
+                      size="small"
+                      type="number"
+                      {...field}
+                      fullWidth
+                      error={!!errors.recursion}
+                      helperText={errors.recursion?.message || ""}
+                    />
+                  </>
+                )}
+              />
+            )}
             <Controller
               name="description"
               control={control}
@@ -176,7 +213,7 @@ const CreatePageModal = ({ isOpen, handleClose }) => {
               sx={{ marginRight: 1 }}
               disabled={!isFormValid}
             >
-              {`Create New Page`}
+              {isEditing ? "Update Page" : "Create New Page"}
             </Button>
             <Button variant="outlined" onClick={handleClose}>
               Cancel

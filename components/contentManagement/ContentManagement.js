@@ -25,11 +25,13 @@ import { DataGrid } from "@mui/x-data-grid";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import { apiService } from "authscape";
 import dayjs from "dayjs";
+import BuildIcon from "@mui/icons-material/Build";
 import CreatePageModal from "./CreatePageModal";
 import PageEditorModal from "./PageEditorModal";
 
-const ContentManagement = ({}) => {
+const ContentManagement = ({ config }) => {
   const refDataGrid = useRef(null);
+
   const initialPaginationModel = {
     offset: 1,
     length: 8,
@@ -47,19 +49,13 @@ const ContentManagement = ({}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(null);
   const [rowCount, setRowCount] = useState(0);
+  const [pageTypes, setPageTypes] = useState([]);
   const totalPages = Math.ceil(rowCount / initialPaginationModel.length);
 
   const columns = [
     {
       field: "title",
       headerName: "Title",
-      flex: 1,
-      height: 200,
-    },
-
-    {
-      field: "templateTitle",
-      headerName: "Page Template",
       flex: 1,
       height: 200,
     },
@@ -92,6 +88,17 @@ const ContentManagement = ({}) => {
       ),
     },
     {
+      field: "recursion",
+      headerName: "Recursion",
+      flex: 1,
+      height: 200,
+      valueGetter: (params) => {
+        return params
+          ? `${params == 1 ? "Everyday" : params + " Days"}`
+          : "N/A";
+      },
+    },
+    {
       field: "lastUpdated",
       headerName: "Last Update",
       flex: 1,
@@ -100,6 +107,7 @@ const ContentManagement = ({}) => {
         return `${dayjs(params).format("ddd, DD MMM YYYY")}`;
       },
     },
+
     {
       field: "actions",
       type: "actions",
@@ -112,10 +120,22 @@ const ContentManagement = ({}) => {
             key={`edit-${id}`}
             icon={
               <Tooltip title="Edit" arrow>
-                <EditIcon color="warning" />
+                <EditIcon color="primary" />
               </Tooltip>
             }
             label="Edit"
+            onClick={() => {
+              setIsOpen(row);
+            }}
+          />,
+          <GridActionsCellItem
+            key={`build-${id}`}
+            icon={
+              <Tooltip title="Build" arrow>
+                <BuildIcon color="secondary" />
+              </Tooltip>
+            }
+            label="Build"
             onClick={() => {
               setIsEditorOpen(id);
             }}
@@ -174,23 +194,20 @@ const ContentManagement = ({}) => {
   };
 
   const fetchPageTypes = async () => {
-    try {
-      let response = await apiService().get("/ContentManagement/GetPageTypes");
-      if (response && response.status === 200) {
-        if (chipState.length == 0) {
-          const chipModel = response.data.reduce((acc, type) => {
-            acc[type.title] = {
-              id: type.id,
-              variant: "outlined",
-              color: "default",
-            };
-            return acc;
-          }, {});
-          setChipState(chipModel);
-        }
+    const response = await apiService().get("/ContentManagement/GetPageTypes");
+    if (response && response.status === 200) {
+      setPageTypes(response.data);
+      if (chipState.length == 0) {
+        const chipModel = response.data.reduce((acc, type) => {
+          acc[type.title] = {
+            id: type.id,
+            variant: "outlined",
+            color: "default",
+          };
+          return acc;
+        }, {});
+        setChipState(chipModel);
       }
-    } catch (error) {
-      console.error("Error fetching page types:", error);
     }
   };
 
@@ -275,7 +292,6 @@ const ContentManagement = ({}) => {
             gap: 2,
           }}
         >
-          {" "}
           <Box
             sx={{
               display: "flex",
@@ -415,8 +431,10 @@ const ContentManagement = ({}) => {
           reloadUI();
           setPaginationModel(initialPaginationModel);
         }}
+        pageTypes={pageTypes}
       />
       <PageEditorModal
+        config={config}
         isOpen={isEditorOpen}
         handleClose={() => {
           setIsEditorOpen(null);

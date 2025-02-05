@@ -23,29 +23,26 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
 });
 
-const PageEditorModal = ({ isOpen, handleClose }) => {
+const PageEditorModal = ({ config, isOpen, handleClose }) => {
   const [page, setPage] = useState({});
-  const [config, setConfig] = useState({});
-  const [contentData, setContentData] = useState({});
+  const initialData = {
+    root: {
+      props: {},
+    },
+    content: [],
+    zones: {},
+  };
+  const [contentData, setContentData] = useState(initialData);
 
   const fetchPageDetail = async () => {
-    try {
-      let response = await apiService().get(
-        `/ContentManagement/GetPage?pageId=${isOpen}`
-      );
-
-      if (response && response.status === 200) {
-        console.log("API Response:", response.data);
-        const pageTemplateConfig = response.data?.pageTemplate?.config || "{}";
-        const pageContent = response.data?.content || "{}";
-        console.log("Parsed Config:", JSON.parse(pageTemplateConfig));
-        console.log("Parsed Data:", JSON.parse(pageContent));
-        setPage(response.data);
-        setConfig(JSON.parse(pageTemplateConfig));
-        setContentData(JSON.parse(pageContent));
+    let response = await apiService().get(
+      `/ContentManagement/GetPage?pageId=${isOpen}`
+    );
+    if (response && response.status === 200) {
+      setPage(response.data);
+      if (response.data.content) {
+        setContentData(response.data.content);
       }
-    } catch (error) {
-      console.error("Error fetching or parsing page data:", error);
     }
   };
 
@@ -55,11 +52,21 @@ const PageEditorModal = ({ isOpen, handleClose }) => {
     }
   }, [isOpen]);
 
-  const save = (data) => {
-    setData(data);
+  const save = async (data) => {
+    const contentParam = {
+      pageId: page.id,
+      content: JSON.stringify(data),
+    };
+    let response = await apiService().post(
+      `/ContentManagement/UpdatePageContent`,
+      contentParam
+    );
+    if (response && response.status === 200) {
+      handleClose();
+    } else {
+      alert("error");
+    }
   };
-
-  const initialData = {};
 
   return (
     <Dialog
@@ -93,16 +100,12 @@ const PageEditorModal = ({ isOpen, handleClose }) => {
         }}
       >
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          {config && contentData ? (
-            <Puck
-              className={"Puck"}
-              config={config}
-              data={contentData}
-              onPublish={save}
-            />
-          ) : (
-            <Typography>Loading...</Typography>
-          )}
+          <Puck
+            className={"Puck"}
+            config={config}
+            data={contentData}
+            onPublish={save}
+          />
         </Box>
       </DialogContent>
     </Dialog>
