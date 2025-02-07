@@ -19,7 +19,7 @@ export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, 
     const [page, setPage] = useState(1);
     const [pageLength, setPageLength] = useState(0);
     const [filters, setFilters] = useState([]);
-
+    const [expandedCategories, setExpandedCategories] = useState([]);
     const [lastFilterSelected, setLastFilterSelected] = useState(null);
 
     const addToFilter = (newFilter) => { 
@@ -35,7 +35,6 @@ export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, 
     const Accordion = styled((props) => (
         <MuiAccordion disableGutters elevation={0} square {...props} />
       ))(({ theme }) => ({
-        // border: `1px solid ${theme.palette.divider}`,
         '&:not(:last-child)': {
           borderBottom: 0,
         },
@@ -49,9 +48,7 @@ export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, 
     };
 
     const fetchData = async () => {
-
         setIsLoading(true);
-
         const response = await apiService().post("/Marketplace/Search", {
             pageNumber: page,
             pageSize: pageSize,
@@ -60,39 +57,30 @@ export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, 
             categoryFilters: categories
         });
 
-        if (response != null && response.status == 200)
-        {
+        if (response != null && response.status == 200) {
             setCategories(response.data.filters);
             setProducts(response.data.products);
             setPageLength(response.data.pageSize)
             setTotal(response.data.total);
 
-            if (smoothScrollEnable)
-            {
+            if (smoothScrollEnable) {
                 window.scroll({
                     top: 0,
                     left: 0,
-                    behavior: 'smooth' // Optional for smooth scrolling
+                    behavior: 'smooth'
                 });
             }
         }
-
         setIsLoading(false);
     }
 
     useEffect(() => {
-
         fetchData();
-
     }, [page, filters]);
 
-
     useEffect(() => {
-
         setPage(1);
-
     }, [filters]);
-
 
     return (
         <Box>
@@ -125,60 +113,74 @@ export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, 
             
             <Grid container spacing={2} sx={{paddingTop:2, backgroundColor:"#"}}>
                 <Grid size={2}>
-                    {categories != null && categories.map((according, index) => {
+                    {categories != null && categories.map((category, index) => {
                         return (
-                            <Accordion key={index} defaultExpanded={according.expanded} sx={{ boxShadow: 'none', fontSize:14, margin: 0 }}>
-                                <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header" sx={{fontSize:16, marginTop:0, marginBottom: 0, borderTop:"1px solid #e0e0e0", marginLeft: -1, marginBottom:0}}>
-                                    {according.category}
+                            <Accordion 
+                                key={index}
+                                expanded={expandedCategories.includes(category.category)}
+                                onChange={(event, isExpanded) => {
+                                    setExpandedCategories(prev => 
+                                        isExpanded 
+                                            ? [...prev, category.category] 
+                                            : prev.filter(cat => cat !== category.category)
+                                    );
+                                }}
+                                sx={{ boxShadow: 'none', fontSize:14, margin: 0 }}
+                            >
+                                <AccordionSummary 
+                                    expandIcon={<ExpandMoreIcon />} 
+                                    aria-controls="panel1-content" 
+                                    id="panel1-header" 
+                                    sx={{
+                                        fontSize:16, 
+                                        marginTop:0, 
+                                        marginBottom: 0, 
+                                        borderTop:"1px solid #e0e0e0", 
+                                        marginLeft: -1
+                                    }}
+                                >
+                                    {category.category}
                                 </AccordionSummary>
                                 <Box sx={{marginTop:0, marginLeft:1, marginBottom:2}}>
                                     <Stack>
-                                        {according.options.map((filterOption, index) => {
+                                        {category.options.map((filterOption, index) => {
                                             return (
                                                 <Box key={index}>
-                                                    <Stack direction="row"
-                                                        spacing={0}
-                                                        sx={{alignItems: "center"}}>
+                                                    <Stack direction="row" spacing={0} sx={{alignItems: "center"}}>
                                                         <Box>
-
-                                                        <FormControlLabel
-                                                            control={
-                                                                <Checkbox
-                                                                size="small"
-                                                                sx={{padding:0.8, color:"lightgray"}}
-                                                                checked={filters.some(f => 
-                                                                    f.category === according.category && 
-                                                                    f.option === filterOption.name
-                                                                )}
-                                                                onChange={(event) => {
-                                                                    if (event.target.checked)
-                                                                        {
-                                                                            setLastFilterSelected({
-                                                                                category: according.category,
-                                                                                option: filterOption.name
-                                                                            });
-        
-                                                                            addToFilter({
-                                                                                category: according.category,
-                                                                                option: filterOption.name
-                                                                            })
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            removeFromFilter(according.category, filterOption.name);
-                                                                        }
-                                                                }} 
-                                                                />
-                                                            }
-                                                            label={<Typography sx={{fontSize:14}}>{filterOption.name}</Typography>} 
+                                                            <FormControlLabel
+                                                                control={
+                                                                    <Checkbox
+                                                                        size="small"
+                                                                        sx={{padding:0.8, color:"lightgray"}}
+                                                                        checked={filters.some(f => 
+                                                                            f.category === category.category && 
+                                                                            f.option === filterOption.name
+                                                                        )}
+                                                                        onChange={(event) => {
+                                                                            event.stopPropagation();
+                                                                            if (event.target.checked) {
+                                                                                setLastFilterSelected({
+                                                                                    category: category.category,
+                                                                                    option: filterOption.name
+                                                                                });
+                                                                                addToFilter({
+                                                                                    category: category.category,
+                                                                                    option: filterOption.name
+                                                                                });
+                                                                            } else {
+                                                                                removeFromFilter(category.category, filterOption.name);
+                                                                            }
+                                                                        }} 
+                                                                    />
+                                                                }
+                                                                label={<Typography sx={{fontSize:14}}>{filterOption.name}</Typography>} 
                                                             />
-
                                                         </Box>
                                                     </Stack>
                                                 </Box>
                                             )
-                                        })
-                                    }
+                                        })}
                                     </Stack>
                                 </Box>
                             </Accordion>
@@ -189,28 +191,22 @@ export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, 
                     <Box sx={{paddingBottom:2}}>
                         <Grid container spacing={2}>
                             {products != null && products.map((product, index) => {
-
                                 let productData = {};
-
                                 for (let index = 0; index < product.length; index++) {
                                     const element = product[index];
                                     productData[element.name] = element.value;
                                 }
-
                                 return (
                                 <Grid size={3} key={index}>
                                     <Card product={productData} />
                                 </Grid>
                                 )
                             })}
-                            
                         </Grid>
                     </Box>
-
                     <Pagination count={pageLength} page={page} onChange={handleChange} />
                 </Grid>
             </Grid>
-            
         </Box>
     )
 }
