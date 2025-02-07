@@ -26,12 +26,11 @@ import { GridActionsCellItem } from "@mui/x-data-grid";
 import { apiService } from "authscape";
 import dayjs from "dayjs";
 import BuildIcon from "@mui/icons-material/Build";
-
 import CreatePageModal from "./CreatePageModal";
 import PageEditorModal from "./PageEditorModal";
 import ConfirmationModal from "../confirmationModal";
 
-const ContentManagement = ({ config }) => {
+const ContentManagement = ({ config , minHeight, loadedUser}) => {
   const refDataGrid = useRef(null);
   const initialPaginationModel = {
     offset: 1,
@@ -258,24 +257,7 @@ const ContentManagement = ({ config }) => {
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 2 }}>
-      <Typography variant="h4">Content Management Dashboard</Typography>
       <Box my={2}>
-        <Grid
-          container
-          mb={1}
-          display={"flex"}
-          justifyContent={"space-between"}
-        >
-          <Stack>
-            <Typography variant="h6">Manage Website & Email Content</Typography>
-            <Typography variant="subtitle2" mt={1}>
-              Create, update, and manage website pages and email templates in
-              one centralized location. Use the tools below to streamline
-              content customization and ensure consistency across all digital
-              platforms.
-            </Typography>
-          </Stack>
-        </Grid>
         <Box
           mb={2}
           sx={{
@@ -359,7 +341,7 @@ const ContentManagement = ({ config }) => {
           </FormControl>
         </Box>
         <Box
-          sx={{ width: "100%", overflowX: "scroll", minHeight: "56vh" }}
+          sx={{ width: "100%", overflowX: "scroll", minHeight: {minHeight} }}
           mt={1}
         >
           <DataGrid
