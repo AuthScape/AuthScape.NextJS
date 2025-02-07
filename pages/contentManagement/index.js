@@ -1,7 +1,8 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import Box from "@mui/material/Box";
 import { Typography } from "@mui/material";
-import ContentManagement from "../../components/contentManagement/ContentManagement";
+// import ContentManagement from "../../components/contentManagement/ContentManagement";
+import ContentManagement from 'authscape-contentmanagement';
 
 const Editor = ({ loadedUser, showNavigationBar }) => {
   const config = {
