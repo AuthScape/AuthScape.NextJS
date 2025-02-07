@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {apiService} from 'authscape';
-import { Checkbox, TextField, Paper, Typography, Box, Stack, FormControl, InputLabel, Select, MenuItem, Breadcrumbs } from '@mui/material';
+import { Checkbox, Typography, Box, Stack, Breadcrumbs } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordion from '@mui/material/Accordion';
@@ -10,9 +10,11 @@ import Card from '../../components/marketplace/card';
 import Pagination from '@mui/material/Pagination';
 import { styled } from '@mui/material/styles';
 import Link from '@mui/material/Link';
+import { useRouter } from 'next/router'
 
-export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, smoothScrollEnable = true, currentUser}) {
+export default function Marketplace({setIsLoading, platform = 1, maxHeightScrolling = 300, cardGridSize = 3, pageSize = 12, smoothScrollEnable = true, currentUser}) {
 
+    const router = useRouter();
     const [categories, setCategories] = useState(null);
     const [products, setProducts] = useState(null);
     const [total, setTotal] = useState(0);
@@ -48,7 +50,9 @@ export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, 
     };
 
     const fetchData = async () => {
+
         setIsLoading(true);
+        
         const response = await apiService().post("/Marketplace/Search", {
             pageNumber: page,
             pageSize: pageSize,
@@ -71,6 +75,7 @@ export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, 
                 });
             }
         }
+
         setIsLoading(false);
     }
 
@@ -88,6 +93,9 @@ export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, 
                 <Grid container spacing={2}>
                     <Grid size={10}>
                         <Box sx={{paddingTop:0}}>
+
+                            <p>Post: {router.query.slug[0] + " -> " + router.query.slug[1]}</p>
+
                             <Breadcrumbs separator=">" aria-label="breadcrumb">
                                 <Link underline="hover" color="inherit" href="/" >
                                     All Categories
@@ -141,11 +149,11 @@ export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, 
                                 >
                                     {category.category}
                                 </AccordionSummary>
-                                <Box sx={{marginTop:0, marginLeft:1, marginBottom:2}}>
-                                    <Stack>
+                                <Box sx={{marginTop:0, paddingLeft:1, marginBottom:2, position:"relative", maxHeight: maxHeightScrolling, overflow:"auto"}}>
+                                    <Stack >
                                         {category.options.map((filterOption, index) => {
                                             return (
-                                                <Box key={index}>
+                                                <Box key={index} >
                                                     <Stack direction="row" spacing={0} sx={{alignItems: "center"}}>
                                                         <Box>
                                                             <FormControlLabel
@@ -197,14 +205,16 @@ export default function Marketplace({setIsLoading, platform = 1, pageSize = 12, 
                                     productData[element.name] = element.value;
                                 }
                                 return (
-                                <Grid size={3} key={index}>
+                                <Grid size={cardGridSize} key={index}>
                                     <Card product={productData} />
                                 </Grid>
                                 )
                             })}
                         </Grid>
                     </Box>
-                    <Pagination count={pageLength} page={page} onChange={handleChange} />
+                    <Box>
+                        <Pagination size="large" count={pageLength} page={page} onChange={handleChange} showFirstButton showLastButton />
+                    </Box>
                 </Grid>
             </Grid>
         </Box>
