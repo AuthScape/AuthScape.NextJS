@@ -84,11 +84,9 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
     const response = await apiService().post(apiEndpoint, param);
 
     if (response != null && response.status === 200) {
-      alert("success");
       handleClose();
       reset();
     } else {
-      alert("failed");
     }
   };
 

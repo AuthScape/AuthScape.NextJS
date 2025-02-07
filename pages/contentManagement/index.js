@@ -85,7 +85,7 @@ const Editor = ({ loadedUser, showNavigationBar }) => {
     },
   };
 
-  return <ContentManagement config={config} />;
+  return <ContentManagement config={config} minHeight={"75vh"} loadedUser={loadedUser}/>;
 };
 
 export default Editor;

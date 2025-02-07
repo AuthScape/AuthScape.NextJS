@@ -45,9 +45,7 @@ const PageEditorModal = ({ config, isOpen, handleClose }) => {
     );
     if (response && response.status === 200) {
       handleClose();
-    } else {
-      alert("error");
-    }
+    } 
   };
 
   return (
