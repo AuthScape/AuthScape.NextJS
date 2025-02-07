@@ -2987,6 +2987,14 @@ audit@^0.0.6:
   resolved "https://registry.npmjs.org/audit/-/audit-0.0.6.tgz"
   integrity sha512-xgv3Y3RIYE00N2/xk10VLlwFd1kjc7FRaX1vC8+CsOfDRe53a06vOSkp91BOSNijZfddYum47a1Fvju/2+JPcw==
 
+authscape-contentmanagement@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/authscape-contentmanagement/-/authscape-contentmanagement-1.0.1.tgz"
+  integrity sha512-MRqvXQhBVbVf1RHfE/wg15IX8KFsD+1ugnDeX1IpSLDyTMJJhxyVKwEYyD4ESRisly0im9IeyO7KKI//oFwdCw==
+  dependencies:
+    eslint-config-next "^14.1.0"
+    react "^18.2.0"
+
 authscape-kanban@^1.0.28:
   version "1.0.28"
   resolved "https://registry.npmjs.org/authscape-kanban/-/authscape-kanban-1.0.28.tgz"

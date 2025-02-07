@@ -21,7 +21,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
+export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
   const isEditing = typeof isOpen !== "boolean";
 
   const initialData = {
@@ -221,5 +221,3 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
     </Dialog>
   );
 };
-
-export default CreatePageModal;

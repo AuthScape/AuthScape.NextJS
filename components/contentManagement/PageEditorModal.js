@@ -9,7 +9,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
 });
 
-const PageEditorModal = ({ config, isOpen, handleClose }) => {
+export const PageEditorModal = ({ config, isOpen, handleClose }) => {
   const [page, setPage] = useState({});
   const initialData = {
     content: [],
@@ -86,5 +86,3 @@ const PageEditorModal = ({ config, isOpen, handleClose }) => {
     </Dialog>
   );
 };
-
-export default PageEditorModal;

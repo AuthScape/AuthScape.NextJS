@@ -26,6 +26,8 @@ import { GridActionsCellItem } from "@mui/x-data-grid";
 import { apiService } from "authscape";
 import dayjs from "dayjs";
 import BuildIcon from "@mui/icons-material/Build";
+
+// remove after npm production
 import CreatePageModal from "./CreatePageModal";
 import PageEditorModal from "./PageEditorModal";
 import ConfirmationModal from "../confirmationModal";
