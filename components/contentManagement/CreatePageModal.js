@@ -20,8 +20,7 @@ import { apiService } from "authscape";
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-
-export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
+const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
   const isEditing = typeof isOpen !== "boolean";
 
   const initialData = {
@@ -221,3 +220,5 @@ export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
     </Dialog>
   );
 };
+
+export default CreatePageModal

@@ -29,10 +29,10 @@ import BuildIcon from "@mui/icons-material/Build";
 
 // remove after npm production
 import CreatePageModal from "./CreatePageModal";
-import PageEditorModal from "./PageEditorModal";
+import PageEditor from "./PageEditor";
 import ConfirmationModal from "../confirmationModal";
 
-const ContentManagement = ({ config , minHeight, loadedUser}) => {
+const ContentManagement = ({ config, minHeight, loadedUser }) => {
   const refDataGrid = useRef(null);
   const initialPaginationModel = {
     offset: 1,
@@ -258,150 +258,169 @@ const ContentManagement = ({ config , minHeight, loadedUser}) => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ paddingTop: 2 }}>
-      <Box my={2}>
-        <Box
-          mb={2}
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 2,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 1,
-              flexGrow: 1,
-              order: 1,
-            }}
-          >
-            {Object.keys(chipState).map((label) => (
-              <Chip
-                key={label}
-                label={label}
-                variant={chipState[label].variant}
-                color={chipState[label].color}
-                sx={{ cursor: "pointer" }}
-                onClick={() => handleChipClick(label)}
-              />
-            ))}
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              flexWrap: "wrap",
-              gap: 2,
-              order: { xs: 1, md: 2 },
-            }}
-          >
-            <Button
-              variant="contained"
-              onClick={() => {
-                setIsOpen(true);
+    <>
+      {!isEditorOpen ? (
+        <Container maxWidth="xl" sx={{ paddingTop: 2 }}>
+          <Box my={2}>
+            <Box
+              mb={2}
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 2,
               }}
             >
-              Create New Page
-            </Button>
-          </Box>
-        </Box>
-        <Box mt={1} mb={2} display={"flex"} justifyContent={"flex-end"}>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Search Pages by title..."
-            onChange={handleSearchChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <FormControl
-            sx={{ marginLeft: 1, maxWidth: 200 }}
-            fullWidth
-            size="small"
-          >
-            <InputLabel id="sort-by-label">Sort By</InputLabel>
-            <Select
-              id="dealers-sort-selection"
-              label="Sort By"
-              value={paginationModel.sort}
-              onChange={handleSortChange}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 1,
+                  flexGrow: 1,
+                  order: 1,
+                }}
+              >
+                {Object.keys(chipState).map((label) => (
+                  <Chip
+                    key={label}
+                    label={label}
+                    variant={chipState[label].variant}
+                    color={chipState[label].color}
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => handleChipClick(label)}
+                  />
+                ))}
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  flexWrap: "wrap",
+                  gap: 2,
+                  order: { xs: 1, md: 2 },
+                }}
+              >
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setIsOpen(true);
+                  }}
+                >
+                  Create New Page
+                </Button>
+              </Box>
+            </Box>
+            <Box mt={1} mb={2} display={"flex"} justifyContent={"flex-end"}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Search Pages by title..."
+                onChange={handleSearchChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <FormControl
+                sx={{ marginLeft: 1, maxWidth: 200 }}
+                fullWidth
+                size="small"
+              >
+                <InputLabel id="sort-by-label">Sort By</InputLabel>
+                <Select
+                  id="dealers-sort-selection"
+                  label="Sort By"
+                  value={paginationModel.sort}
+                  onChange={handleSortChange}
+                >
+                  <MenuItem value={1}>{`Title (Ascending)`}</MenuItem>
+                  <MenuItem value={2}>{`Title (Descending)`}</MenuItem>
+                  <MenuItem value={3}>{`Update Date (Ascending)`}</MenuItem>
+                  <MenuItem value={4}>{`Update Date (Descending)`}</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box
+              sx={{
+                width: "100%",
+                overflowX: "scroll",
+                minHeight: { minHeight },
+              }}
+              mt={1}
             >
-              <MenuItem value={1}>{`Title (Ascending)`}</MenuItem>
-              <MenuItem value={2}>{`Title (Descending)`}</MenuItem>
-              <MenuItem value={3}>{`Update Date (Ascending)`}</MenuItem>
-              <MenuItem value={4}>{`Update Date (Descending)`}</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-        <Box
-          sx={{ width: "100%", overflowX: "scroll", minHeight: {minHeight} }}
-          mt={1}
-        >
-          <DataGrid
-            disableRowSelectionOnClick
-            disableColumnSelector
-            disableSelectionOnClick
-            columns={columns}
-            rows={pageList}
-            pageSize={8}
-            rowsPerPage={[8]}
-            ref={refDataGrid}
-            disableColumnFilter
-            disableColumnSort
-            disableColumnMenu
-            rowCount={rowCount}
-            slots={{
-              pagination: (props) => (
-                <Box display={"flex"} alignItems={"center"} mr={2} my={2}>
-                  {totalPages !== 0 && (
-                    <>
-                      <IconButton
-                        aria-label="previousPage"
-                        size="small"
-                        disabled={paginationModel.offset == 1}
-                        onClick={() => {
-                          setPaginationModel({
-                            ...paginationModel,
-                            offset: paginationModel.offset - 1,
-                          });
-                        }}
-                      >
-                        <KeyboardArrowLeftIcon fontSize="inherit" />
-                      </IconButton>
-                      <Typography>
-                        {paginationModel.offset} of {totalPages}
-                      </Typography>
-                      <IconButton
-                        aria-label="nextPage"
-                        size="small"
-                        disabled={paginationModel.offset == totalPages}
-                        onClick={() => {
-                          setPaginationModel({
-                            ...paginationModel,
-                            offset: paginationModel.offset + 1,
-                          });
-                        }}
-                      >
-                        <KeyboardArrowRightIcon fontSize="inherit" />
-                      </IconButton>
-                    </>
-                  )}
-                  <Typography>Total Pages: {rowCount}</Typography>
-                </Box>
-              ),
-            }}
-          />
-        </Box>
-      </Box>
+              <DataGrid
+                disableRowSelectionOnClick
+                disableColumnSelector
+                disableSelectionOnClick
+                columns={columns}
+                rows={pageList}
+                pageSize={8}
+                rowsPerPage={[8]}
+                ref={refDataGrid}
+                disableColumnFilter
+                disableColumnSort
+                disableColumnMenu
+                rowCount={rowCount}
+                slots={{
+                  pagination: (props) => (
+                    <Box display={"flex"} alignItems={"center"} mr={2} my={2}>
+                      {totalPages !== 0 && (
+                        <>
+                          <IconButton
+                            aria-label="previousPage"
+                            size="small"
+                            disabled={paginationModel.offset == 1}
+                            onClick={() => {
+                              setPaginationModel({
+                                ...paginationModel,
+                                offset: paginationModel.offset - 1,
+                              });
+                            }}
+                          >
+                            <KeyboardArrowLeftIcon fontSize="inherit" />
+                          </IconButton>
+                          <Typography>
+                            {paginationModel.offset} of {totalPages}
+                          </Typography>
+                          <IconButton
+                            aria-label="nextPage"
+                            size="small"
+                            disabled={paginationModel.offset == totalPages}
+                            onClick={() => {
+                              setPaginationModel({
+                                ...paginationModel,
+                                offset: paginationModel.offset + 1,
+                              });
+                            }}
+                          >
+                            <KeyboardArrowRightIcon fontSize="inherit" />
+                          </IconButton>
+                        </>
+                      )}
+                      <Typography>Total Pages: {rowCount}</Typography>
+                    </Box>
+                  ),
+                }}
+              />
+            </Box>
+          </Box>
+        </Container>
+      ) : (
+        <PageEditor
+          config={config}
+          isOpen={isEditorOpen}
+          handleClose={() => {
+            setIsEditorOpen(null);
+            reloadUI();
+            setPaginationModel(initialPaginationModel);
+          }}
+        />
+      )}
+
       <CreatePageModal
         isOpen={isOpen}
         handleClose={() => {
@@ -411,15 +430,7 @@ const ContentManagement = ({ config , minHeight, loadedUser}) => {
         }}
         pageTypes={pageTypes}
       />
-      <PageEditorModal
-        config={config}
-        isOpen={isEditorOpen}
-        handleClose={() => {
-          setIsEditorOpen(null);
-          reloadUI();
-          setPaginationModel(initialPaginationModel);
-        }}
-      />
+
       <ConfirmationModal
         title={"Are you sure you want to remove this page?"}
         description={
@@ -442,7 +453,7 @@ const ContentManagement = ({ config , minHeight, loadedUser}) => {
         }}
         open={showConfirmDeletePage != null ? true : false}
       />
-    </Container>
+    </>
   );
 };
 
