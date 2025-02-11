@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "@mui/material";
+import { Button, Box } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { apiService } from "authscape";
 import { Puck } from "@measured/puck";
@@ -45,30 +45,32 @@ const PageEditor = ({ config, isOpen, handleClose }) => {
   };
 
   return (
-    <Puck
-      config={config}
-      data={contentData}
-      onPublish={save}
-      overrides={{
-        headerActions: ({ children }) => {
-          return (
-            <>
-              {children}
-              <Button
-                color="error"
-                variant="outlined"
-                startIcon={<CloseIcon />}
-                onClick={() => {
-                  handleClose();
-                }}
-              >
-                Close
-              </Button>
-            </>
-          );
-        },
-      }}
-    />
+    <Box sx={{ zIndex: 1025 }}>
+      <Puck
+        config={config}
+        data={contentData}
+        onPublish={save}
+        overrides={{
+          headerActions: ({ children }) => {
+            return (
+              <>
+                {children}
+                <Button
+                  color="error"
+                  variant="outlined"
+                  startIcon={<CloseIcon />}
+                  onClick={() => {
+                    handleClose();
+                  }}
+                >
+                  Close
+                </Button>
+              </>
+            );
+          },
+        }}
+      />
+    </Box>
   );
 };
 
