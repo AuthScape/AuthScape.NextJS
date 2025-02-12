@@ -159,7 +159,16 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                                 <Box key={index} >
                                                     <Stack direction="row" spacing={0} sx={{alignItems: "center"}}>
                                                         <Box>
-                                                            <FormControlLabel
+
+
+                                                            <Box>{filterOption.name}</Box>
+                                                            <Box>{filterOption.subcategories.map((subcat) =>
+                                                                <Box sx={{paddingLeft:2}}>{subcat.name}</Box>
+                                                            )}</Box>
+
+
+
+                                                            {/* <FormControlLabel
                                                                 control={
                                                                     <Checkbox
                                                                         size="small"
@@ -186,7 +195,7 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                                                     />
                                                                 }
                                                                 label={<Typography sx={{fontSize:14}}>{filterOption.name}</Typography>} 
-                                                            />
+                                                            /> */}
                                                         </Box>
                                                     </Stack>
                                                 </Box>
