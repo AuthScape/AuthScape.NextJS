@@ -25,6 +25,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import { apiService } from "authscape";
 import dayjs from "dayjs";
+import LinkIcon from "@mui/icons-material/Link";
 import BuildIcon from "@mui/icons-material/Build";
 
 // remove after npm production
@@ -65,6 +66,12 @@ const ContentManagement = ({ config, minHeight, loadedUser }) => {
     {
       field: "typeTitle",
       headerName: "Page Type",
+      flex: 1,
+      height: 200,
+    },
+    {
+      field: "slug",
+      headerName: "Slug",
       flex: 1,
       height: 200,
     },
@@ -114,11 +121,30 @@ const ContentManagement = ({ config, minHeight, loadedUser }) => {
     {
       field: "actions",
       type: "actions",
-      width: 100,
+      flex: 1,
       headerName: "Actions",
       cellClassName: "actions",
       getActions: ({ id, row }) => {
-        const actions = [
+        const actions = [];
+
+        if (row.recursion == null) {
+          actions.unshift(
+            <GridActionsCellItem
+              key={`link-${id}`}
+              icon={
+                <Tooltip title="Open Link" arrow>
+                  <LinkIcon color="info" />
+                </Tooltip>
+              }
+              label="Open Link"
+              onClick={() => {
+                window.open(`/${row.slug}`, "_blank", "noopener,noreferrer");
+              }}
+            />
+          );
+        }
+
+        actions.push(
           <GridActionsCellItem
             key={`edit-${id}`}
             icon={
@@ -154,8 +180,8 @@ const ContentManagement = ({ config, minHeight, loadedUser }) => {
             onClick={async () => {
               setShowConfirmDeletePage(id);
             }}
-          />,
-        ];
+          />
+        );
         return actions;
       },
     },

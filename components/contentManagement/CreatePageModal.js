@@ -12,10 +12,14 @@ import {
   Box,
   Select,
   MenuItem,
+  InputAdornment,
+  Tooltip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useForm, Controller } from "react-hook-form";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { apiService } from "authscape";
+import { cursor, fontSize } from "@xstyled/styled-components";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -28,6 +32,7 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
     pageTypeId: null,
     description: "",
     recursion: null,
+    slug: "",
   };
 
   const {
@@ -48,12 +53,13 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
       setValue("pageTypeId", isOpen.pageTypeId);
       setValue("description", isOpen.description);
       setValue("recursion", isOpen.recursion);
+      setValue("slug", isOpen.slug);
     } else {
       reset();
     }
   }, [isEditing, isOpen, reset, setValue]);
 
-  const watchedFields = watch(["title", "description"]);
+  const watchedFields = watch(["title", "description", "slug"]);
   const pageTypeId = watch("pageTypeId");
   const recursion = watch("recursion");
 
@@ -67,13 +73,14 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
 
   const onSave = async (pageParam) => {
     event.preventDefault();
-    const { title, pageTypeId, description, recursion } = pageParam;
+    const { title, pageTypeId, description, recursion, slug } = pageParam;
     const param = {
       pageId: isEditing ? isOpen.id : null,
       title: title,
       pageTypeId: pageTypeId,
       description: description,
       recursion: recursion,
+      slug: slug,
     };
 
     const apiEndpoint = isEditing
@@ -180,6 +187,9 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
                   <>
                     <Typography variant="subtitle2">Recursion Day</Typography>
                     <TextField
+                       InputProps={{
+                        endAdornment: <InputAdornment position="end">Days</InputAdornment>,
+                      }}
                       size="small"
                       type="number"
                       {...field}
@@ -191,6 +201,39 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
                 )}
               />
             )}
+
+            <Controller
+              name="slug"
+              control={control}
+              rules={{ required: "Slug is required" }}
+              render={({ field }) => (
+                <>
+                  <Typography variant="subtitle2">
+                    Page Slug{" "}
+                    <Tooltip
+                      arrow
+                      title="This will be part of the page URL, e.g., yourwebsite.com/your-slug"
+                    >
+                      <InfoOutlinedIcon
+                        sx={{ fontSize: 15, cursor: "pointer" }}
+                        color="warning"
+                      />
+                    </Tooltip>
+                  </Typography>
+                  <TextField
+                     InputProps={{
+                      startAdornment: <InputAdornment position="start">/</InputAdornment>,
+                    }}
+                    size="small"
+                    {...field}
+                    fullWidth
+                    error={!!errors.slug}
+                    helperText={errors.slug?.message || ""}
+                  />
+                </>
+              )}
+            />
+
             <Controller
               name="description"
               control={control}
