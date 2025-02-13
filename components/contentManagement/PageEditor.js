@@ -5,7 +5,7 @@ import { apiService } from "authscape";
 import { Puck } from "@measured/puck";
 import "@measured/puck/puck.css";
 
- const PageEditor = ({ config, isOpen, handleClose }) => {
+ export const PageEditor = ({ config, isOpen, handleClose }) => {
   const [page, setPage] = useState({});
   const initialData = {
     content: [],
@@ -45,7 +45,7 @@ import "@measured/puck/puck.css";
   };
 
   return (
-    <Box sx={{ zIndex: 1025 }}>
+   <Box sx={{ position: "relative", zIndex: 1025 }}>
       <Puck
         config={config}
         data={contentData}
@@ -73,5 +73,3 @@ import "@measured/puck/puck.css";
     </Box>
   );
 };
-
-export default PageEditor
