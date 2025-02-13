@@ -1,9 +1,10 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { apiService } from "authscape";
 import Box from "@mui/material/Box";
 import { Typography } from "@mui/material";
-import ContentManagement from "../../components/contentManagement/ContentManagement";
-
-const Editor = ({ loadedUser, showNavigationBar }) => {
+import { Render } from "@measured/puck";
+const SlugPage = () => {
   const config = {
     components: {
       Header: {
@@ -84,14 +85,25 @@ const Editor = ({ loadedUser, showNavigationBar }) => {
       },
     },
   };
+  const router = useRouter();
+  const { slug } = router.query;
+  const [pageInfo, setPageInfo] = useState(null);
 
-  return (
-    <ContentManagement
-      config={config}
-      minHeight={"75vh"}
-      loadedUser={loadedUser}
-    />
-  );
+  const fetchPageDetail = async () => {
+    let response = await apiService().get(
+      `/Pages/GetPageWithSlug?slug=${slug}`
+    );
+    if (response && response.status === 200) {
+      const data = JSON.parse(response.data.content);
+      console.log(data.data);
+      setPageInfo(data);
+    }
+  };
+  useEffect(() => {
+    fetchPageDetail();
+  }, []);
+
+  return pageInfo && <Render config={config} data={pageInfo.data} />;
 };
 
-export default Editor;
+export default SlugPage;
