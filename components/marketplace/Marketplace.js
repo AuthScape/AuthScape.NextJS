@@ -124,10 +124,11 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
             
             <Grid container spacing={2} sx={{paddingTop:2, backgroundColor:"#"}}>
                 <Grid size={2}>
-                    {categories != null && categories.map((category, index) => {
+                    {/* Update categories.map to use category.category as the key */}
+                    {categories != null && categories.map((category) => {
                         return (
                             <Accordion 
-                                key={index}
+                                key={category.category} // Use category name as key
                                 expanded={expandedCategories.includes(category.category)}
                                 onChange={(event, isExpanded) => {
                                     setExpandedCategories(prev => 
@@ -154,19 +155,13 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                 </AccordionSummary>
                                 <Box sx={{marginTop:0, paddingLeft:1, marginBottom:2, position:"relative", maxHeight: maxHeightScrolling, overflow:"auto"}}>
                                     <Stack >
-                                        {category.options.map((filterOption, index) => {
+                                        {/* Update filterOptions.map to use filterOption.name as the key */}
+                                        {category.options.map((filterOption) => {
                                             return (
-                                                <Box key={index} >
+                                                <Box key={filterOption.name} > {/* Use filter option name as key */}
                                                     <Stack direction="row" spacing={0} sx={{alignItems: "center"}}>
                                                         <Box>
-
-
-                                                            {/* <Box>{filterOption.name}</Box>
-                                                            <Box>{filterOption.subcategories.map((subcat) =>
-                                                                <Box sx={{paddingLeft:2}}>{subcat.name}</Box>
-                                                            )}</Box> */}
-
-                                                            {filterOption.subcategories.length == 0 &&
+                                                            {filterOption.subcategories.length === 0 ? (
                                                                 <FormControlLabel
                                                                     control={
                                                                         <Checkbox
@@ -195,25 +190,20 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                                                     }
                                                                     label={<Typography sx={{fontSize:14}}>{filterOption.name}</Typography>} 
                                                                 />
-                                                            }
-
-                                                            {filterOption.subcategories.length > 0 &&
-                                                            <>
-
-
+                                                            ) : (
                                                                 <Accordion>
                                                                     <AccordionSummary
                                                                         expandIcon={<ExpandMoreIcon />}
                                                                         aria-controls="panel1-content"
-                                                                        id="panel1-header">
+                                                                        id="panel1-header"
+                                                                    >
                                                                         <Typography component="span">{filterOption.name}</Typography>
                                                                     </AccordionSummary>
                                                                     <AccordionDetails>
-
-                                                                        <Box>{filterOption.subcategories.map((subcat) =>
-
-
+                                                                        {/* Update subcategories.map to use subcat.name as the key */}
+                                                                        {filterOption.subcategories.map((subcat) => (
                                                                             <FormControlLabel
+                                                                                key={subcat.name} // Use subcategory name as key
                                                                                 control={
                                                                                     <Checkbox
                                                                                         size="small"
@@ -241,24 +231,10 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                                                                 }
                                                                                 label={<Typography sx={{fontSize:14}}>{subcat.name}</Typography>} 
                                                                             />
-
-
-                                                                            // <Box sx={{paddingLeft:2}}>{subcat.name}</Box>
-                                                                        
-                                                                        
-                                                                        
-                                                                        )}</Box>
-
+                                                                        ))}
                                                                     </AccordionDetails>
                                                                 </Accordion>
-
-
-                                                                
-
-                                                            </>
-                                                            }
-
-                                                            
+                                                            )}
                                                         </Box>
                                                     </Stack>
                                                 </Box>

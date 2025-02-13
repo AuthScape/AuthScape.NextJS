@@ -3,7 +3,6 @@ import { Button, Box } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { apiService } from "authscape";
 import { Puck } from "@measured/puck";
-import "@measured/puck/puck.css";
 
  export const PageEditor = ({ config, isOpen, handleClose }) => {
   const [page, setPage] = useState({});

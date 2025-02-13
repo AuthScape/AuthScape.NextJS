@@ -13,6 +13,7 @@ import 'react-querybuilder/dist/query-builder.css';
 // spreadsheet
 import "../styles/reactGrid.scss";
 import 'react-image-crop/dist/ReactCrop.css'
+import "@measured/puck/puck.css";
 
 
 import "@measured/puck/puck.css";
