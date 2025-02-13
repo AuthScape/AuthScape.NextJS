@@ -19,7 +19,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useForm, Controller } from "react-hook-form";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { apiService } from "authscape";
-import { cursor, fontSize } from "@xstyled/styled-components";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
