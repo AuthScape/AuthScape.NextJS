@@ -23,16 +23,18 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
     const [expandedCategories, setExpandedCategories] = useState([]);
     const [lastFilterSelected, setLastFilterSelected] = useState(null);
 
+    const [expandedSubcategories, setExpandedSubcategories] = useState([]);
+
     const addToFilter = (newFilter) => { 
         setFilters(prevFilters => [...prevFilters, newFilter]);
     };
-
-    const removeFromFilter = (category, option) => { 
+    
+    const removeFromFilter = (category, subcategory, option) => { 
         setFilters(prevFilters => prevFilters.filter(
-            filter => !(filter.category === category && filter.option === option)
-          ));          
-    }
-
+            filter => !(filter.category === category && filter.subcategory === subcategory && filter.option === option)
+        ));          
+    };
+    
     const Accordion = styled((props) => (
         <MuiAccordion disableGutters elevation={0} square {...props} />
       ))(({ theme }) => ({
@@ -159,9 +161,10 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                         {category.options.map((filterOption) => {
                                             return (
                                                 <Box key={filterOption.name} > {/* Use filter option name as key */}
+
                                                     <Stack direction="row" spacing={0} sx={{alignItems: "center"}}>
                                                         <Box>
-                                                            {filterOption.subcategories.length === 0 ? (
+                                                            {(filterOption.subcategories == null || filterOption.subcategories.length === 0) ? (
                                                                 <FormControlLabel
                                                                     control={
                                                                         <Checkbox
@@ -169,6 +172,7 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                                                             sx={{padding:0.8, color:"lightgray"}}
                                                                             checked={filters.some(f => 
                                                                                 f.category === category.category && 
+                                                                                f.subcategory === "" &&
                                                                                 f.option === filterOption.name
                                                                             )}
                                                                             onChange={(event) => {
@@ -176,14 +180,16 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                                                                 if (event.target.checked) {
                                                                                     setLastFilterSelected({
                                                                                         category: category.category,
+                                                                                        subcategory: "",
                                                                                         option: filterOption.name
                                                                                     });
                                                                                     addToFilter({
                                                                                         category: category.category,
+                                                                                        subcategory: "",
                                                                                         option: filterOption.name
                                                                                     });
                                                                                 } else {
-                                                                                    removeFromFilter(category.category, filterOption.name);
+                                                                                    removeFromFilter(category.category, "", filterOption.name);
                                                                                 }
                                                                             }} 
                                                                         />
@@ -191,47 +197,63 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                                                     label={<Typography sx={{fontSize:14}}>{filterOption.name}</Typography>} 
                                                                 />
                                                             ) : (
-                                                                <Accordion>
+                                                                <Accordion
+                                                                    expanded={expandedSubcategories.includes(filterOption.name)}
+                                                                    onChange={(event, isExpanded) => {
+                                                                    event.stopPropagation();
+                                                                    setExpandedSubcategories(prev =>
+                                                                        isExpanded
+                                                                        ? [...prev, filterOption.name]
+                                                                        : prev.filter(name => name !== filterOption.name)
+                                                                    );
+                                                                    }}
+                                                                >
                                                                     <AccordionSummary
-                                                                        expandIcon={<ExpandMoreIcon />}
-                                                                        aria-controls="panel1-content"
-                                                                        id="panel1-header"
+                                                                    expandIcon={<ExpandMoreIcon />}
+                                                                    aria-controls="panel1-content"
+                                                                    id="panel1-header"
                                                                     >
-                                                                        <Typography component="span">{filterOption.name}</Typography>
+                                                                    <Typography component="span">{filterOption.name}</Typography>
                                                                     </AccordionSummary>
                                                                     <AccordionDetails>
-                                                                        {/* Update subcategories.map to use subcat.name as the key */}
-                                                                        {filterOption.subcategories.map((subcat) => (
-                                                                            <FormControlLabel
-                                                                                key={subcat.name} // Use subcategory name as key
-                                                                                control={
-                                                                                    <Checkbox
-                                                                                        size="small"
-                                                                                        sx={{padding:0.8, color:"lightgray"}}
-                                                                                        checked={filters.some(f => 
-                                                                                            f.category === category.category && 
-                                                                                            f.option === subcat.name
-                                                                                        )}
-                                                                                        onChange={(event) => {
-                                                                                            event.stopPropagation();
-                                                                                            if (event.target.checked) {
-                                                                                                setLastFilterSelected({
-                                                                                                    category: category.category,
-                                                                                                    option: subcat.name
-                                                                                                });
-                                                                                                addToFilter({
-                                                                                                    category: category.category,
-                                                                                                    option: subcat.name
-                                                                                                });
-                                                                                            } else {
-                                                                                                removeFromFilter(category.category, subcat.name);
-                                                                                            }
-                                                                                        }}
-                                                                                    />
-                                                                                }
-                                                                                label={<Typography sx={{fontSize:14}}>{subcat.name}</Typography>} 
+                                                                    {filterOption.subcategories.map((subcat) => (
+                                                                        <FormControlLabel
+                                                                        key={subcat.name}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                size="small"
+                                                                                sx={{ padding: 0.8, color: "lightgray" }}
+                                                                                checked={filters.some(f => 
+                                                                                    f.category === category.category && // need to introduce subcategory
+                                                                                    f.subcategory === filterOption.name &&
+                                                                                    f.option === subcat.name
+                                                                                )}
+                                                                                onClick={(event) => event.stopPropagation()} // Added click handler
+                                                                                onChange={(event) => {
+
+                                                                                    event.stopPropagation();
+                                                                                    if (event.target.checked) {
+                                                                                        setLastFilterSelected({
+                                                                                            category: category.category, // need to introduce subcategory
+                                                                                            subcategory: filterOption.name,
+                                                                                            option: subcat.name
+                                                                                        });
+                                                                                        addToFilter({
+                                                                                            category: category.category, // need to introduce subcategory
+                                                                                            subcategory: filterOption.name,
+                                                                                            option: subcat.name
+                                                                                        });
+                                                                                    } else {
+                                                                                        removeFromFilter(category.category, filterOption.name, subcat.name); // need to introduce subcategory
+                                                                                    }
+
+                                                                                }}
                                                                             />
-                                                                        ))}
+                                                                        }
+                                                                        label={<Typography sx={{ fontSize: 14 }}>{subcat.name}</Typography>}
+                                                                        onClick={(event) => event.stopPropagation()} // Prevent label click propagation
+                                                                        />
+                                                                    ))}
                                                                     </AccordionDetails>
                                                                 </Accordion>
                                                             )}
