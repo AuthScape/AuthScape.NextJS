@@ -37,8 +37,6 @@ export default function RecipeReviewCard({product}) {
   return (
     <Card sx={{ maxWidth: 345, position:"relative", border: "1px solid lightgray", cursor:"pointer", height: "100%" }}>
 
-      {/* {JSON.stringify(product)} */}
-
       <Stack 
         direction="row"
         spacing={0}

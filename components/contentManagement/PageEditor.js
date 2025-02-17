@@ -4,7 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { apiService } from "authscape";
 import { Puck } from "@measured/puck";
 
- export const PageEditor = ({ config, isOpen, handleClose }) => {
+ const PageEditor = ({ config, isOpen, handleClose }) => {
   const [page, setPage] = useState({});
   const initialData = {
     content: [],
@@ -72,3 +72,5 @@ import { Puck } from "@measured/puck";
     </Box>
   );
 };
+
+export default PageEditor;
