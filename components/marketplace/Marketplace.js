@@ -10,7 +10,7 @@ import Pagination from '@mui/material/Pagination';
 import { styled } from '@mui/material/styles';
 import Link from '@mui/material/Link';
 import { useRouter } from 'next/router'
-import { justifyContent } from '@xstyled/styled-components';
+import { display, justifyContent, marginTop, paddingTop } from '@xstyled/styled-components';
 
 const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId = 1, companyId = null, maxHeightScrolling = 300, cardGridSize = 3, pageSize = 12, smoothScrollEnable = true, cardView = null}) => {
 
@@ -96,7 +96,7 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
             <Box sx={{paddingLeft:2, fontSize:16, paddingTop:1, paddingBottom:1}}>
                 <Grid container spacing={2}>
                     <Grid size={10}>
-                        <Box sx={{paddingTop:0}}>
+                        {/* <Box sx={{paddingTop:0}}>
 
                             {router.query.slug != null &&
                             <p>Post: {router.query.slug[0] + " -> " + router.query.slug[1]}</p>
@@ -115,7 +115,7 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                 </Link>
                                 <Typography sx={{ color: "gray" }}>Lounge Chair</Typography>
                             </Breadcrumbs>
-                        </Box>
+                        </Box> */}
                     </Grid>
                     <Grid size={2}>
                         <Box sx={{textAlign:"right"}}>
@@ -140,8 +140,7 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                             : prev.filter(cat => cat !== category.category)
                                     );
                                 }}
-                                sx={{ boxShadow: 'none', fontSize:14, margin: 0 }}
-                            >
+                                sx={{ boxShadow: 'none', fontSize:14, margin: 0 }}>
                                 <AccordionSummary 
                                     expandIcon={<ExpandMoreIcon />} 
                                     aria-controls="panel1-content" 
@@ -152,8 +151,7 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                         marginBottom: 0, 
                                         borderTop:"1px solid #e0e0e0", 
                                         marginLeft: -1
-                                    }}
-                                >
+                                    }}>
                                     {category.category}
                                 </AccordionSummary>
                                 <Box sx={{marginTop:0, paddingLeft:1, marginBottom:2, position:"relative", maxHeight: maxHeightScrolling, overflow:"auto"}}>
@@ -163,7 +161,7 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                             return (
                                                 <Box key={filterOption.name} > {/* Use filter option name as key */}
 
-                                                    <Stack direction="row" spacing={0} sx={{alignItems: "center"}}>
+                                                    <Stack direction="row" spacing={0} sx={{display:"block"}}>
                                                         <Box>
                                                             {(filterOption.subcategories == null || filterOption.subcategories.length === 0) ? (
                                                                 <FormControlLabel
@@ -207,15 +205,16 @@ const Marketplace = ({setIsLoading, currentUser, oemCompanyId = null, platformId
                                                                         ? [...prev, filterOption.name]
                                                                         : prev.filter(name => name !== filterOption.name)
                                                                     );
-                                                                    }}>
+                                                                    }}
+                                                                    sx={{marginTop:-2}}>
                                                                         <AccordionSummary
                                                                         expandIcon={<ExpandMoreIcon />}
                                                                         aria-controls="panel1-content"
                                                                         id="panel1-header"
-                                                                        sx={{justifyContent:"space-between"}}>
+                                                                        sx={{paddingTop:0, marginTop:-1}}>
                                                                             <Typography component="span">{filterOption.name}</Typography>
                                                                         </AccordionSummary>
-                                                                        <AccordionDetails>
+                                                                        <AccordionDetails sx={{marginTop:-2}}>
                                                                         {filterOption.subcategories.map((subcat) => (
                                                                             <Box>
                                                                                 <FormControlLabel
