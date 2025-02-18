@@ -187,8 +187,10 @@ export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
                   <>
                     <Typography variant="subtitle2">Recursion Day</Typography>
                     <TextField
-                       InputProps={{
-                        endAdornment: <InputAdornment position="end">Days</InputAdornment>,
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">Days</InputAdornment>
+                        ),
                       }}
                       size="small"
                       type="number"
@@ -221,14 +223,25 @@ export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
                     </Tooltip>
                   </Typography>
                   <TextField
-                     InputProps={{
-                      startAdornment: <InputAdornment position="start">/</InputAdornment>,
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">/</InputAdornment>
+                      ),
                     }}
                     size="small"
                     {...field}
                     fullWidth
                     error={!!errors.slug}
                     helperText={errors.slug?.message || ""}
+                    onKeyDown={(e) => {
+                      if (e.key === " ") {
+                        e.preventDefault();
+                      }
+                    }}
+                    onChange={(e) => {
+                      const newValue = e.target.value.replace(/\s/g, "");
+                      field.onChange(newValue);
+                    }}
                   />
                 </>
               )}
