@@ -276,4 +276,4 @@ export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
   );
 };
 
-//export default CreatePageModal;
+// export default CreatePageModal;

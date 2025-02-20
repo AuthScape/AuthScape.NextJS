@@ -4,12 +4,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import { apiService } from "authscape";
 import { Puck } from "@measured/puck";
 
-export const PageEditor = ({ config, isOpen, handleClose }) => {
+export const PageEditor = ({ setIsLoading, config, isOpen, handleClose }) => {
   const [page, setPage] = useState({});
   const initialData = {};
   const [contentData, setContentData] = useState(initialData);
 
   const fetchPageDetail = async () => {
+    setIsLoading(true);
     try {
       let response = await apiService().get(
         `/ContentManagement/GetPage?pageId=${isOpen}`
@@ -17,6 +18,7 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
 
       if (response && response.status === 200) {
         setPage(response.data);
+
         if (response.data.content) {
           try {
             const parsedContent = JSON.parse(response.data.content);
@@ -31,6 +33,7 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
     } catch (error) {
       console.error("API fetch error:", error);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -66,7 +69,7 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
       {contentData.content ? (
         <Puck
           config={config}
-          data={initialData}
+          data={contentData}
           onPublish={save}
           overrides={{
             headerActions: ({ children }) => {
@@ -98,11 +101,11 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
           }}
         >
           <p>Loading content...</p>
-          <CircularProgress size={"small"} />
+          <CircularProgress />
         </Box>
       )}
     </Box>
   );
 };
 
-//export default PageEditor;
+// export default PageEditor;

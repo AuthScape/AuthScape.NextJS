@@ -5,7 +5,8 @@ import { AuthScapeApp } from "authscape";
 import "react-toastify/dist/ReactToastify.css";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import "reactflow/dist/style.css";
-import { Backdrop, Box, CircularProgress } from "@mui/material";
+import { Backdrop, Box, CircularProgress, Typography } from "@mui/material";
+import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import { baselightTheme } from "../components/theme";
 import "react-querybuilder/dist/query-builder.css";
 // spreadsheet
@@ -44,8 +45,16 @@ function MyApp({ Component, pageProps }) {
         }}
         open={isLoading}
       >
-        <Box>
-          <CircularProgress />
+        <Box
+          sx={{
+            animation: "rotate 2s linear infinite",
+            "@keyframes rotate": {
+              "0%": { transform: "rotate(0deg)" },
+              "100%": { transform: "rotate(360deg)" },
+            },
+          }}
+        >
+          <HourglassBottomIcon sx={{ fontSize: 40 }} />
         </Box>
         <Box sx={{ paddingTop: 2 }}>Loading...</Box>
       </Backdrop>
@@ -57,7 +66,7 @@ function MyApp({ Component, pageProps }) {
       <AuthScapeApp
         Component={Component}
         layout={layout}
-        //loadingLayout={loadingLayout}
+        loadingLayout={loadingLayout}
         muiTheme={baselightTheme}
         enforceLoggedIn={true}
         pageProps={pageProps}

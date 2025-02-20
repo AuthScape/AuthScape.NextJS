@@ -33,7 +33,7 @@ import CreatePageModal from "./CreatePageModal";
 import PageEditor from "./PageEditor";
 import ConfirmationModal from "../confirmationModal";
 
-const ContentManagement = ({ config, minHeight, loadedUser }) => {
+const ContentManagement = ({ config, minHeight, loadedUser, setIsLoading }) => {
   const refDataGrid = useRef(null);
   const initialPaginationModel = {
     offset: 1,
@@ -444,6 +444,7 @@ const ContentManagement = ({ config, minHeight, loadedUser }) => {
             reloadUI();
             setPaginationModel(initialPaginationModel);
           }}
+          setIsLoading={setIsLoading}
         />
       )}
 

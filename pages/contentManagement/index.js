@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import { Typography } from "@mui/material";
 import ContentManagement from "../../components/contentManagement/ContentManagement";
 
-const Editor = ({ loadedUser, showNavigationBar }) => {
+const Editor = ({ loadedUser, showNavigationBar, setIsLoading }) => {
   const config = {
     components: {
       Header: {
@@ -90,6 +90,7 @@ const Editor = ({ loadedUser, showNavigationBar }) => {
       config={config}
       minHeight={"75vh"}
       loadedUser={loadedUser}
+      setIsLoading={setIsLoading}
     />
   );
 };
