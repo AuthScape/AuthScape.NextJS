@@ -4,13 +4,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import { apiService } from "authscape";
 import { Puck } from "@measured/puck";
 
-export const PageEditor = ({ setIsLoading, config, isOpen, handleClose }) => {
+export const PageEditor = ({ config, isOpen, handleClose }) => {
   const [page, setPage] = useState({});
   const initialData = {};
   const [contentData, setContentData] = useState(initialData);
 
   const fetchPageDetail = async () => {
-    setIsLoading(true);
     try {
       let response = await apiService().get(
         `/ContentManagement/GetPage?pageId=${isOpen}`
@@ -33,7 +32,6 @@ export const PageEditor = ({ setIsLoading, config, isOpen, handleClose }) => {
     } catch (error) {
       console.error("API fetch error:", error);
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {
