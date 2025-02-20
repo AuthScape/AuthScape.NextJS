@@ -3,13 +3,20 @@ import { Button, Box, CircularProgress } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { apiService } from "authscape";
 import { Puck } from "@measured/puck";
-
 export const PageEditor = ({ config, isOpen, handleClose }) => {
   const [page, setPage] = useState({});
-  const initialData = {};
+  const initialData = {
+    root: {
+      props: {},
+    },
+    content: [],
+    zones: {},
+  };
   const [contentData, setContentData] = useState(initialData);
+  const [loading, setLoading] = useState(true);
 
   const fetchPageDetail = async () => {
+    setLoading(true);
     try {
       let response = await apiService().get(
         `/ContentManagement/GetPage?pageId=${isOpen}`
@@ -31,6 +38,9 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
       }
     } catch (error) {
       console.error("API fetch error:", error);
+      setContentData(initialData);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -39,6 +49,7 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
       fetchPageDetail();
     } else {
       setContentData(initialData);
+      setLoading(false);
     }
   }, [isOpen]);
 
@@ -64,7 +75,20 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
 
   return (
     <Box sx={{ position: "relative", zIndex: 1025 }}>
-      {contentData.content ? (
+      {console.log(contentData)}
+      {loading ? (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <p>Loading content...</p>
+          <CircularProgress />
+        </Box>
+      ) : (
         <Puck
           config={config}
           data={contentData}
@@ -89,18 +113,6 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
             },
           }}
         />
-      ) : (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <p>Loading content...</p>
-          <CircularProgress />
-        </Box>
       )}
     </Box>
   );
