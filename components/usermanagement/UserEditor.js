@@ -11,7 +11,8 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemText from '@mui/material/ListItemText';
 import { useForm, Controller } from 'react-hook-form';
-import { Tab, Tabs } from '@mui/material';
+import { EditorState, ContentState } from 'draft-js';
+import { Tab, Tabs, Stack } from '@mui/material';
 import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
 import { apiService } from 'authscape';
 import Grid from '@mui/material/Grid2';
@@ -22,8 +23,11 @@ import {renderCustomField, renderSystemField } from './EditorFields';
 
 const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, ref) => {
 
+  // const [htmlToDraft, setHtmlToDraft] = useState(null);
+  // const [draftToHTML, setDraftToHTML] = useState(null);
   const {control, register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
 
+  const [editors, setEditors] = useState({});
   const refTimeoutToken = useRef(null);
 
   const refShouldClose = useRef(null);
@@ -72,6 +76,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
       setTabValue(newValue);
   };
 
+
   useEffect(() => {
 
       const fetchData = async () => {
@@ -89,68 +94,96 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
           }
 
       }
+
+      // if (typeof window !== "undefined") {
+
+      //   import("html-to-draftjs").then((mod) => {
+      //     setHtmlToDraft(() => mod.default);
+      //   });
+      //   import("draftjs-to-html").then((mod) => {
+      //     setDraftToHTML(() => mod.default); // Set default export
+      //   });
+      // }
+
       fetchData();
 
   }, []);
 
+
   useEffect(() => {
 
-    if (userId != null)
-    {
-      const fetchData = async () => {
-        let response = await apiService().get("/UserManagement/GetUser?userId=" + userId);
-        if (response != null && response.status == 200)
-        {
-          setUser(response.data);
-
-          if (response.data.company != null)
-          {
-            setCompany(response.data.company);
-          }
-
-          if (response.data.location != null)
-          {
-            setLocation(response.data.location);
-          }
-
-          if (response.data.customFields != null)
-          {
-            setCustomFields(response.data.customFields);
-          }
-
-          // assign all selected roles
-          if (response.data.roles != null)
-          {
-            let roleNames = [];
-            for (let index = 0; index < response.data.roles.length; index++) {
-              const role = response.data.roles[index];
-              
-              roleNames.push(role);
-            }
-            setSelectedRole(roleNames);
-          }
-
-          // assign all selected permissions
-          if (response.data.permissions != null)
-          {
-            let permissionNames = [];
-            for (let index = 0; index < response.data.permissions.length; index++) {
-              const permission = response.data.permissions[index];
-              
-              permissionNames.push(permission);
-            }
-            setSelectedPermission(permissionNames);
-          }
-          
-        }
-      }
-
-      if (userId != -1)
+    const fetchData = async () => {
+      let response = await apiService().get("/UserManagement/GetUser?userId=" + userId);
+      if (response != null && response.status == 200)
       {
-        fetchData();
+        setUser(response.data);
+
+        if (response.data.company != null)
+        {
+          setCompany(response.data.company);
+        }
+
+        if (response.data.location != null)
+        {
+          setLocation(response.data.location);
+        }
+
+        if (response.data.customFields != null)
+        {
+            setCustomFields(response.data.customFields);
+
+            // response.data.customFields.filter((cf) => cf.customFieldType == 2)
+            // .map((cf) => {
+            //     editors[cf.id] = EditorState.createEmpty();
+                
+            //     if (cf.value.trim().length > 0)
+            //     {
+            //       const blocksFromHTML = htmlToDraft(cf.value);
+            //       const { contentBlocks, entityMap } = blocksFromHTML;
+            //       const contentState = ContentState.createFromBlockArray(contentBlocks, entityMap);
+            //       editors[cf.id] = EditorState.createWithContent(contentState);
+            //     }
+              
+            // });
+
+        }
+
+
+          setEditors({...editors});
+
       }
-      
+
+        // assign all selected roles
+        if (response.data.roles != null)
+        {
+          let roleNames = [];
+          for (let index = 0; index < response.data.roles.length; index++) {
+            const role = response.data.roles[index];
+            
+            roleNames.push(role);
+          }
+          setSelectedRole(roleNames);
+        }
+
+        // assign all selected permissions
+        if (response.data.permissions != null)
+        {
+          let permissionNames = [];
+          for (let index = 0; index < response.data.permissions.length; index++) {
+            const permission = response.data.permissions[index];
+            
+            permissionNames.push(permission);
+          }
+          setSelectedPermission(permissionNames);
+        }
+        
     }
+
+    if (userId != -1)
+    {
+      fetchData();
+    }
+      
 
   }, [userId])
 
@@ -265,7 +298,11 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
 
             customFields && customFields.forEach(customField => {
 
-              let newValue = data[customField.customFieldId];
+              let newValue = 
+              // customField.customFieldType == 2 ? 
+              // draftToHTML(editors[customField.customFieldId].getCurrentContent()) 
+              // : 
+              data[customField.customFieldId];
               if (newValue != null)
               {
                 userCustomFields.push({
@@ -303,7 +340,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
           })} noValidate autoComplete="off">
             
             <Grid container spacing={2} sx={{paddingTop:2}}>
-              <Grid size={3} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
+              <Grid size={4} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
                 <Box sx={{textAlign:"center", display:"flex", justifyContent:"center", padding:2 }}>
                     <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg"  sx={{ width: 100, height: 100 }} />
                 </Box>
@@ -498,30 +535,40 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                     {errors.permissions && <Typography color={"red"}>{"permissions"} is required.</Typography>}
 
                 </Box>
-            
 
               </Grid>
-              <Grid size={9}>
-
-                <Box>
-                  <Box>
-                  <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth" aria-label="basic tabs example" centered>
-                    {tabOptions.map((tab, index) => {
-                      return (
-                        <Tab key={tab.id} label={tab.name} value={tab.id} />
-                      )
-                    })}
-                  </Tabs>
-                  </Box>
-                  
-                  <Grid container spacing={1} sx={{paddingLeft:2, paddingRight:2, paddingTop:2}}>
-
+              <Grid item size={3} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
+                <Box sx={{fontWeight:"bold", paddingBottom: 1}}>
+                  Custom Fields
+                </Box>
+                
+                <Box spacing={1} >
+                  {customFields &&
+                    <>
+                      {renderCustomField(userId, user, control, errors, register, setValue, customFields.filter(s => !s.tabId),
+                    editors, setEditors)}
+                    </>
+                  }
+                </Box>
+              </Grid>
+              <Grid item size={5} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
+                  <Stack spacing={2}>
+                    <Box>
+                      <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth" aria-label="basic tabs example" centered>
+                        {tabOptions.map((tab, index) => {
+                          return (
+                            <Tab key={tab.id} label={tab.name} value={tab.id} />
+                          )
+                        })}
+                      </Tabs>
+                    </Box>
+                    <Box>
                     {tabOptions.map((tab, index) => {
                       return (
                         <>
                         {tabValue === tab.id && 
                           <>
-                            {customFields != null &&
+                            {customFields &&
                               <>
                                 {renderCustomField(userId, user, control, errors, register, setValue, customFields.filter(s => s.tabId == tab.id))}
                               </>
@@ -531,10 +578,14 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                         </>
                       )
                     })}
-
-                      <Button ref={refSubmitButton} variant="contained" type="submit" sx={{display:"none"}}>Save Changes</Button>
-                  </Grid>
-                </Box>
+                    </Box>
+                  </Stack>
+                 
+                 
+                    
+                    
+                  <Button ref={refSubmitButton} variant="contained" type="submit" sx={{display:"none"}}>Save Changes</Button>
+                  
               </Grid>
             </Grid>
           </form>

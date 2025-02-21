@@ -1,7 +1,8 @@
 import React, {useEffect, useState, useRef} from 'react';
 import { Box, textAlign } from '@mui/system';
+import DeleteIcon from '@mui/icons-material/Delete';
 import TextField from '@mui/material/TextField';
-import { Button } from '@mui/material';
+import { IconButton, Button } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
@@ -23,6 +24,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
+import { backgroundColor, flexDirection, justifyContent } from '@xstyled/styled-components';
 
 export function CustomFields({platformType}) {
 
@@ -31,6 +33,8 @@ export function CustomFields({platformType}) {
     const [newCustomFieldOpen, setNewCustomFieldOpen] = useState(null);
 
     const [newTabFieldOpen, setNewTabFieldOpen] = useState(null);
+    const [deleteCustomFieldOpen, setDeleteCustomFieldOpen] = useState(null);
+    const [deleteCustomTabOpen, setDeleteCustomTabOpen] = useState(null);
 
   
 
@@ -42,12 +46,13 @@ export function CustomFields({platformType}) {
     }
   }
 
+  const fetchData = async () => {
+    await RefreshFields();
+    }
 
   useEffect(() => {
 
-    const fetchData = async () => {
-        await RefreshFields();
-    }
+    
     fetchData();
 
   }, []);
@@ -84,13 +89,14 @@ export function CustomFields({platformType}) {
                 await refreshTabOptions();
 
                 const customFieldResponse = await apiService().get("/UserManagement/GetCustomField?id=" + newCustomFieldOpen);
+                
                 if (customFieldResponse != null && customFieldResponse.status == 200)
                 {
                     refName.current.value = customFieldResponse.data.name;
                     setFieldType(customFieldResponse.data.fieldType);
                     setIsRequired(customFieldResponse.data.isRequired);
                     setGridSize(customFieldResponse.data.gridSize);
-                    setTabSelection(customFieldResponse.data.tabId);
+                    setTabSelection(customFieldResponse.data.tabId ? customFieldResponse.data.tabId : null);
                 }
                 
             }
@@ -146,13 +152,6 @@ export function CustomFields({platformType}) {
 
         </Dialog>
 
-
-
-
-
-
-
-
         <Dialog
             open={newCustomFieldOpen}
             onClose={() => {
@@ -179,7 +178,7 @@ export function CustomFields({platformType}) {
                             setFieldType(event.target.value);
                         }}>
                         <MenuItem value={1}>TextField</MenuItem>
-                        <MenuItem value={2}>RichTextField</MenuItem>
+                        {/* <MenuItem value={2}>RichTextField</MenuItem> */}
                         <MenuItem value={3}>Number</MenuItem>
                         <MenuItem value={4}>Date</MenuItem>
                         <MenuItem value={5}>Yes / No</MenuItem>
@@ -188,18 +187,42 @@ export function CustomFields({platformType}) {
 
                 <Box sx={{paddingBottom:2}}>
                     <FormControl fullWidth>
-                        <InputLabel id="tab-simple-select-label">Tabs</InputLabel>
-                        <Select
+                        <InputLabel shrink id="tab-simple-select-label" sx={{
+                            backgroundColor: "white",
+                            px: "3px"
+                        }}>Tabs</InputLabel>
+                        <Select aria-expanded={true}
                             labelId="tab-simple-select-label"
                             id="tab-simple-select"
+                            //displayEmpty
                             value={tabSelection}
-                            label="Tabs"
+                            label={"tabs"}
+                            
                             onChange={(event) => {
                                 setTabSelection(event.target.value);
                             }}>
+                                <MenuItem value={null}> <em>None</em> </MenuItem>
                                 {tabOptions != null && tabOptions.map((tab) => {
                                     return (
-                                    <MenuItem key={tab.id} value={tab.id}>{tab.name}</MenuItem>
+                                        <MenuItem key={tab.id} value={tab.id}>
+                                            <Stack direction={"row"}  sx={{
+                                                alignItems: "center",
+                                                justifyContent: "space-between",
+                                                width: "100%"
+                                            }}>
+                                                <Box>
+                                                    <Typography>{tab.name}</Typography>
+                                                </Box>
+                                                <Box>
+                                                    <IconButton color={"error"} onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        setDeleteCustomFieldOpen(tab);
+                                                    }}>
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Box>
+                                            </Stack>
+                                        </MenuItem>
                                     )
                                 })}
                         </Select>
@@ -277,6 +300,7 @@ export function CustomFields({platformType}) {
 
 
   return (
+    <>
     <Box>
         <Typography variant="h3" gutterBottom>
             Custom Fields
@@ -326,13 +350,23 @@ export function CustomFields({platformType}) {
                             {row.fieldType == 5 && "Yes / No"}
                         </TableCell>
                         <TableCell component="th" scope="row">
-                            {row.customFieldTab.name}
+                            {row.customFieldTab ? row.customFieldTab.name : ""}
                         </TableCell>
                         <TableCell component="th" scope="row">
                             {row.isRequired == true ? "Required" : "Not Required"}
                         </TableCell>
                         <TableCell component="th" scope="row">
                             {row.gridSize}
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                            <IconButton color={"error"} onClick={(event) => {
+                                    
+                                    event.stopPropagation();
+                                    setDeleteCustomFieldOpen(row);
+                                }
+                            }>
+                                <DeleteIcon />
+                            </IconButton>
                         </TableCell>
                     </TableRow>
                 ))}
@@ -343,5 +377,58 @@ export function CustomFields({platformType}) {
 
         {AddNewCustomField()}
     </Box>
+
+    <Dialog
+        open={deleteCustomFieldOpen}
+        onClose={() => setDeleteCustomFieldOpen(null)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          Delete {deleteCustomFieldOpen && deleteCustomFieldOpen.name} field?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete the {deleteCustomFieldOpen && deleteCustomFieldOpen.name} field?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+            <Button  onClick={async () => {
+                let response = await apiService().delete("/UserManagement/DeleteCustomField?id=" + deleteCustomFieldOpen.id);
+                RefreshFields();
+                setDeleteCustomFieldOpen(null);
+            }}>
+                Yes
+            </Button>
+            <Button  onClick={() => setDeleteCustomFieldOpen(null)}>No</Button>
+        
+        </DialogActions>
+    </Dialog>
+    <Dialog
+        open={deleteCustomTabOpen}
+        onClose={() => setDeleteCustomTabOpen(null)}
+      >
+        <DialogTitle id="alert-dialog-title">
+          Delete {deleteCustomTabOpen && deleteCustomTabOpen.name} field?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete the {deleteCustomTabOpen && deleteCustomTabOpen.name} field?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+            <Button  onClick={async (event) => {
+                debugger;
+                let response = await apiService().delete("/UserManagement/DeleteCustomTab?id=" + deleteCustomTabOpen.id);
+                refreshTabOptions();
+                setDeleteCustomFieldOpen(null);
+            }}>
+                Yes
+            </Button>
+            <Button  onClick={() => setDeleteCustomFieldOpen(null)}>No</Button>
+        
+        </DialogActions>
+    </Dialog>
+    </>
   )
 }

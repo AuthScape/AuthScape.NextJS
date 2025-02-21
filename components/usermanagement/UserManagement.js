@@ -43,6 +43,8 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
     const [searchByName, setSearchByName] = useState('');
     const [searchByCompanyId, setSearchByCompanyId] = useState(null);
     const [searchByRoleId, setSearchByRoleId] = useState(null);
+    const [fields, setFields] = useState([]);
+    const [columns, setColumns] = useState([]);
 
     const filterLoaded = useRef(false);
 
@@ -59,51 +61,64 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
             field: 'fullName',
             headerName: 'Full name',
             flex: 1,
-            renderCell: (param) => {
-                return param.row.firstName + " " + param.row.lastName; 
-            }
+            valueGetter: (value, row) => row.firstName + " " + row.lastName 
+            // renderCell: (param) => {
+            //     return param.row.firstName + " " + param.row.lastName; 
+            // }
         },
         { field: 'userName', flex:1, headerName: 'Email', editable: false, headerClassName: 'invoiceHeaderColumn' },  
         {
             field: 'company',
             headerName: 'Company',
-            flex: 1,    
-            renderCell: (param) => {
-                return param.row.company != null ? param.row.company.title : ""; 
-            }
+            flex: 1, 
+            valueGetter: (value, row) => row.company.title    
+            // renderCell: (param) => {
+            //     return param.row.company != null ? param.row.company.title : ""; 
+            // }
         },
         {
             field: 'location',
             headerName: 'Location',
             flex: 1,    
-            renderCell: (param) => {
-                return param.row.location != null ? param.row.location.title : ""; 
-            }
+            valueGetter: (value, row) => row.location.title
+            // renderCell: (param) => {
+            //     return param.row.location != null ? param.row.location.title : ""; 
+            // }
         },
         {
             field: 'isActive',
             headerName: 'Status',
             flex: 1,    
-            renderCell: (param) => {
-                return param.row.isActive ? "Active" : "Not Active"; 
-            }
+            valueFormatter: (row) => row.isActive ? "Active" : "Not Active"
+            // renderCell: (param) => {
+            //     return param.row.isActive ? "Active" : "Not Active"; 
+            // }
         },
         {
             field: 'roles',
             headerName: 'Roles',
             flex: 1,    
-            renderCell: (param) => {
-                return param.row.roles; 
-            }
+            // renderCell: (param) => {
+            //     return param.row.roles; 
+            // }
         },
         {
-            field: 'permission',
-            headerName: 'Permission',
+            field: 'permissions',
+            headerName: 'Permissions',
             flex: 1,    
-            renderCell: (param) => {
-                return param.row.permissions; 
-            }
+            // renderCell: (param) => {
+            //     return param.row.permissions; 
+            // }
         },
+        // {
+        //     field: 'permissions',
+        //     headerName: 'Permissions',
+        //     flex: 1,    
+        //     renderCell: (param) => {
+        //         debugger;
+        //         return param.row.permissions; 
+        //     }
+        // }
     ];
 
 
@@ -155,8 +170,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
     useEffect(() => {
 
         setDataGridRefreshKey(dataGridRefreshKey + 1);
-
-    }, [searchByName]);
+    }, [searchByName, columns]);
 
     useEffect(() => {
 
@@ -165,6 +179,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
             filterLoaded.current = true;
             getAllCompanies();
             getAllRoles();
+            getAllCustomFields();
         }
 
     }, [filterLoaded.current])
@@ -174,7 +189,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
         let response = "";
         if (platformType == 1)
         {
-            response = "/UserManagement/GetUsers";
+            response = "/UserManagement/GetUsers"; 
         }
         else if (platformType == 2)
         {
@@ -188,11 +203,32 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
         return response;
     }
 
-    const getColumns = () => {
+    const getColumns = (customFields) => {
 
         if (platformType == 1)
         {
-            return userColumns;
+           
+            let cols = [...userColumns, ...customFields.map((field, i) => {
+               
+                return {
+                    field: `customField${i + 1}`,
+                    headerName: field.name,
+                    flex: 1,
+                    valueGetter: (_, row) => {
+                        
+                        if (row.customFields)
+                        {
+                            let cf = row.customFields.find(f => f.customFieldId == field.id);
+                            if (cf) return cf.value;
+                        }
+
+                        return null;
+                    } 
+                };
+            })];
+
+            setColumns(cols);
+         
         }
         else if (platformType == 2)
         {
@@ -221,6 +257,13 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
         setAllCompanies(results);
     }
 
+    const getAllCustomFields = async () => {
+
+        let res = await apiService().get(`/UserManagement/GetCustomFields?platformType=${platformType}`);
+        getColumns(res.data);
+
+    }
+
     const getAllRoles = async () => {
 
         let results = [];
@@ -246,6 +289,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                     <>
                         <Box sx={{paddingRight:2}}>
                             <KeyboardBackspaceRoundedIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, cursor:"pointer" }} onClick={() => {
+                                
                                 setShowUserDetails(null);
                             }} />
                         </Box>
@@ -256,7 +300,10 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                     {showCustomSettings &&
                     <>
                         <Box sx={{paddingRight:2}}>
-                            <KeyboardBackspaceRoundedIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, cursor:"pointer" }} onClick={() => {
+                            <KeyboardBackspaceRoundedIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, cursor:"pointer" }} onClick={async () => {
+                                
+                                await getAllCustomFields();
+                                setDataGridRefreshKey(dataGridRefreshKey + 1);
                                 setShowCustomSettings(false);
                             }} />
                         </Box>
@@ -438,12 +485,13 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                     {!showCustomSettings &&
                     <Box>
                         {showUserDetails == null &&
+                     
                         <EditableDatagrid 
                             key={dataGridRefreshKey}
                             height={height}
                             pageSize={25}
                             url={getDataGrid()} 
-                            columns={getColumns()}
+                            columns={columns}
                             params={{
                                 searchByName: searchByName,
                                 searchByCompanyId: searchByCompanyId,
