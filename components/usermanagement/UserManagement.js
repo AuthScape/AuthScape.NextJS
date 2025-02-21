@@ -24,6 +24,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
     const [showUserDetails, setShowUserDetails] = useState(null);
     const [showCustomSettings, setShowCustomSettings] = useState(false);
 
+    const [showArchiveUserDialog, setShowArchiveUserDialog] = useState(null);
     const [showContactDialog, setShowContactDialog] = useState(false);
 
 
@@ -43,6 +44,8 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
     const [searchByName, setSearchByName] = useState('');
     const [searchByCompanyId, setSearchByCompanyId] = useState(null);
     const [searchByRoleId, setSearchByRoleId] = useState(null);
+    const [fields, setFields] = useState([]);
+    const [columns, setColumns] = useState([]);
 
     const filterLoaded = useRef(false);
 
@@ -59,51 +62,75 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
             field: 'fullName',
             headerName: 'Full name',
             flex: 1,
-            renderCell: (param) => {
-                return param.row.firstName + " " + param.row.lastName; 
-            }
-        },
-        { field: 'userName', flex:1, headerName: 'Email', editable: false, headerClassName: 'invoiceHeaderColumn' },  
-        {
-            field: 'company',
-            headerName: 'Company',
-            flex: 1,    
-            renderCell: (param) => {
-                return param.row.company != null ? param.row.company.title : ""; 
-            }
-        },
-        {
-            field: 'location',
-            headerName: 'Location',
-            flex: 1,    
-            renderCell: (param) => {
-                return param.row.location != null ? param.row.location.title : ""; 
-            }
+            valueGetter: (value, row) => row.firstName + " " + row.lastName 
+            // renderCell: (param) => {
+            //     return param.row.firstName + " " + param.row.lastName; 
+            // }
         },
         {
             field: 'isActive',
             headerName: 'Status',
             flex: 1,    
-            renderCell: (param) => {
-                return param.row.isActive ? "Active" : "Not Active"; 
-            }
+            valueGetter: (_, row) => row.isActive,
+            valueFormatter: (value, row) => {
+                return value == true ? "Active" : ("Inactive" + (row.archived ? " (archived)" : "" ))
+            },
+          
         },
+        { field: 'userName', flex:1, headerName: 'Email', editable: false, headerClassName: 'invoiceHeaderColumn' },  
+        {
+            field: 'company',
+            headerName: 'Company',
+            flex: 1, 
+            valueGetter: (value, row) => row.company.title    
+            // renderCell: (param) => {
+            //     return param.row.company != null ? param.row.company.title : ""; 
+            // }
+        },      
+        {
+            field: 'phoneNumber',
+            headerName: 'Phone Number',
+            flex: 1, 
+            valueGetter: (value, row) => row.phoneNumber    
+            // renderCell: (param) => {
+            //     return param.row.company != null ? param.row.company.title : ""; 
+            // }
+        },
+        {
+            field: 'location',
+            headerName: 'Location',
+            flex: 1,    
+            valueGetter: (_, row) => row.location.title
+            // renderCell: (param) => {
+            //     return param.row.location != null ? param.row.location.title : ""; 
+            // }
+        },
+       
         {
             field: 'roles',
             headerName: 'Roles',
             flex: 1,    
-            renderCell: (param) => {
-                return param.row.roles; 
-            }
+            // renderCell: (param) => {
+            //     return param.row.roles; 
+            // }
         },
         {
-            field: 'permission',
-            headerName: 'Permission',
+            field: 'permissions',
+            headerName: 'Permissions',
             flex: 1,    
-            renderCell: (param) => {
-                return param.row.permissions; 
-            }
+            // renderCell: (param) => {
+            //     return param.row.permissions; 
+            // }
         },
+        // {
+        //     field: 'permissions',
+        //     headerName: 'Permissions',
+        //     flex: 1,    
+        //     renderCell: (param) => {
+        //         debugger;
+        //         return param.row.permissions; 
+        //     }
+        // }
     ];
 
 
@@ -155,8 +182,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
     useEffect(() => {
 
         setDataGridRefreshKey(dataGridRefreshKey + 1);
-
-    }, [searchByName]);
+    }, [searchByName, columns]);
 
     useEffect(() => {
 
@@ -165,6 +191,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
             filterLoaded.current = true;
             getAllCompanies();
             getAllRoles();
+            getAllCustomFields();
         }
 
     }, [filterLoaded.current])
@@ -174,7 +201,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
         let response = "";
         if (platformType == 1)
         {
-            response = "/UserManagement/GetUsers";
+            response = "/UserManagement/GetUsers"; 
         }
         else if (platformType == 2)
         {
@@ -188,11 +215,48 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
         return response;
     }
 
-    const getColumns = () => {
+    const getColumns = (customFields) => {
 
         if (platformType == 1)
         {
-            return userColumns;
+           
+            let cols = [...userColumns, ...customFields.map((field, i) => {
+               
+                return {
+                    field: `customField${i + 1}`,
+                    headerName: field.name,
+                    flex: 1,
+                    valueGetter: (_, row) => {
+                        
+                        if (row.customFields)
+                        {
+                            let cf = row.customFields.find(f => f.customFieldId == field.id);
+                            if (cf) return cf.value;
+                        }
+
+                        return null;
+                    } 
+                };
+            }), {
+                field: '',
+                headerName: '',
+                flex: 1,
+                renderCell: 
+                    (param) => {
+                        return (
+                            <Button onClick={(e) =>{
+                                e.stopPropagation();
+                                setShowArchiveUserDialog(param.row);
+
+                            }}>
+                                Archive
+                            </Button>
+                        )
+                    }
+            }];
+
+            setColumns(cols);
+         
         }
         else if (platformType == 2)
         {
@@ -221,6 +285,13 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
         setAllCompanies(results);
     }
 
+    const getAllCustomFields = async () => {
+
+        let res = await apiService().get(`/UserManagement/GetCustomFields?platformType=${platformType}`);
+        getColumns(res.data);
+
+    }
+
     const getAllRoles = async () => {
 
         let results = [];
@@ -246,6 +317,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                     <>
                         <Box sx={{paddingRight:2}}>
                             <KeyboardBackspaceRoundedIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, cursor:"pointer" }} onClick={() => {
+                                
                                 setShowUserDetails(null);
                             }} />
                         </Box>
@@ -256,7 +328,10 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                     {showCustomSettings &&
                     <>
                         <Box sx={{paddingRight:2}}>
-                            <KeyboardBackspaceRoundedIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, cursor:"pointer" }} onClick={() => {
+                            <KeyboardBackspaceRoundedIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, cursor:"pointer" }} onClick={async () => {
+                                
+                                await getAllCustomFields();
+                                setDataGridRefreshKey(dataGridRefreshKey + 1);
                                 setShowCustomSettings(false);
                             }} />
                         </Box>
@@ -271,6 +346,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                             <Box sx={{paddingRight:2, paddingLeft:2}}>
                                 <Button variant="text" startIcon={<SaveRoundedIcon />} onClick={async () => {
 
+                                    
                                     userEditorRef.current.saveChanges();
 
                                 }}>Save</Button>
@@ -438,12 +514,13 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                     {!showCustomSettings &&
                     <Box>
                         {showUserDetails == null &&
+                     
                         <EditableDatagrid 
                             key={dataGridRefreshKey}
                             height={height}
                             pageSize={25}
                             url={getDataGrid()} 
-                            columns={getColumns()}
+                            columns={columns}
                             params={{
                                 searchByName: searchByName,
                                 searchByCompanyId: searchByCompanyId,
@@ -566,9 +643,41 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                         </DialogActions>
                     </Dialog>
 
+                    
+                    {
+                        showArchiveUserDialog &&
+                        <Dialog
+                            open={showArchiveUserDialog}
+                            onClose={() => {
+                                setShowArchiveUserDialog(null);
+                            }}
+                            aria-labelledby="alert-dialog-title"
+                            aria-describedby="alert-dialog-description">
+                            <DialogTitle id="alert-dialog-title">
+                            {`Archive ${showArchiveUserDialog.firstName + " " + showArchiveUserDialog.lastName}?`}
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
+                                    Are you sure you want to archive the user
+                                    {showArchiveUserDialog.firstName + " " + showArchiveUserDialog.lastName} ?
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                            <Button onClick={() => {
+                                setShowArchiveUserDialog(null);
+                            }}>Cancel</Button>
+                            <Button onClick={async () => {
 
+                                let res = await apiService().delete(`/UserManagement/ArchiveUser?id=${showArchiveUserDialog.id}`);
+                                setDataGridRefreshKey(dataGridRefreshKey + 1);
+                                setShowArchiveUserDialog(null);
 
-
+                            }}>
+                                Yes
+                            </Button>
+                            </DialogActions>
+                        </Dialog>
+                    }
 
                     <Dialog
                         open={showContactDialog}
@@ -621,7 +730,9 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                         <CustomFields platformType={platformType} />
                     }
 
-                    <CSVUsersUpload showDialog={uploadUsersShowDialog} onClose={() => {
+                    <CSVUsersUpload showDialog={uploadUsersShowDialog} platformType={platformType} onClose={() => {
+                        
+                        setDataGridRefreshKey(dataGridRefreshKey + 1);
                         setUploadUsersShowDialog(false);
                     }} />
                 </Box>

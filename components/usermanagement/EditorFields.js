@@ -1,10 +1,24 @@
 import { Box, TextField, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
+
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import Grid from '@mui/material/Grid2';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
-// import { RichTextEditor } from "./RichTextEditor";
+import dayjs from 'dayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
+import dynamic from "next/dynamic";
+
+const Editor = dynamic(
+  () => import("react-draft-wysiwyg").then((mod) => mod.Editor),
+  { ssr: false }
+);
+
+
+// import { RichTextEditor } from 'authscape';
 
 export const findTheValue = (fieldObject, field) => {
 
@@ -49,16 +63,19 @@ const findCustomFieldValue = (fieldObject, field) => {
     return result;
 }
 
-export const renderCustomField = (identifier, fieldObject, control, errors, register, setValue, customFields) => {
+export const renderCustomField = (identifier, fieldObject, control, errors, register, setValue, customFields, 
+  editors, setEditors
+) => {
+
 
   return (
-      <>
+      <Grid container spacing={2}>
       {(identifier != -1 ? fieldObject != null : true) && customFields.map((field, index) => {
 
           let result = findCustomFieldValue(fieldObject, field.name);
 
           return (
-            <Grid key={index} size={field.size != null ? field.size : 12}>
+            <Grid key={index} item size={field.size ? field.size : 12}>
               {/* {JSON.stringify(field)} */}
               <Controller
                 name={field.customFieldId}
@@ -79,48 +96,76 @@ export const renderCustomField = (identifier, fieldObject, control, errors, regi
                         value={value || ''}
                       />
                     )}
-                    {(field.customFieldType == 2) && (
-                      <Box sx={{height:10}}>
+                    {/* {(field.customFieldType == 2) && (
+                      <Box sx={{backgroundColor: "transparent", 
                         
+                          '& .MuiButtonBase-root': {
+                            display: 'none'
+                          }
+                      }}>
+                        <Editor editorState={editors[field.customFieldId]} 
+                        onEditorStateChange={(newEditorState) => {
+                          setEditors({...editors, 
+                          [field.customFieldId]: newEditorState});
+                        }} />
+                       
 
-
-
-
-                        {/* <div>
-                          <label htmlFor="editor1">Editor 1</label>
-                          <RichTextEditor name="editor1" setValue={setValue} />
-                          <textarea
-                              {...register("editor1")}
-                              style={{ display: "none" }} // Hide the textarea
-                          />
-                        </div>              */}
-
-
-
-
-                        {/* <RichTextEditor height={200} html={value} onSave={(html) => {
-                          onChange(html);
-                        }} /> */}
+                      
                       </Box>
 
-                      // <TextField
-                      //   label={field.name}
-                      //   variant="outlined"
-                      //   margin="normal"
-                      //   fullWidth
-                      //   {...register(field.customFieldId, { required: field.isRequired })}
-                      //   onChange={onChange}
-                      //   value={value || ''}
-                      // />
-                    )}
+                    )} */}
+                     {/* <RichTextEditor ref={textEditorRef} html={value} 
+                        
+                        {...register(field.customFieldId, { required: field.isRequired })}
+
+                        onChange={(value) => {
+                          debugger;
+                        }}
+                         
+                        onSave={(html) => {
+                        
+                          onChange(html);
+                        }}/> */}
+                        
+                    {
+                      field.customFieldType === 3 && (
+                          <TextField
+                          variant="outlined"
+                          label={field.name}
+                          type="number"
+                          margin="normal"
+                          fullWidth
+                          {...register(field.customFieldId, { required: field.isRequired })}
+                          onChange={onChange}
+                          value={value || 0}
+                        />
+                      )
+                    }
+                    {
+                      field.customFieldType === 4 && (
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              label={field.name}
+                              value={dayjs(value)}
+                              {...register(field.customFieldId, { required: field.isRequired })}
+                              onChange={onChange}
+                            />
+                          </LocalizationProvider>
+
+                      )
+                    }
                     {field.customFieldType === 5 && (
-                      <FormControlLabel
+                      <FormControlLabel sx={{
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center"
+                      }}
                         control={
-                          <Switch
-                            checked={value || false}
-                            {...register(field.customFieldId, { required: field.isRequired })}
-                            onChange={onChange}
-                          />
+                            <Switch
+                              checked={value || false}
+                              {...register(field.customFieldId, { required: field.isRequired })}
+                              onChange={onChange}
+                            />
                         }
                         label={field.name}
                       />
@@ -135,7 +180,7 @@ export const renderCustomField = (identifier, fieldObject, control, errors, regi
           )
 
       })}
-      </>
+      </Grid>
   )
 }
 

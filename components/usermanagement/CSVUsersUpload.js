@@ -14,7 +14,7 @@ import CloudDownloadRoundedIcon from '@mui/icons-material/CloudDownloadRounded';
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 
-export function CSVUsersUpload({customFields, showDialog, onClose}) {
+export function CSVUsersUpload({customFields, showDialog, platformType, onClose}) {
 
     const [activeStep, setActiveStep] = React.useState(0);
     const [completed, setCompleted] = React.useState({});
@@ -111,7 +111,7 @@ export function CSVUsersUpload({customFields, showDialog, onClose}) {
 
                                     <Button startIcon={<CloudDownloadRoundedIcon />} variant="contained" sx={{marginTop:2}} onClick={async () => {
 
-                                        await apiService().DownloadFile("/UserManagement/GetDownloadTemplate", "DownloadFile.csv", () => {
+                                        await apiService().DownloadFile(`/UserManagement/GetDownloadTemplate?platformType=${platformType}`, "DownloadFile.csv", () => {
 
                                         });
 
