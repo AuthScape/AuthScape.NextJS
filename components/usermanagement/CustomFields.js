@@ -36,24 +36,24 @@ export function CustomFields({platformType}) {
     const [deleteCustomFieldOpen, setDeleteCustomFieldOpen] = useState(null);
     const [deleteCustomTabOpen, setDeleteCustomTabOpen] = useState(null);
 
-  
+    
 
-  const RefreshFields = async () => {
-    let response = await apiService().get("/UserManagement/GetCustomFields?platformType=" + platformType);
-    if (response != null && response.status == 200)
-    {
-        setCustomFields(response.data);
+    const RefreshFields = async () => {
+        let response = await apiService().get("/UserManagement/GetCustomFields?platformType=" + platformType);
+        if (response != null && response.status == 200)
+        {
+            setCustomFields(response.data);
+        }
     }
-  }
 
-  const fetchData = async () => {
-    await RefreshFields();
-    }
+//   const fetchData = async () => {
+//     await RefreshFields();
+//     }
 
   useEffect(() => {
 
-    
-    fetchData();
+    RefreshFields();
+    // fetchData();
 
   }, []);
 
@@ -63,45 +63,45 @@ export function CustomFields({platformType}) {
     const [fieldType, setFieldType] = useState(1);
     const [gridSize, setGridSize] = useState(1);
     const [isRequired, setIsRequired] = useState(false);
-    const [tabOptions, setTabOptions] = useState(null);
+    const [tabOptions, setTabOptions] = useState([]);
 
     const [tabSelection, setTabSelection] = useState(null);
 
     const refTabName = useRef(null);
 
-
     const refreshTabOptions = async () => {
         const customTabResponse = await apiService().get("/UserManagement/GetCustomTabs?platformType=" + platformType);
-        if (customTabResponse != null && customTabResponse.status == 200)
+        
+        if (customTabResponse  && customTabResponse.status == 200)
         {
             setTabOptions(customTabResponse.data);
         }
     }
 
+    const fetchCustomField = async () => {
+
+        await refreshTabOptions();
+
+        const customFieldResponse = await apiService().get("/UserManagement/GetCustomField?id=" + newCustomFieldOpen);
+        
+        if (customFieldResponse != null && customFieldResponse.status == 200)
+        {
+            refName.current.value = customFieldResponse.data.name;
+            setFieldType(customFieldResponse.data.fieldType);
+            setIsRequired(customFieldResponse.data.isRequired);
+            setGridSize(customFieldResponse.data.gridSize);
+            setTabSelection(customFieldResponse.data.tabId ? customFieldResponse.data.tabId : null);
+        }
+        
+    }
+
     useEffect(() => {
 
-        
-        if (newCustomFieldOpen != null && newCustomFieldOpen != -1)
+        if (newCustomFieldOpen)
         {
             // look up the record for this custom field so we can display the values on the components
-            const fetchData = async () => {
-
-                await refreshTabOptions();
-
-                const customFieldResponse = await apiService().get("/UserManagement/GetCustomField?id=" + newCustomFieldOpen);
-                
-                if (customFieldResponse != null && customFieldResponse.status == 200)
-                {
-                    refName.current.value = customFieldResponse.data.name;
-                    setFieldType(customFieldResponse.data.fieldType);
-                    setIsRequired(customFieldResponse.data.isRequired);
-                    setGridSize(customFieldResponse.data.gridSize);
-                    setTabSelection(customFieldResponse.data.tabId ? customFieldResponse.data.tabId : null);
-                }
-                
-            }
-
-            fetchData();
+           if (newCustomFieldOpen != -1) fetchCustomField();
+            refreshTabOptions();
         }
 
     }, [newCustomFieldOpen]);
@@ -194,6 +194,8 @@ export function CustomFields({platformType}) {
                         <Select aria-expanded={true}
                             labelId="tab-simple-select-label"
                             id="tab-simple-select"
+                            renderValue={(selected) => 
+                                tabOptions.find(t => t.id == selected).name }
                             //displayEmpty
                             value={tabSelection}
                             label={"tabs"}
@@ -202,7 +204,7 @@ export function CustomFields({platformType}) {
                                 setTabSelection(event.target.value);
                             }}>
                                 <MenuItem value={null}> <em>None</em> </MenuItem>
-                                {tabOptions != null && tabOptions.map((tab) => {
+                                {tabOptions && tabOptions.map((tab) => {
                                     return (
                                         <MenuItem key={tab.id} value={tab.id}>
                                             <Stack direction={"row"}  sx={{
@@ -213,14 +215,16 @@ export function CustomFields({platformType}) {
                                                 <Box>
                                                     <Typography>{tab.name}</Typography>
                                                 </Box>
-                                                <Box>
-                                                    <IconButton color={"error"} onClick={(event) => {
-                                                        event.stopPropagation();
-                                                        setDeleteCustomFieldOpen(tab);
-                                                    }}>
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Box>
+                                                {
+                                                    <Box>
+                                                        <IconButton color={"error"} onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            setDeleteCustomTabOpen(tab);
+                                                        }}>
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </Box>
+                                                }
                                             </Stack>
                                         </MenuItem>
                                     )
@@ -294,6 +298,35 @@ export function CustomFields({platformType}) {
             </Button>
             </DialogActions>
         </Dialog>
+
+        <Dialog
+        open={deleteCustomTabOpen}
+        onClose={() => setDeleteCustomTabOpen(null)}
+      >
+        <DialogTitle id="alert-dialog-title">
+          Delete {deleteCustomTabOpen && deleteCustomTabOpen.name} tab?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete the {deleteCustomTabOpen && deleteCustomTabOpen.name} tab?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+            <Button  onClick={async (event) => {
+                
+                let response = await apiService().delete("/UserManagement/DeleteCustomTab?id=" + deleteCustomTabOpen.id);
+                
+                refreshTabOptions();
+                setDeleteCustomTabOpen(null);
+            }}>
+                Yes
+            </Button>
+            <Button  onClick={() => {
+            setDeleteCustomTabOpen(null)
+            }}>No</Button>
+        
+        </DialogActions>
+    </Dialog>
     </>
     )
   }
@@ -395,7 +428,7 @@ export function CustomFields({platformType}) {
         <DialogActions>
             <Button  onClick={async () => {
                 let response = await apiService().delete("/UserManagement/DeleteCustomField?id=" + deleteCustomFieldOpen.id);
-                RefreshFields();
+                await RefreshFields();
                 setDeleteCustomFieldOpen(null);
             }}>
                 Yes
@@ -404,31 +437,7 @@ export function CustomFields({platformType}) {
         
         </DialogActions>
     </Dialog>
-    <Dialog
-        open={deleteCustomTabOpen}
-        onClose={() => setDeleteCustomTabOpen(null)}
-      >
-        <DialogTitle id="alert-dialog-title">
-          Delete {deleteCustomTabOpen && deleteCustomTabOpen.name} field?
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Are you sure you want to delete the {deleteCustomTabOpen && deleteCustomTabOpen.name} field?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-            <Button  onClick={async (event) => {
-                debugger;
-                let response = await apiService().delete("/UserManagement/DeleteCustomTab?id=" + deleteCustomTabOpen.id);
-                refreshTabOptions();
-                setDeleteCustomFieldOpen(null);
-            }}>
-                Yes
-            </Button>
-            <Button  onClick={() => setDeleteCustomFieldOpen(null)}>No</Button>
-        
-        </DialogActions>
-    </Dialog>
+    
     </>
   )
 }

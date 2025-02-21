@@ -323,6 +323,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                 companyId: company != null ? company.id : null,
                 locationId: location != null ? location.id : null,
                 email: data.Email,
+                phoneNumber: data.PhoneNumber,
                 isActive: data.IsActive,
                 roles: selectedRoles != "" ? selectedRoles : null,
                 permissions: selectedPermission != "" ? selectedPermission : null,
