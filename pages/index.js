@@ -15,7 +15,6 @@ export default function Home({loadedUser, setIsLoading, currentUser, setOpenLogi
 
   return (
     <div className={styles.container}>
-
       <Head>
           <title>AuthScape | Home</title>
       </Head>
@@ -27,8 +26,6 @@ export default function Home({loadedUser, setIsLoading, currentUser, setOpenLogi
       <Button variant="contained" sx={{marginRight:1}} onClick={async () => {
             await authService().login();
         }}>Login</Button>
-
-
       <Button variant="contained" sx={{marginRight:1}} onClick={async () => {
             await authService().logout();
         }}>Logout</Button>

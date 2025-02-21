@@ -1,4 +1,5 @@
 import { Puck } from "@measured/puck";
+ 
 const config = {
   components: {
     HeadingBlock: {
@@ -13,9 +14,9 @@ const config = {
     },
   },
 };
-
+ 
 const initialData = {};
-
+ 
 const save = (data) => {};
 
 const Index = () => {
