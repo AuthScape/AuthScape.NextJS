@@ -23,7 +23,7 @@ import { apiService } from "authscape";
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
+ export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
   const isEditing = typeof isOpen !== "boolean";
 
   const initialData = {
@@ -58,17 +58,20 @@ export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
     }
   }, [isEditing, isOpen, reset, setValue]);
 
-  const watchedFields = watch(["title", "description", "slug"]);
+  const watchedFields = watch(["title", "description",]);
   const pageTypeId = watch("pageTypeId");
   const recursion = watch("recursion");
+  const slug = watch("slug")
 
   const selectedPageType = pageTypes.find((type) => type.id === pageTypeId);
   const isRecursive = selectedPageType?.isRecursive || false;
+  const isHomepage = selectedPageType?.isHomepage || false;
 
   const isFormValid =
     watchedFields.every((field) => field?.trim() !== "") &&
     pageTypeId &&
-    (!isRecursive || (isRecursive && recursion));
+    (!isRecursive || recursion) &&
+    (isHomepage || slug);
 
   const onSave = async (pageParam) => {
     event.preventDefault();
@@ -79,7 +82,7 @@ export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
       pageTypeId: pageTypeId,
       description: description,
       recursion: recursion,
-      slug: slug,
+      slug: !isHomepage ? slug : "",
     };
 
     const apiEndpoint = isEditing
@@ -202,50 +205,50 @@ export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
                 )}
               />
             )}
-
-            <Controller
-              name="slug"
-              control={control}
-              rules={{ required: "Slug is required" }}
-              render={({ field }) => (
-                <>
-                  <Typography variant="subtitle2">
-                    Page Slug{" "}
-                    <Tooltip
-                      arrow
-                      title="This will be part of the page URL, e.g., yourwebsite.com/your-slug"
-                    >
-                      <InfoOutlinedIcon
-                        sx={{ fontSize: 15, cursor: "pointer" }}
-                        color="warning"
-                      />
-                    </Tooltip>
-                  </Typography>
-                  <TextField
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">/</InputAdornment>
-                      ),
-                    }}
-                    size="small"
-                    {...field}
-                    fullWidth
-                    error={!!errors.slug}
-                    helperText={errors.slug?.message || ""}
-                    onKeyDown={(e) => {
-                      if (e.key === " ") {
-                        e.preventDefault();
-                      }
-                    }}
-                    onChange={(e) => {
-                      const newValue = e.target.value.replace(/\s/g, "");
-                      field.onChange(newValue);
-                    }}
-                  />
-                </>
-              )}
-            />
-
+            {!isHomepage &&
+              <Controller
+                name="slug"
+                control={control}
+                rules={{ required: "Slug is required" }}
+                render={({ field }) => (
+                  <>
+                    <Typography variant="subtitle2">
+                      Page Slug{" "}
+                      <Tooltip
+                        arrow
+                        title="This will be part of the page URL, e.g., yourwebsite.com/your-slug"
+                      >
+                        <InfoOutlinedIcon
+                          sx={{ fontSize: 15, cursor: "pointer" }}
+                          color="warning"
+                        />
+                      </Tooltip>
+                    </Typography>
+                    <TextField
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">/</InputAdornment>
+                        ),
+                      }}
+                      size="small"
+                      {...field}
+                      fullWidth
+                      error={!!errors.slug}
+                      helperText={errors.slug?.message || ""}
+                      onKeyDown={(e) => {
+                        if (e.key === " ") {
+                          e.preventDefault();
+                        }
+                      }}
+                      onChange={(e) => {
+                        const newValue = e.target.value.replace(/\s/g, "");
+                        field.onChange(newValue);
+                      }}
+                    />
+                  </>
+                )}
+              />
+            }
             <Controller
               name="description"
               control={control}
@@ -275,5 +278,4 @@ export const CreatePageModal = ({ isOpen, handleClose, pageTypes }) => {
     </Dialog>
   );
 };
-
 // export default CreatePageModal;

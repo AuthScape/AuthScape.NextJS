@@ -75,7 +75,6 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
 
   return (
     <Box sx={{ position: "relative", zIndex: 1025 }}>
-      {console.log(contentData)}
       {loading ? (
         <Box
           sx={{
@@ -118,4 +117,4 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
   );
 };
 
-// export default PageEditor;
+//export default PageEditor;
