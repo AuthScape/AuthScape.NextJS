@@ -27,7 +27,8 @@ import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import ConfirmationModal from "../confirmationModal";
 import CreateAssetModal from "./CreateAssetModal";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-const AssetManagement = ({ minHeight }) => {
+import ImageViewer from "./ImageViewer";
+export const AssetManagement = ({ minHeight }) => {
   const refDataGrid = useRef(null);
   const initialPaginationModel = {
     offset: 1,
@@ -40,6 +41,7 @@ const AssetManagement = ({ minHeight }) => {
   );
   const [ui, setUI] = React.useState(false);
   const [isOpen, setIsOpen] = React.useState(false);
+  const [viewer, setViewer] = React.useState(null);
   const [assetList, setAssetList] = useState([]);
   const [rowCount, setRowCount] = React.useState(0);
   const totalPages = Math.ceil(rowCount / initialPaginationModel.length);
@@ -146,7 +148,9 @@ const AssetManagement = ({ minHeight }) => {
               </Tooltip>
             }
             label="View"
-            onClick={() => {}}
+            onClick={() => {
+              setViewer(row);
+            }}
           />,
           <GridActionsCellItem
             key={`edit-${id}`}
@@ -333,8 +337,16 @@ const AssetManagement = ({ minHeight }) => {
           setPaginationModel(initialPaginationModel);
         }}
       />
+      <ImageViewer
+        isOpen={viewer}
+        handleClose={() => {
+          setViewer(false);
+          reloadUI();
+          setPaginationModel(initialPaginationModel);
+        }}
+      />
     </>
   );
 };
 
-export default AssetManagement;
+//export default AssetManagement;
