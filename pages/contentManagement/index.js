@@ -4,6 +4,7 @@ import { Typography } from "@mui/material";
 import ContentManagement from "../../components/contentManagement/ContentManagement";
 
 const Editor = ({ loadedUser, showNavigationBar }) => {
+
   const config = {
     components: {
       Header: {
@@ -89,7 +90,7 @@ const Editor = ({ loadedUser, showNavigationBar }) => {
     <ContentManagement
       config={config}
       minHeight={"75vh"}
-      loadedUser={loadedUser}
+        loadedUser={loadedUser}
     />
   );
 };

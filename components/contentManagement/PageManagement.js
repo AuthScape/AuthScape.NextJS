@@ -39,6 +39,7 @@ export const PageManagement = ({
   loadedUser,
   isEditorOpen,
   setIsEditorOpen,
+  configLoad,
 }) => {
   const refDataGrid = useRef(null);
   const initialPaginationModel = {
@@ -225,6 +226,7 @@ export const PageManagement = ({
 
   const reloadUI = () => {
     setUI(!ui);
+    configLoad();
   };
 
   const fetchPageList = async () => {
