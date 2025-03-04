@@ -33,7 +33,7 @@ import CreatePageModal from "./CreatePageModal";
 import PageEditor from "./PageEditor";
 import ConfirmationModal from "../confirmationModal";
 
-const PageManagement = ({
+export const PageManagement = ({
   config,
   minHeight,
   loadedUser,
@@ -515,4 +515,4 @@ const PageManagement = ({
   );
 };
 
-export default PageManagement;
+// export default PageManagement;

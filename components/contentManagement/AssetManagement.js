@@ -28,7 +28,7 @@ import ConfirmationModal from "../confirmationModal";
 import CreateAssetModal from "./CreateAssetModal";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ImageViewer from "./ImageViewer";
-const AssetManagement = ({ minHeight }) => {
+export const AssetManagement = ({ minHeight }) => {
   const refDataGrid = useRef(null);
   const initialPaginationModel = {
     offset: 1,
@@ -349,4 +349,4 @@ const AssetManagement = ({ minHeight }) => {
   );
 };
 
-export default AssetManagement;
+//export default AssetManagement;

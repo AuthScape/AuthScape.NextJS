@@ -21,7 +21,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const CreateAssetModal = ({ isOpen, handleClose }) => {
+export const CreateAssetModal = ({ isOpen, handleClose }) => {
   const isEditing = typeof isOpen !== "boolean";
 
   const initialData = {
@@ -217,4 +217,4 @@ const CreateAssetModal = ({ isOpen, handleClose }) => {
   );
 };
 
-export default CreateAssetModal;
+// export default CreateAssetModal;
