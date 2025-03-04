@@ -52,7 +52,10 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes, pageRoots }) => {
     if (isEditing) {
       setValue("title", isOpen.title);
       setValue("pageTypeId", isOpen.pageTypeId);
-      setValue("pageRootId", isOpen.pageRootId);
+      setValue(
+        "pageRootId",
+        isOpen.pageRootId == null ? -1 : isOpen.pageRootId
+      );
       setValue("description", isOpen.description);
       setValue("recursion", isOpen.recursion);
       setValue("slug", isOpen.slug);
@@ -86,7 +89,7 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes, pageRoots }) => {
       pageId: isEditing ? isOpen.id : null,
       title: title,
       pageTypeId: pageTypeId,
-      pageRootId: pageRootId,
+      pageRootId: pageRootId == -1 ? null : pageRootId,
       description: description,
       recursion: recursion,
       slug: !isHomepage ? slug : "",
@@ -199,7 +202,7 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes, pageRoots }) => {
                         field.onChange(event.target.value);
                       }}
                     >
-                      <MenuItem key={0} value={0}>
+                      <MenuItem key={-1} value={-1}>
                         {"No Root"}
                       </MenuItem>
                       {pageRoots.map((root) => (
@@ -212,34 +215,7 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes, pageRoots }) => {
                 )}
               />
             )}
-            {isRecursive && (
-              <Controller
-                name="recursion"
-                control={control}
-                rules={{
-                  required: "Recursion is required",
-                  min: { value: 1, message: "Recursion must be at least one" },
-                }}
-                render={({ field }) => (
-                  <>
-                    <Typography variant="subtitle2">Recursion Day</Typography>
-                    <TextField
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">Days</InputAdornment>
-                        ),
-                      }}
-                      size="small"
-                      type="number"
-                      {...field}
-                      fullWidth
-                      error={!!errors.recursion}
-                      helperText={errors.recursion?.message || ""}
-                    />
-                  </>
-                )}
-              />
-            )}
+
             {!isHomepage && (
               <Controller
                 name="slug"
@@ -279,6 +255,34 @@ const CreatePageModal = ({ isOpen, handleClose, pageTypes, pageRoots }) => {
                         const newValue = e.target.value.replace(/\s/g, "");
                         field.onChange(newValue);
                       }}
+                    />
+                  </>
+                )}
+              />
+            )}
+            {isRecursive && (
+              <Controller
+                name="recursion"
+                control={control}
+                rules={{
+                  required: "Recursion is required",
+                  min: { value: 1, message: "Recursion must be at least one" },
+                }}
+                render={({ field }) => (
+                  <>
+                    <Typography variant="subtitle2">Recursion Day</Typography>
+                    <TextField
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">Days</InputAdornment>
+                        ),
+                      }}
+                      size="small"
+                      type="number"
+                      {...field}
+                      fullWidth
+                      error={!!errors.recursion}
+                      helperText={errors.recursion?.message || ""}
                     />
                   </>
                 )}

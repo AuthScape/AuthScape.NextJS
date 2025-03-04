@@ -77,6 +77,15 @@ const PageManagement = ({
       height: 200,
     },
     {
+      field: "rootUrl",
+      headerName: "Root",
+      flex: 1,
+      height: 200,
+      valueGetter: (params) => {
+        return params ? `${params == null ? "No Root" : "/" + params}` : "N/A";
+      },
+    },
+    {
       field: "slug",
       headerName: "Slug",
       flex: 1,
@@ -145,7 +154,15 @@ const PageManagement = ({
               }
               label="Open Link"
               onClick={() => {
-                window.open(`/${row.slug}`, "_blank", "noopener,noreferrer");
+                window.open(
+                  `${
+                    row.rootUrl == null
+                      ? "/" + row.slug
+                      : "/" + row.rootUrl + "/" + row.slug
+                  }`,
+                  "_blank",
+                  "noopener,noreferrer"
+                );
               }}
             />
           );
@@ -300,6 +317,7 @@ const PageManagement = ({
 
   return (
     <>
+      {console.log(pageList)}
       {!isEditorOpen ? (
         <Box my={2}>
           <Box
