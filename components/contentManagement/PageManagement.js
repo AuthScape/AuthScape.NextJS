@@ -82,7 +82,7 @@ const PageManagement = ({
       flex: 1,
       height: 200,
       valueGetter: (params) => {
-        return params ? `${params == null ? "No Root" : "/" + params}` : "N/A";
+        return params ? `${"/" + params}` : "No Root";
       },
     },
     {

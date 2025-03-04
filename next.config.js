@@ -19,7 +19,7 @@ module.exports = withPWA({
     appDir: true,
   },
   images: {
-      domains: ["localhost:3000"]
+      domains: ["localhost:3000", "axiomna.blob.core.windows.net"]
   },
   publicExcludes: ["!robots.txt", "!static"],
   env: {
