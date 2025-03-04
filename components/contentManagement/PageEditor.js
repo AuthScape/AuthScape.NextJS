@@ -3,7 +3,8 @@ import { Button, Box, CircularProgress } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { apiService } from "authscape";
 import { Puck } from "@measured/puck";
-export const PageEditor = ({ config, isOpen, handleClose }) => {
+//export
+const PageEditor = ({ config, isOpen, handleClose }) => {
   const [page, setPage] = useState({});
   const initialData = {
     root: {
@@ -117,4 +118,4 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
   );
 };
 
-//export default PageEditor;
+export default PageEditor;
