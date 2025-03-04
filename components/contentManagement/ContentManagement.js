@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Container, Box, Tabs, Tab, Typography } from "@mui/material";
 import PageManagement from "./PageManagement";
 import AssetManagement from "./AssetManagement";
- const ContentManagement = ({ config, minHeight }) => {
+const ContentManagement = ({ config, minHeight, configLoad }) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [isEditorOpen, setIsEditorOpen] = useState(null);
   const handleSelectedTab = (event, newValue) => {
@@ -45,9 +45,12 @@ import AssetManagement from "./AssetManagement";
             minHeight={minHeight}
             isEditorOpen={isEditorOpen}
             setIsEditorOpen={setIsEditorOpen}
+            configLoad={configLoad}
           />
         )}
-        {selectedTab === 1 && <AssetManagement minHeight={minHeight} />}
+        {selectedTab === 1 && (
+          <AssetManagement minHeight={minHeight} configLoad={configLoad} />
+        )}
       </Box>
     </Container>
   );

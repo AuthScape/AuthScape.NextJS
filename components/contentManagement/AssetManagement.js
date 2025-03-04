@@ -28,7 +28,7 @@ import ConfirmationModal from "../confirmationModal";
 import CreateAssetModal from "./CreateAssetModal";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ImageViewer from "./ImageViewer";
-export const AssetManagement = ({ minHeight }) => {
+export const AssetManagement = ({ minHeight, configLoad }) => {
   const refDataGrid = useRef(null);
   const initialPaginationModel = {
     offset: 1,
@@ -48,6 +48,7 @@ export const AssetManagement = ({ minHeight }) => {
   const [showConfirmDeletePage, setShowConfirmDeletePage] = useState(null);
   const reloadUI = () => {
     setUI(!ui);
+    configLoad();
   };
   const debounce = (callback, delay) => {
     let timerId;
