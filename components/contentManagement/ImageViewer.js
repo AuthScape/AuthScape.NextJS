@@ -18,7 +18,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const ImageViewer = ({ isOpen, handleClose }) => {
+const ImageViewer = ({ isOpen, handleClose }) => {
   return (
     <Dialog
       fullWidth
@@ -64,4 +64,4 @@ export const ImageViewer = ({ isOpen, handleClose }) => {
   );
 };
 
-//export default ImageViewer;
+export default ImageViewer;

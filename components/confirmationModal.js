@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-export default function confirmationModal({title, description, cancelClicked, okClicked, open = false, cancelTitle = "Cancel", okTitle = "OK"}) {
+export default function ConfirmationModal({title, description, cancelClicked, okClicked, open = false, cancelTitle = "Cancel", okTitle = "OK"}) {
     return (
         <Dialog
             open={open}

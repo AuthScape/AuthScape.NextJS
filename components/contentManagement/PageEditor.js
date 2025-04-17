@@ -3,7 +3,12 @@ import { Button, Box, CircularProgress } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { apiService } from "authscape";
 import { Puck } from "@measured/puck";
-export const PageEditor = ({ config, isOpen, handleClose }) => {
+import createEmotionCache from "@measured/puck-plugin-emotion-cache";
+
+
+const emotionCache = createEmotionCache("css");
+
+const PageEditor = ({ config, isOpen, handleClose }) => {
   const [page, setPage] = useState({});
   const initialData = {
     root: {
@@ -14,6 +19,7 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
   };
   const [contentData, setContentData] = useState(initialData);
   const [loading, setLoading] = useState(true);
+
 
   const fetchPageDetail = async () => {
     setLoading(true);
@@ -48,13 +54,16 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
     if (isOpen) {
       fetchPageDetail();
     } else {
-      setContentData(initialData);
+      setTimeout(() => {
+        setContentData(initialData);
+      }, (1000));
+      
       setLoading(false);
     }
   }, [isOpen]);
 
   const save = async (data) => {
-    try {
+    // try {
       const contentParam = {
         pageId: page.id,
         content: JSON.stringify({ data }),
@@ -65,16 +74,16 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
         contentParam
       );
 
-      if (response && response.status === 200) {
-        handleClose();
-      }
-    } catch (error) {
-      console.error("Error saving content:", error);
-    }
+    //   if (response && response.status === 200) {
+    //     handleClose();
+    //   }
+    // } catch (error) {
+    //   console.error("Error saving content:", error);
+    // }
   };
 
   return (
-    <Box sx={{ position: "relative", zIndex: 1025 }}>
+    <Box sx={{ position: "fixed", left:0, right:0, top:0, bottom: 0, zIndex: 1025 }}>
       {loading ? (
         <Box
           sx={{
@@ -92,6 +101,7 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
           config={config}
           data={contentData}
           onPublish={save}
+          plugins={[emotionCache]}
           overrides={{
             headerActions: ({ children }) => {
               return (
@@ -117,4 +127,4 @@ export const PageEditor = ({ config, isOpen, handleClose }) => {
   );
 };
 
-//export default PageEditor;
+export default PageEditor;
