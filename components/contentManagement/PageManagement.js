@@ -27,24 +27,26 @@ import { apiService } from "authscape";
 import dayjs from "dayjs";
 import LinkIcon from "@mui/icons-material/Link";
 import BuildIcon from "@mui/icons-material/Build";
-
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 // remove after npm production
 import CreatePageModal from "./CreatePageModal";
 import PageEditor from "./PageEditor";
 import ConfirmationModal from "../confirmationModal";
 
-export const PageManagement = ({
+const PageManagement = ({
   config,
   minHeight,
   loadedUser,
   isEditorOpen,
   setIsEditorOpen,
   configLoad,
+  oemCompanyId
 }) => {
   const refDataGrid = useRef(null);
   const initialPaginationModel = {
     offset: 1,
     length: 8,
+    privateLabelCompanyId: oemCompanyId,
     search: "",
     sort: 3,
     chipFilters: [],
@@ -156,10 +158,9 @@ export const PageManagement = ({
               label="Open Link"
               onClick={() => {
                 window.open(
-                  `${
-                    row.rootUrl == null
-                      ? "/" + row.slug
-                      : "/" + row.rootUrl + "/" + row.slug
+                  `${row.rootUrl == null
+                    ? "/" + row.slug
+                    : "/" + row.rootUrl + "/" + row.slug
                   }`,
                   "_blank",
                   "noopener,noreferrer"
@@ -193,7 +194,26 @@ export const PageManagement = ({
             onClick={() => {
               setIsEditorOpen(id);
             }}
-          />,
+          />, <GridActionsCellItem
+          key={`duplicate-${id}`}
+          icon={
+            <Tooltip title="Duplicate" arrow>
+              <ContentCopyIcon color="primary" />
+            </Tooltip>
+          }
+          label="Duplicate"
+          onClick={async () => {
+            let response = await apiService().post(
+              `/ContentManagement/CreatePageDuplication?pageId=${row.id}${row.oemCompanyId ? `&oemCompanyId=${row.oemCompanyId}` : ""
+              }`
+            );
+
+            if (response != null && response.status === 200) {
+              reloadUI();
+              setPaginationModel(initialPaginationModel);
+            }
+          }}
+        />,
           <GridActionsCellItem
             key={`delete-${id}`}
             icon={
@@ -230,6 +250,7 @@ export const PageManagement = ({
   };
 
   const fetchPageList = async () => {
+
     let response = await apiService().post(
       "/ContentManagement/GetPages",
       paginationModel
@@ -259,7 +280,7 @@ export const PageManagement = ({
   };
 
   const fetchPageRoots = async () => {
-    const response = await apiService().get("/ContentManagement/GetPageRoots");
+    const response = await apiService().get("/ContentManagement/GetPageRoots?privateLabelCompanyId=" + oemCompanyId);
     if (response && response.status === 200) {
       setPageRoots(response.data);
     }
@@ -319,7 +340,6 @@ export const PageManagement = ({
 
   return (
     <>
-      {console.log(pageList)}
       {!isEditorOpen ? (
         <Box my={2}>
           <Box
@@ -473,9 +493,10 @@ export const PageManagement = ({
           config={config}
           isOpen={isEditorOpen}
           handleClose={() => {
-            setIsEditorOpen(null);
-            reloadUI();
-            setPaginationModel(initialPaginationModel);
+            window.location.reload();
+            // setIsEditorOpen(null);
+            // reloadUI();
+            // setPaginationModel(initialPaginationModel);
           }}
         />
       )}
@@ -489,6 +510,7 @@ export const PageManagement = ({
         }}
         pageTypes={pageTypes}
         pageRoots={pageRoots}
+        oemCompanyId={oemCompanyId}
       />
 
       <ConfirmationModal
@@ -517,4 +539,4 @@ export const PageManagement = ({
   );
 };
 
-// export default PageManagement;
+export default PageManagement;

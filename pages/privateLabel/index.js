@@ -15,7 +15,7 @@ export default function Home({loadedUser, setIsLoading, currentUser, toast}) {
 
         <Box sx={{width: '100%' }}>
             <Box>
-                <PrivateLabelEditor azureWebsite={"indealspaces.azurewebsites.net"} azureTxtValue={"3C6463B49E18993E32249450799B7A1F04A9BC60DB6AD1BFBCC6429AC7F074F3"} loadedUser={loadedUser} showAllDomains={true} toast={toast} notification={() => {
+                <PrivateLabelEditor azureWebsite={"yoursitename.azurewebsites.net"} azureTxtValue={"txtValue"} loadedUser={loadedUser} showAllDomains={true} toast={toast} notification={() => {
                 }} />
             </Box>
         </Box>

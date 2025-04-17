@@ -21,7 +21,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const CreateAssetModal = ({ isOpen, handleClose }) => {
+const CreateAssetModal = ({ isOpen, handleClose, oemCompanyId }) => {
   const isEditing = typeof isOpen !== "boolean";
 
   const initialData = {
@@ -73,6 +73,7 @@ export const CreateAssetModal = ({ isOpen, handleClose }) => {
           assetId: isOpen.id,
           title,
           description,
+          privateLabelCompanyId: oemCompanyId
         }
       );
       if (response && response.status === 200) {
@@ -83,6 +84,12 @@ export const CreateAssetModal = ({ isOpen, handleClose }) => {
       const data = new FormData();
       data.append("title", title);
       data.append("description", description);
+
+      if (oemCompanyId != null)
+      {
+        data.append("privateLabelCompanyId", oemCompanyId);
+      }
+
       if (file) data.append("file", file, file.name);
 
       const response = await apiService().post(
@@ -217,4 +224,4 @@ export const CreateAssetModal = ({ isOpen, handleClose }) => {
   );
 };
 
-// export default CreateAssetModal;
+export default CreateAssetModal;

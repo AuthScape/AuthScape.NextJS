@@ -28,13 +28,15 @@ import ConfirmationModal from "../confirmationModal";
 import CreateAssetModal from "./CreateAssetModal";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ImageViewer from "./ImageViewer";
-export const AssetManagement = ({ minHeight, configLoad }) => {
+import { LazyLoadImage } from "react-lazy-load-image-component";
+const AssetManagement = ({ minHeight, configLoad, oemCompanyId }) => {
   const refDataGrid = useRef(null);
   const initialPaginationModel = {
     offset: 1,
     length: 8,
     search: "",
     sort: 3,
+    privateLabelCompanyId: oemCompanyId,
   };
   const [paginationModel, setPaginationModel] = React.useState(
     initialPaginationModel
@@ -82,6 +84,40 @@ export const AssetManagement = ({ minHeight, configLoad }) => {
   };
 
   const columns = [
+    {
+      headerName: "Image",
+      width: 150,
+      height: 200,
+      renderCell: (params) => (
+        <Tooltip
+          arrow
+          placement="right"
+          title={
+            <span>
+              <LazyLoadImage
+                alt={params.row.fileName || "Image"}
+                height={250}
+                width={250}
+                effect="blur"
+                style={{ objectFit: "contain", borderRadius: 5 }}
+                src={params.row.url}
+              />
+            </span>
+          }
+        >
+          <span>
+            <LazyLoadImage
+              src={params.row.url}
+              alt={params.row.fileName || "Image"}
+              effect="blur"
+              height={"100%"}
+              width={"100%"}
+              style={{ objectFit: "contain", borderRadius: 5 }}
+            />
+          </span>
+        </Tooltip>
+      ),
+    },
     {
       field: "title",
       headerName: "Title",
@@ -332,6 +368,7 @@ export const AssetManagement = ({ minHeight, configLoad }) => {
       />
       <CreateAssetModal
         isOpen={isOpen}
+        oemCompanyId={oemCompanyId}
         handleClose={() => {
           setIsOpen(false);
           reloadUI();
@@ -350,4 +387,4 @@ export const AssetManagement = ({ minHeight, configLoad }) => {
   );
 };
 
-//export default AssetManagement;
+export default AssetManagement;

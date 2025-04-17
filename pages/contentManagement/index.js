@@ -1,98 +1,102 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
-import Box from "@mui/material/Box";
-import { Typography } from "@mui/material";
-import ContentManagement from "../../components/contentManagement/ContentManagement";
+import React, { useRef, useState, useEffect } from "react";
+import { apiService, PrivateLabelPageModule } from 'authscape';
+import { createConfig } from "../../components/contentManagement/configClient";
+import { ContentManagement } from "../../components/contentManagement/ContentManagement";
+import Head from "next/head";
+import { Box, Typography } from "@mui/material";
 
-const Editor = ({ loadedUser, showNavigationBar }) => {
+const Index = ({ currentUser, loadedUser, oemCompanyId, setIsLoading }) => {
+  const [config, setConfig] = useState(null);
+  const [load, setLoad] = useState(false);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const loadConfig = async () => {
+      const fetchedConfig = await createConfig(oemCompanyId, setIsLoading);
+      setConfig(fetchedConfig);
+      setLoading(false);
+    };
+    loadConfig();
+  }, [load]);
 
-  const config = {
-    components: {
-      Header: {
-        fields: {
-          Header: {
-            type: "select",
-            options: [
-              { label: "H1", value: "h1" },
-              { label: "H2", value: "h2" },
-              { label: "H3", value: "h3" },
-              { label: "H4", value: "h4" },
-              { label: "H5", value: "h5" },
-              { label: "H6", value: "h6" },
-            ],
-          },
-          Text: {
-            type: "text",
-          },
-          Color: {
-            type: "text",
-          },
-          TextAlign: {
-            type: "radio",
-            options: [
-              { label: "Left", value: "left" },
-              { label: "Center", value: "center" },
-              { label: "Right", value: "right" },
-            ],
-          },
-        },
-        render: ({ Text, TextAlign, Color, Header = "h1" }) => {
-          return (
-            <Box
-              sx={{
-                textAlign: TextAlign,
-              }}
-            >
-              <Typography variant={Header} gutterBottom sx={{ color: Color }}>
-                {Text}
-              </Typography>
-            </Box>
-          );
-        },
-      },
-      Text: {
-        fields: {
-          Text: {
-            type: "text",
-          },
-          FontSize: {
-            type: "number",
-          },
-          Color: {
-            type: "text",
-          },
-          TextAlign: {
-            type: "radio",
-            options: [
-              { label: "Left", value: "left" },
-              { label: "Center", value: "center" },
-              { label: "Right", value: "right" },
-            ],
-          },
-        },
-        render: ({ Text, FontSize, Color, TextAlign }) => {
-          return (
-            <Box
-              sx={{
-                textAlign: TextAlign,
-                fontSize: FontSize,
-                color: Color,
-              }}
-            >
-              {Text}
-            </Box>
-          );
-        },
-      },
-    },
+  const configLoad = () => {
+    setLoad(!load);
   };
 
+  if (loading || !config) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "60vh",
+          backgroundColor: "#f4f4f4",
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{ fontWeight: "bold", color: "#333", mb: 2 }}
+        >
+          Loading Configuration
+        </Typography>
+        <Box sx={{ display: "flex", gap: "5px" }}>
+          <Box
+            sx={{
+              width: "10px",
+              height: "10px",
+              backgroundColor: "#007bff",
+              borderRadius: "50%",
+              animation: "bounce 1.5s infinite ease-in-out",
+              "@keyframes bounce": {
+                "0%, 80%, 100%": { transform: "scale(0)" },
+                "40%": { transform: "scale(1.2)" },
+              },
+            }}
+          />
+          <Box
+            sx={{
+              width: "10px",
+              height: "10px",
+              backgroundColor: "#007bff",
+              borderRadius: "50%",
+              animation: "bounce 1.5s infinite ease-in-out",
+              animationDelay: "0.2s",
+            }}
+          />
+          <Box
+            sx={{
+              width: "10px",
+              height: "10px",
+              backgroundColor: "#007bff",
+              borderRadius: "50%",
+              animation: "bounce 1.5s infinite ease-in-out",
+              animationDelay: "0.4s",
+            }}
+          />
+        </Box>
+      </Box>
+    );
+  }
+
   return (
-    <ContentManagement
-      config={config}
-      minHeight={"75vh"}
+    <>
+      <Head>
+        <title>Content Management</title>
+        <meta name="title" content={"Content Management"} />
+      </Head>
+      <ContentManagement
+        config={config}
+        minHeight="65vh"
+        oemCompanyId={oemCompanyId}
         loadedUser={loadedUser}
-    />
+        configLoad={configLoad}
+        notification={(content) => {
+          alert(content);
+        }}
+      />
+    </>
   );
 };
 
-export default Editor;
+export default Index;

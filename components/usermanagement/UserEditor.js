@@ -538,21 +538,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                 </Box>
 
               </Grid>
-              <Grid item size={3} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
-                <Box sx={{fontWeight:"bold", paddingBottom: 1}}>
-                  Custom Fields
-                </Box>
-                
-                <Box spacing={1} >
-                  {customFields &&
-                    <>
-                      {renderCustomField(userId, user, control, errors, register, setValue, customFields.filter(s => !s.tabId),
-                    editors, setEditors)}
-                    </>
-                  }
-                </Box>
-              </Grid>
-              <Grid item size={5} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
+              <Grid item size={8} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
                   <Stack spacing={2}>
                     <Box>
                       <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth" aria-label="basic tabs example" centered>
