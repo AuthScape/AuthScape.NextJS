@@ -19,7 +19,7 @@ import { CSVUsersUpload } from './CSVUsersUpload'; // remove when done
 import { CustomFields } from './CustomFields'; // remove when done
 
 
-export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompleted = null, onAccountCreated = null}) => {
+export const UserManagement = ({height = "50vh", platformType = 1, defaultIdentifier = null, onUploadCompleted = null, onAccountCreated = null}) => {
 
     const [showUserDetails, setShowUserDetails] = useState(null);
     const [showCustomSettings, setShowCustomSettings] = useState(false);
@@ -181,7 +181,10 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
 
     useEffect(() => {
 
-        setDataGridRefreshKey(dataGridRefreshKey + 1);
+        if (defaultIdentifier == null)
+        {
+            setDataGridRefreshKey(dataGridRefreshKey + 1);
+        }
     }, [searchByName, columns]);
 
     useEffect(() => {
@@ -454,7 +457,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                 </AppBar>
 
                 <Box sx={{marginTop:1, padding:2, borderRadius:1, boxShadow:"0px 2px 4px -1px rgba(0,0,0,0.2),0px 4px 5px 0px rgba(0,0,0,0.14),0px 1px 10px 0px rgba(0,0,0,0.12)"}}>
-                    {showUserDetails == null &&
+                    {(showUserDetails == null && defaultIdentifier == null) &&
                         <Box sx={{paddingBottom:1}}>
 
                             <Grid container spacing={2}>
@@ -513,7 +516,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
 
                     {!showCustomSettings &&
                     <Box>
-                        {showUserDetails == null &&
+                        {(showUserDetails == null && defaultIdentifier == null) &&
                      
                         <EditableDatagrid 
                             key={dataGridRefreshKey}
@@ -532,14 +535,14 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                         }
 
                         <Box>
-                            {showUserDetails != null &&
+                            {(showUserDetails != null || defaultIdentifier != null) &&
                             <Grid item xs={12}>
                                 <Box sx={{ width: '100%' }}>
                                     {platformType == 1 &&
                                         <UserEditor
                                             platformType={platformType}
                                             ref={userEditorRef}
-                                            userId={showUserDetails}
+                                            userId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
                                             onSaved={(shouldClose) => {
 
                                                 setDataGridRefreshKey(dataGridRefreshKey + 1);
@@ -553,7 +556,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, onUploadCompl
                                     }
                                     {platformType == 2 &&
                                         <CompanyEditor 
-                                            companyId={showUserDetails}
+                                            companyId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
                                             platformType={platformType}
                                             ref={userEditorRef}
                                             onSaved={(shouldClose) => {
