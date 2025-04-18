@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef, useImperativeHandle, forwardRef } from 'react';
-import { Box } from '@mui/system';
+import { Box, textAlign } from '@mui/system';
 import TextField from '@mui/material/TextField';
-import { Autocomplete, Avatar, Button } from '@mui/material';
+import { Autocomplete, Avatar, Button, Drawer } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
@@ -19,6 +19,8 @@ import Grid from '@mui/material/Grid2';
 
 // remove when publishing
 import {renderCustomField, renderSystemField } from './EditorFields';
+import CompanyEditor from './CompanyEditor';
+import { UserManagement } from './UserManagement';
 
 
 const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, ref) => {
@@ -32,6 +34,8 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
 
   const refShouldClose = useRef(null);
   const refSubmitButton = useRef(null);
+
+  const [editAddCompanyId, setEditAddCompanyId] = useState(null);
 
   const [selectedRoles, setSelectedRole] = useState([]);
   const [selectedPermission, setSelectedPermission] = useState([]);
@@ -358,108 +362,106 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                 </Box>
 
                 <Box>
-                  <Autocomplete
-                    id="companySelect"
-                    sx={{paddingTop:2}}
-                    getOptionLabel={
-                      (option) => option.title
+                <Autocomplete
+                  id="companySelect"
+                  sx={{ paddingTop: 2 }}
+                  getOptionLabel={(option) => option.title || option}
+                  options={[...companies, { title: "Add Company", isAddOption: true }]} // Add option appended here
+                  autoComplete
+                  includeInputInList
+                  filterSelectedOptions
+                  value={company}
+                  noOptionsText="No companies"
+                  onChange={(event, newValue) => {
+                    if (newValue?.isAddOption) {
+                      // Handle "Add Company" logic
+                      const newCompany = prompt("Enter the new company name:"); // Prompt the user for input
+                      if (newCompany) {
+                        const updatedCompany = { title: newCompany };
+                        setCompanies([...companies, updatedCompany]); // Add the new company to the list
+                        setCompany(updatedCompany); // Select the new company
+                      }
+                    } else {
+                      setCompany(newValue); // Select an existing company
                     }
-                    filterOptions={(x) => x}
-                    options={companies != null ? companies : []}
-                    autoComplete
-                    includeInputInList
-                    filterSelectedOptions
-                    value={company}
-                    noOptionsText="No companies"
-                    onChange={(event, newValue) => {
-                      //setCompanies(newValue ? [newValue, ...companies] : companies);
-                      setCompany(newValue);
-                      setLocation(null);
-                    }}
-                    onInputChange={(event, newInputValue) => {
-                      setInputCompanyValue(newInputValue);
-                      setLocation(null);
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Company" fullWidth />
-                    )}
-                    renderOption={(props, option) => {
-                      // const matches =
-                      //   option.structured_formatting.main_text_matched_substrings || [];
+                    setLocation(null);
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    setInputCompanyValue(newInputValue);
+                    setLocation(null);
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Company" fullWidth />
+                  )}
+                  renderOption={(props, option) => (
+                    <li {...props} key={"company-" + option.title}>
+                      <Grid container alignItems="center">
+                        <Grid item sx={{ display: 'flex', width: 44 }}>
+                          <BusinessRoundedIcon sx={{ color: 'text.secondary' }} />
+                        </Grid>
+                        <Grid item sx={{ width: 'calc(100% - 44px)', wordWrap: 'break-word' }}>
+                          <Typography variant="body2" color={option.isAddOption ? "primary" : "text.secondary"}>
+                            {option.title}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </li>
+                  )}
+                />
+                <Box sx={{textAlign:"right", paddingTop: 1}}>
+                  <Button variant={"text"} onClick={() => {
+                    setEditAddCompanyId(company != null ? company.id : -1);
+                  }}>Edit Company</Button>
+                  <Button variant={"text"} onClick={() =>{
+                    setEditAddCompanyId(-1);
+                  }}>Add Company</Button>
+                </Box>
 
-                      // const parts = parse(
-                      //   option.structured_formatting.main_text,
-                      //   matches.map((match) => [match.offset, match.offset + match.length]),
-                      // );
-
-
-                      return (
-                        <li {...props} key={"company-" + props.id} >
-                          <Grid container alignItems="center">
-                            <Grid item sx={{ display: 'flex', width: 44 }}>
-                              <BusinessRoundedIcon sx={{ color: 'text.secondary' }} />
-                            </Grid>
-                            <Grid item sx={{ width: 'calc(100% - 44px)', wordWrap: 'break-word' }}>
-                              {/* {parts.map((part, index) => (
-                                <Box
-                                  key={index}
-                                  component="span"
-                                  sx={{ fontWeight: part.highlight ? 'bold' : 'regular' }}
-                                >
-                                  {part.text}
-                                </Box>
-                              ))} */}
-                              <Typography variant="body2" color="text.secondary">
-                                {option.title}
-                              </Typography>
-                            </Grid>
-                          </Grid>
-                        </li>
-                      );
-                    }}
-                  />
-
-                  <Autocomplete
-                    id="LocationSelect"
-                    sx={{paddingTop:3}}
-                    getOptionLabel={
-                      (option) => option.title
+                <Autocomplete
+                  id="LocationSelect"
+                  sx={{ paddingTop: 3 }}
+                  getOptionLabel={(option) => option.title || option}
+                  options={[...locations, { title: "Add Location", isAddOption: true }]} // Add option appended here
+                  autoComplete
+                  includeInputInList
+                  filterSelectedOptions
+                  value={location}
+                  noOptionsText="No locations"
+                  onChange={(event, newValue) => {
+                    if (newValue?.isAddOption) {
+                      // Handle "Add Location" logic
+                      const newLocation = prompt("Enter the new location name:"); // Prompt the user for input
+                      if (newLocation) {
+                        const updatedLocation = { title: newLocation };
+                        setLocations([...locations, updatedLocation]); // Add the new location to the list
+                        setLocation(updatedLocation); // Select the new location
+                      }
+                    } else {
+                      setLocation(newValue); // Select an existing location
                     }
-                    filterOptions={(x) => x}
-                    options={locations != null ? locations : []}
-                    autoComplete
-                    includeInputInList
-                    filterSelectedOptions
-                    value={location}
-                    noOptionsText="No locations"
-                    onChange={(event, newValue) => {
-                      setLocations(newValue ? [newValue, ...locations] : locations);
-                      setLocation(newValue);
-                    }}
-                    onInputChange={(event, newInputValue) => {
-                      //setInputCompanyValue(newInputValue);
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Location" fullWidth />
-                    )}
-                    renderOption={(props, option) => {
-
-                      return (
-                        <li {...props}>
-                          <Grid container alignItems="center">
-                            <Grid item sx={{ display: 'flex', width: 44 }}>
-                              <BusinessRoundedIcon sx={{ color: 'text.secondary' }} />
-                            </Grid>
-                            <Grid item sx={{ width: 'calc(100% - 44px)', wordWrap: 'break-word' }}>
-                              <Typography variant="body2" color="text.secondary">
-                                {option.title}
-                              </Typography>
-                            </Grid>
-                          </Grid>
-                        </li>
-                      );
-                    }}
-                  />
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    // Optional: Update input handling logic
+                    setInputCompanyValue(newInputValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Location" fullWidth />
+                  )}
+                  renderOption={(props, option) => (
+                    <li {...props} key={"location-" + option.title}>
+                      <Grid container alignItems="center">
+                        <Grid item sx={{ display: 'flex', width: 44 }}>
+                          <BusinessRoundedIcon sx={{ color: 'text.secondary' }} />
+                        </Grid>
+                        <Grid item sx={{ width: 'calc(100% - 44px)', wordWrap: 'break-word' }}>
+                          <Typography variant="body2" color={option.isAddOption ? "primary" : "text.secondary"}>
+                            {option.title}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </li>
+                  )}
+                />
                 </Box>
 
                 <Box sx={{fontWeight:"bold", paddingTop:2}}>
@@ -576,6 +578,29 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
               </Grid>
             </Grid>
           </form>
+
+
+          {/* Company information */}
+          <React.Fragment key={"right"}>
+            <Drawer
+              anchor={"right"}
+              open={editAddCompanyId != null}
+              maxWidth={"lg"}
+              onClose={() => {
+                setEditAddCompanyId(null);
+              }}
+              sx={{
+                "& .MuiDrawer-paper": {
+                  width: "80vw", // Set width to 80% of the viewport width
+                  maxWidth: "1000px", // Optional: Limit the maximum width
+                },
+              }}          
+              >
+                <Box sx={{padding:2}}>
+                  <UserManagement platformType={2} defaultIdentifier={editAddCompanyId} />
+                </Box>
+            </Drawer>
+          </React.Fragment>
       </Box>
   )
 });
