@@ -114,81 +114,63 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
   }, []);
 
 
-  useEffect(() => {
 
-    const fetchData = async () => {
-      let response = await apiService().get("/UserManagement/GetUser?userId=" + userId);
-      if (response != null && response.status == 200)
+  const fetchUserData = async () => {
+    let response = await apiService().get("/UserManagement/GetUser?userId=" + userId);
+    if (response != null && response.status == 200)
+    {
+      setUser(response.data);
+
+      if (response.data.company != null)
       {
-        setUser(response.data);
-
-        if (response.data.company != null)
-        {
-          setCompany(response.data.company);
-        }
-
-        if (response.data.location != null)
-        {
-          setLocation(response.data.location);
-        }
-
-        if (response.data.customFields != null)
-        {
-            setCustomFields(response.data.customFields);
-
-            // response.data.customFields.filter((cf) => cf.customFieldType == 2)
-            // .map((cf) => {
-            //     editors[cf.id] = EditorState.createEmpty();
-                
-            //     if (cf.value.trim().length > 0)
-            //     {
-            //       const blocksFromHTML = htmlToDraft(cf.value);
-            //       const { contentBlocks, entityMap } = blocksFromHTML;
-            //       const contentState = ContentState.createFromBlockArray(contentBlocks, entityMap);
-            //       editors[cf.id] = EditorState.createWithContent(contentState);
-            //     }
-              
-            // });
-
-        }
-
-
-          setEditors({...editors});
-
+        setCompany(response.data.company);
       }
 
-        // assign all selected roles
-        if (response.data.roles != null)
-        {
-          let roleNames = [];
-          for (let index = 0; index < response.data.roles.length; index++) {
-            const role = response.data.roles[index];
-            
-            roleNames.push(role);
-          }
-          setSelectedRole(roleNames);
-        }
+      if (response.data.location != null)
+      {
+        setLocation(response.data.location);
+      }
 
-        // assign all selected permissions
-        if (response.data.permissions != null)
-        {
-          let permissionNames = [];
-          for (let index = 0; index < response.data.permissions.length; index++) {
-            const permission = response.data.permissions[index];
-            
-            permissionNames.push(permission);
-          }
-          setSelectedPermission(permissionNames);
-        }
-        
+      if (response.data.customFields != null)
+      {
+          setCustomFields(response.data.customFields);
+      }
+
+      setEditors({...editors});
     }
+
+      // assign all selected roles
+      if (response.data.roles != null)
+      {
+        let roleNames = [];
+        for (let index = 0; index < response.data.roles.length; index++) {
+          const role = response.data.roles[index];
+          
+          roleNames.push(role);
+        }
+        setSelectedRole(roleNames);
+      }
+
+      // assign all selected permissions
+      if (response.data.permissions != null)
+      {
+        let permissionNames = [];
+        for (let index = 0; index < response.data.permissions.length; index++) {
+          const permission = response.data.permissions[index];
+          
+          permissionNames.push(permission);
+        }
+        setSelectedPermission(permissionNames);
+      }
+  }
+
+  useEffect(() => {
 
     if (userId != -1)
     {
-      fetchData();
+      fetchUserData();
     }
       
-
   }, [userId])
 
   const fields = [
@@ -597,7 +579,10 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
               }}          
               >
                 <Box sx={{padding:2}}>
-                  <UserManagement platformType={2} defaultIdentifier={editAddCompanyId} />
+                  <UserManagement platformType={2} defaultIdentifier={editAddCompanyId} onSaved={async () => {
+                    setEditAddCompanyId(null);
+                    await fetchUserData();
+                  }} />
                 </Box>
             </Drawer>
           </React.Fragment>

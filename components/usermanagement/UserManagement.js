@@ -19,7 +19,7 @@ import { CSVUsersUpload } from './CSVUsersUpload'; // remove when done
 import { CustomFields } from './CustomFields'; // remove when done
 
 
-export const UserManagement = ({height = "50vh", platformType = 1, defaultIdentifier = null, onUploadCompleted = null, onAccountCreated = null}) => {
+export const UserManagement = ({height = "50vh", platformType = 1, defaultIdentifier = null, onUploadCompleted = null, onAccountCreated = null, onSaved = null}) => {
 
     const [showUserDetails, setShowUserDetails] = useState(null);
     const [showCustomSettings, setShowCustomSettings] = useState(false);
@@ -344,7 +344,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
 
                     {!showCustomSettings &&
                     <>
-                        {showUserDetails &&
+                        {(showUserDetails || defaultIdentifier) &&
                         <>
                             <Box sx={{paddingRight:2, paddingLeft:2}}>
                                 <Button variant="text" startIcon={<SaveRoundedIcon />} onClick={async () => {
@@ -358,7 +358,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                         </>
                         }
 
-                        {showUserDetails &&
+                        {(showUserDetails || defaultIdentifier) &&
                         <>
                             <Box sx={{paddingRight:2, paddingLeft:2}}>
                                 <Button variant="text" startIcon={<SaveRoundedIcon />} onClick={async () => {
@@ -386,20 +386,9 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                         }
 
 
-                        {!showUserDetails &&
-                        <>
-                            <Box sx={{paddingRight:2}}>
-                                <Typography variant="body" sx={{fontSize:20, fontWeight:"bold"}}>
-                                    {platformType == 1 && "Accounts"}
-                                    {platformType == 2 && "Companies"}
-                                    {platformType == 3 && "Locations"}
-                                </Typography>
-                            </Box>
-                            <Divider orientation="vertical" flexItem />
-                        </>
-                        }
+                        
 
-                        {!showUserDetails &&
+                        {(!showUserDetails && defaultIdentifier == null) &&
                         <>
                             <Box sx={{paddingRight:2, paddingLeft:1}}>
                                 <Button variant="text" startIcon={<AddRoundedIcon />} onClick={async () => {
@@ -412,7 +401,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                         </>
                         }
 
-                        {!showUserDetails &&
+                        {(!showUserDetails && defaultIdentifier == null) &&
                         <>
                             <Box sx={{paddingRight:2, paddingLeft:1}}>
                                 <Button variant="text" startIcon={<UploadRoundedIcon />} onClick={async () => {
@@ -547,6 +536,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
 
                                                 setDataGridRefreshKey(dataGridRefreshKey + 1);
 
+                                                onSaved();
                                                 if (shouldClose)
                                                 {
                                                     setShowUserDetails(null);
@@ -565,7 +555,8 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
 
                                                 if (shouldClose)
                                                 {
-                                                    setShowUserDetails(null);
+                                                    // need to add a way to close the company editor
+                                                    onSaved();
                                                 }
                                             }}
                                         />
@@ -661,8 +652,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                             </DialogTitle>
                             <DialogContent>
                                 <DialogContentText id="alert-dialog-description">
-                                    Are you sure you want to archive the user
-                                    {showArchiveUserDialog.firstName + " " + showArchiveUserDialog.lastName} ?
+                                    Are you sure you want to archive {showArchiveUserDialog.firstName + " " + showArchiveUserDialog.lastName} ?
                                 </DialogContentText>
                             </DialogContent>
                             <DialogActions>

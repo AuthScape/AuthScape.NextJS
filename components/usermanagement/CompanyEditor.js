@@ -107,7 +107,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
   }, [companyId])
 
   const fields = [
-    "Name"
+    "Title"
   ]
 
   const refreshTabOptions = async () => {
@@ -197,17 +197,10 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                 
             });
 
-            let response = await apiService().put("/UserManagement/UpdateCompany", {
+            let response = await apiService().post("/UserManagement/UpdateCompany", {
                 id: companyId,
-                firstName: data.FirstName,
-                lastName: data.LastName,
-                companyId: company != null ? company.id : null,
-                locationId: location != null ? location.id : null,
-                email: data.Email,
-                phoneNumber: data.PhoneNumber,
-                isActive: data.IsActive,
-                roles: selectedRoles != "" ? selectedRoles : null,
-                permissions: selectedPermission != "" ? selectedPermission : null,
+                title: data.Title,
+                isDeactivated: false,
                 customFields: userCustomFields
             });
 
@@ -232,7 +225,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                   About this company
                 </Box>
 
-                {renderSystemField(companyId, user, control, errors, register, fields)}
+                {renderSystemField(companyId, company, control, errors, register, fields)}
 
                 <Box sx={{fontWeight:"bold", paddingTop:1, paddingBottom: 1}}>
                   Locations
