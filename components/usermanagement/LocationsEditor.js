@@ -1,15 +1,27 @@
 import React, {useEffect, useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Box } from '@mui/system';
+import TextField from '@mui/material/TextField';
 import { Autocomplete, Avatar, Button, Drawer } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import Checkbox from '@mui/material/Checkbox';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemText from '@mui/material/ListItemText';
 import { useForm, Controller } from 'react-hook-form';
+import { EditorState, ContentState } from 'draft-js';
 import { Tab, Tabs, Stack } from '@mui/material';
+import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
 import { apiService } from 'authscape';
 import Grid from '@mui/material/Grid2';
 
 // remove when publishing
 import {renderCustomField, renderSystemField } from './EditorFields';
 
-const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = null}, ref) => {
+
+const LocationEditor = forwardRef(({companyId = null, platformType, onSaved = null}, ref) => {
 
   const {control, register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
 
@@ -210,7 +222,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
 
                 <hr />
                 <Box sx={{fontWeight:"bold", paddingBottom: 1}}>
-                  About this company
+                  About this Location
                 </Box>
 
                 {renderSystemField(companyId, company, control, errors, register, fields)}
@@ -268,6 +280,6 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
   )
 });
 
-CompanyEditor.displayName = "CompanyEditor";
+LocationEditor.displayName = "LocationEditor";
 
-export default CompanyEditor;
+export default LocationEditor;
