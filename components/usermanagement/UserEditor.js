@@ -36,6 +36,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
   const refSubmitButton = useRef(null);
 
   const [editAddCompanyId, setEditAddCompanyId] = useState(null);
+  const [editAddLocationId, setEditAddLocationId] = useState(null);
 
   const [selectedRoles, setSelectedRole] = useState([]);
   const [selectedPermission, setSelectedPermission] = useState([]);
@@ -356,13 +357,16 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                   noOptionsText="No companies"
                   onChange={(event, newValue) => {
                     if (newValue?.isAddOption) {
+                      
+                      setEditAddCompanyId(-1);
+
                       // Handle "Add Company" logic
-                      const newCompany = prompt("Enter the new company name:"); // Prompt the user for input
-                      if (newCompany) {
-                        const updatedCompany = { title: newCompany };
-                        setCompanies([...companies, updatedCompany]); // Add the new company to the list
-                        setCompany(updatedCompany); // Select the new company
-                      }
+                      // const newCompany = prompt("Enter the new company name:"); // Prompt the user for input
+                      // if (newCompany) {
+                      //   const updatedCompany = { title: newCompany };
+                      //   setCompanies([...companies, updatedCompany]); // Add the new company to the list
+                      //   setCompany(updatedCompany); // Select the new company
+                      // }
                     } else {
                       setCompany(newValue); // Select an existing company
                     }
@@ -411,13 +415,17 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                   noOptionsText="No locations"
                   onChange={(event, newValue) => {
                     if (newValue?.isAddOption) {
-                      // Handle "Add Location" logic
-                      const newLocation = prompt("Enter the new location name:"); // Prompt the user for input
-                      if (newLocation) {
-                        const updatedLocation = { title: newLocation };
-                        setLocations([...locations, updatedLocation]); // Add the new location to the list
-                        setLocation(updatedLocation); // Select the new location
-                      }
+
+                      setEditAddLocationId(-1);
+
+
+                      // // Handle "Add Location" logic
+                      // const newLocation = prompt("Enter the new location name:"); // Prompt the user for input
+                      // if (newLocation) {
+                      //   const updatedLocation = { title: newLocation };
+                      //   setLocations([...locations, updatedLocation]); // Add the new location to the list
+                      //   setLocation(updatedLocation); // Select the new location
+                      // }
                     } else {
                       setLocation(newValue); // Select an existing location
                     }
@@ -562,7 +570,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
           </form>
 
 
-          {/* Company information */}
+          {/* Company Information */}
           <React.Fragment key={"right"}>
             <Drawer
               anchor={"right"}
@@ -586,6 +594,34 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                 </Box>
             </Drawer>
           </React.Fragment>
+
+
+          {/* Location Information */}
+          <React.Fragment key={"right"}>
+            <Drawer
+              anchor={"right"}
+              open={editAddLocationId != null}
+              maxWidth={"lg"}
+              onClose={() => {
+                setEditAddLocationId(null);
+              }}
+              sx={{
+                "& .MuiDrawer-paper": {
+                  width: "80vw", // Set width to 80% of the viewport width
+                  maxWidth: "1000px", // Optional: Limit the maximum width
+                },
+              }}          
+              >
+                <Box sx={{padding:2}}>
+                  <UserManagement platformType={3} defaultIdentifier={editAddLocationId} onSaved={async () => {
+                    setEditAddLocationId(null);
+                    await fetchUserData();
+                  }} />
+                </Box>
+            </Drawer>
+          </React.Fragment>
+
+
       </Box>
   )
 });
