@@ -215,13 +215,13 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
 
                 {renderSystemField(companyId, company, control, errors, register, fields)}
 
-                <Box sx={{fontWeight:"bold", paddingTop:1, paddingBottom: 1}}>
+                {/* <Box sx={{fontWeight:"bold", paddingTop:1, paddingBottom: 1}}>
                   Locations
                 </Box>
                 
                 <Box>
                   Need a way to add and view locations
-                </Box>
+                </Box> */}
 
 
               </Grid>

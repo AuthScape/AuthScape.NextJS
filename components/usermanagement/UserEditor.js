@@ -418,14 +418,6 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
 
                       setEditAddLocationId(-1);
 
-
-                      // // Handle "Add Location" logic
-                      // const newLocation = prompt("Enter the new location name:"); // Prompt the user for input
-                      // if (newLocation) {
-                      //   const updatedLocation = { title: newLocation };
-                      //   setLocations([...locations, updatedLocation]); // Add the new location to the list
-                      //   setLocation(updatedLocation); // Select the new location
-                      // }
                     } else {
                       setLocation(newValue); // Select an existing location
                     }
@@ -613,10 +605,12 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
               }}          
               >
                 <Box sx={{padding:2}}>
-                  <UserManagement platformType={3} defaultIdentifier={editAddLocationId} onSaved={async () => {
+
+                  <UserManagement platformType={3} companyId={company != null ? company.id : -1} defaultIdentifier={editAddLocationId} onSaved={async () => {
                     setEditAddLocationId(null);
                     await fetchUserData();
                   }} />
+
                 </Box>
             </Drawer>
           </React.Fragment>

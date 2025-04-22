@@ -21,7 +21,7 @@ import Grid from '@mui/material/Grid2';
 import {renderCustomField, renderSystemField } from './EditorFields';
 
 
-const LocationEditor = forwardRef(({companyId = null, platformType, onSaved = null}, ref) => {
+const LocationEditor = forwardRef(({locationId = null, companyId = null, platformType, onSaved = null}, ref) => {
 
   const {control, register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
 
@@ -32,8 +32,6 @@ const LocationEditor = forwardRef(({companyId = null, platformType, onSaved = nu
 
   const [selectedRoles, setSelectedRole] = useState([]);
   const [selectedPermission, setSelectedPermission] = useState([]);
-
-  const [company, setCompany] = useState(null);
 
   const [locations, setLocations] = useState([]);
   const [location, setLocation] = useState(null);
@@ -61,10 +59,10 @@ const LocationEditor = forwardRef(({companyId = null, platformType, onSaved = nu
 
       await refreshTabOptions();
 
-      let response = await apiService().get("/UserManagement/GetCompany?companyId=" + companyId);
+      let response = await apiService().get("/UserManagement/GetLocation?locationId=" + locationId);
       if (response != null && response.status == 200)
       {
-        setCompany(response.data);
+        setLocation(response.data);
 
         if (response.data.customFields != null)
         {
@@ -98,13 +96,13 @@ const LocationEditor = forwardRef(({companyId = null, platformType, onSaved = nu
         }
     }
 
-    if (companyId != -1)
+    if (locationId != -1)
     {
       fetchData();
     }
       
 
-  }, [companyId])
+  }, [locationId])
 
   const fields = [
     "Title"
@@ -129,11 +127,11 @@ const LocationEditor = forwardRef(({companyId = null, platformType, onSaved = nu
 
     const fetchData = async () => {
 
-      if (company != null)
+      if (location != null)
       {
         if (inputLocationValue == null || inputLocationValue == "")
         {
-          let response = await apiService().get("/UserManagement/GetLocations?companyId=" + company.id);
+          let response = await apiService().get("/UserManagement/GetLocations?locationId=" + locationId);
           if (response != null && response.status == 200)
           {
             setLocations(response.data);
@@ -141,7 +139,7 @@ const LocationEditor = forwardRef(({companyId = null, platformType, onSaved = nu
         }
         else
         {
-          let response = await apiService().get("/UserManagement/GetLocations?companyId=" + company.id + "&name=" + inputLocationValue);
+          let response = await apiService().get("/UserManagement/GetLocations?locationId=" + locationId + "&name=" + inputLocationValue);
           if (response != null && response.status == 200)
           {
             setLocations(response.data);
@@ -150,12 +148,12 @@ const LocationEditor = forwardRef(({companyId = null, platformType, onSaved = nu
       }
     }
 
-    if (company != null || companyId == -1)
+    if (location != null || locationId == -1)
     {
       fetchData();
     }
 
-  }, [company, companyId, inputLocationValue, company])
+  }, [location, locationId, inputLocationValue])
 
 
   const saveChanges = (shouldClose) => {
@@ -197,8 +195,9 @@ const LocationEditor = forwardRef(({companyId = null, platformType, onSaved = nu
                 
             });
 
-            let response = await apiService().post("/UserManagement/UpdateCompany", {
-                id: companyId,
+            let response = await apiService().post("/UserManagement/UpdateLocation", {
+                id: locationId,
+                companyId: companyId,
                 title: data.Title,
                 isDeactivated: false,
                 customFields: userCustomFields
@@ -225,7 +224,7 @@ const LocationEditor = forwardRef(({companyId = null, platformType, onSaved = nu
                   About this Location
                 </Box>
 
-                {renderSystemField(companyId, company, control, errors, register, fields)}
+                {renderSystemField(locationId, location, control, errors, register, fields)}
 
                 <Box sx={{fontWeight:"bold", paddingTop:1, paddingBottom: 1}}>
                   Locations

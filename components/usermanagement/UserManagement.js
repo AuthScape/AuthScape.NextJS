@@ -17,9 +17,10 @@ import UserEditor from './UserEditor'; // remove when done
 import CompanyEditor from './CompanyEditor' // remove when done
 import { CSVUsersUpload } from './CSVUsersUpload'; // remove when done
 import { CustomFields } from './CustomFields'; // remove when done
+import LocationEditor from './LocationsEditor';
 
 
-export const UserManagement = ({height = "50vh", platformType = 1, defaultIdentifier = null, onUploadCompleted = null, onAccountCreated = null, onSaved = null}) => {
+export const UserManagement = ({height = "50vh", platformType = 1, defaultIdentifier = null, companyId = null, onUploadCompleted = null, onAccountCreated = null, onSaved = null}) => {
 
     const [showUserDetails, setShowUserDetails] = useState(null);
     const [showCustomSettings, setShowCustomSettings] = useState(false);
@@ -385,9 +386,6 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                         </>
                         }
 
-
-                        
-
                         {(!showUserDetails && defaultIdentifier == null) &&
                         <>
                             <Box sx={{paddingRight:2, paddingLeft:1}}>
@@ -536,7 +534,11 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
 
                                                 setDataGridRefreshKey(dataGridRefreshKey + 1);
 
-                                                onSaved();
+                                                if (onSaved != null)
+                                                {
+                                                    onSaved();
+                                                }
+                                                
                                                 if (shouldClose)
                                                 {
                                                     setShowUserDetails(null);
@@ -556,7 +558,31 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                                 if (shouldClose)
                                                 {
                                                     // need to add a way to close the company editor
-                                                    onSaved();
+                                                    if (onSaved != null)
+                                                    {
+                                                        onSaved();
+                                                    }
+                                                }
+                                            }}
+                                        />
+                                    }
+                                    {platformType == 3 &&
+                                        <LocationEditor 
+                                            companyId={companyId}
+                                            locationId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
+                                            platformType={platformType}
+                                            ref={userEditorRef}
+                                            onSaved={(shouldClose) => {
+
+                                                setDataGridRefreshKey(dataGridRefreshKey + 1);
+
+                                                if (shouldClose)
+                                                {
+                                                    // need to add a way to close the company editor
+                                                    if (onSaved != null)
+                                                    {
+                                                        onSaved();
+                                                    }
                                                 }
                                             }}
                                         />
