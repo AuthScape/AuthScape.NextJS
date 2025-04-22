@@ -25,8 +25,6 @@ import { UserManagement } from './UserManagement';
 
 const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, ref) => {
 
-  // const [htmlToDraft, setHtmlToDraft] = useState(null);
-  // const [draftToHTML, setDraftToHTML] = useState(null);
   const {control, register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
 
   const [editors, setEditors] = useState({});
@@ -99,16 +97,6 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
           }
 
       }
-
-      // if (typeof window !== "undefined") {
-
-      //   import("html-to-draftjs").then((mod) => {
-      //     setHtmlToDraft(() => mod.default);
-      //   });
-      //   import("draftjs-to-html").then((mod) => {
-      //     setDraftToHTML(() => mod.default); // Set default export
-      //   });
-      // }
 
       fetchData();
 
