@@ -226,15 +226,6 @@ const LocationEditor = forwardRef(({locationId = null, companyId = null, platfor
 
                 {renderSystemField(locationId, location, control, errors, register, fields)}
 
-                <Box sx={{fontWeight:"bold", paddingTop:1, paddingBottom: 1}}>
-                  Locations
-                </Box>
-                
-                <Box>
-                  Need a way to add and view locations
-                </Box>
-
-
               </Grid>
               <Grid item size={8} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
                   <Stack spacing={2}>
@@ -255,7 +246,7 @@ const LocationEditor = forwardRef(({locationId = null, companyId = null, platfor
                           <>
                             {customFields &&
                               <>
-                                {renderCustomField(companyId, company, control, errors, register, setValue, customFields.filter(s => s.tabId == tab.id))}
+                                {renderCustomField(locationId, location, control, errors, register, setValue, customFields.filter(s => s.tabId == tab.id))}
                               </>
                             }
                           </>

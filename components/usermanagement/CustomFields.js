@@ -24,7 +24,6 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
-import { backgroundColor, flexDirection, justifyContent } from '@xstyled/styled-components';
 
 export function CustomFields({platformType}) {
 
