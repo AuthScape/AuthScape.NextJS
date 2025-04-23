@@ -433,6 +433,14 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                   )}
                 />
                 </Box>
+                <Box sx={{textAlign:"right", paddingTop: 1}}>
+                  <Button variant={"text"} onClick={() => {
+                    setEditAddLocationId(company != null ? company.id : -1);
+                  }}>Edit Location</Button>
+                  <Button variant={"text"} onClick={() =>{
+                    setEditAddLocationId(-1);
+                  }}>Add Location</Button>
+                </Box>
 
                 <Box sx={{fontWeight:"bold", paddingTop:2}}>
                   Roles and Permissions
