@@ -407,6 +407,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                       setEditAddLocationId(-1);
 
                     } else {
+                      
                       setLocation(newValue); // Select an existing location
                     }
                   }}
@@ -435,7 +436,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                 </Box>
                 <Box sx={{textAlign:"right", paddingTop: 1}}>
                   <Button variant={"text"} onClick={() => {
-                    setEditAddLocationId(company != null ? company.id : -1);
+                    setEditAddLocationId(location != null ? location.id : -1);
                   }}>Edit Location</Button>
                   <Button variant={"text"} onClick={() =>{
                     setEditAddLocationId(-1);
