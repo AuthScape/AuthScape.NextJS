@@ -129,6 +129,7 @@ const LocationEditor = forwardRef(({locationId = null, companyId = null, platfor
 
       if (location != null)
       {
+
         if (inputLocationValue == null || inputLocationValue == "")
         {
           let response = await apiService().get("/UserManagement/GetLocations?locationId=" + locationId);
