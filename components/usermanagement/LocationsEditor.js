@@ -27,7 +27,7 @@ const LocationEditor = forwardRef(({locationId = null, companyId = null, platfor
 
   const [editors, setEditors] = useState({});
 
-  const refShouldClose = useRef(null);
+  const refShouldClose = useRef(false);
   const refSubmitButton = useRef(null);
 
   const [selectedRoles, setSelectedRole] = useState([]);
@@ -207,7 +207,7 @@ const LocationEditor = forwardRef(({locationId = null, companyId = null, platfor
             {
                 if (onSaved != null)
                 {
-                    onSaved(refShouldClose.current);
+                  onSaved(refShouldClose.current, 3, locationId, response.data);
                 }
             }
 

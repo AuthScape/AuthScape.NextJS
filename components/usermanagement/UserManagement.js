@@ -530,13 +530,18 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                             platformType={platformType}
                                             ref={userEditorRef}
                                             userId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
-                                            onSaved={(shouldClose) => {
+                                            onSaved={(shouldClose, platformType, userId, fields) => {
 
                                                 setDataGridRefreshKey(dataGridRefreshKey + 1);
 
                                                 if (onSaved != null)
                                                 {
-                                                    onSaved();
+                                                    if (shouldClose == null)
+                                                    {
+                                                        shouldClose = false;
+                                                    }
+
+                                                    onSaved(shouldClose, platformType, userId, fields);
                                                 }
                                                 
                                                 if (shouldClose)
@@ -551,17 +556,19 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                             companyId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
                                             platformType={platformType}
                                             ref={userEditorRef}
-                                            onSaved={(shouldClose) => {
+                                            onSaved={(shouldClose, platformType, userId, fields) => {
 
                                                 setDataGridRefreshKey(dataGridRefreshKey + 1);
 
-                                                if (shouldClose)
+                                                // need to add a way to close the company editor
+                                                if (onSaved != null)
                                                 {
-                                                    // need to add a way to close the company editor
-                                                    if (onSaved != null)
+                                                    if (shouldClose == null)
                                                     {
-                                                        onSaved();
+                                                        shouldClose = false;
                                                     }
+
+                                                    onSaved(shouldClose, platformType, userId, fields);
                                                 }
                                             }}
                                         />
@@ -572,17 +579,18 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                             locationId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
                                             platformType={platformType}
                                             ref={userEditorRef}
-                                            onSaved={(shouldClose) => {
+                                            onSaved={(shouldClose, platformType, userId, fields) => {
 
                                                 setDataGridRefreshKey(dataGridRefreshKey + 1);
 
-                                                if (shouldClose)
+                                                if (onSaved != null)
                                                 {
-                                                    // need to add a way to close the company editor
-                                                    if (onSaved != null)
+                                                    if (shouldClose == null)
                                                     {
-                                                        onSaved();
+                                                        shouldClose = false;
                                                     }
+
+                                                    onSaved(shouldClose, platformType, userId, fields);
                                                 }
                                             }}
                                         />

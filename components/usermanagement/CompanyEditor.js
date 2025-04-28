@@ -15,7 +15,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
 
   const [editors, setEditors] = useState({});
 
-  const refShouldClose = useRef(null);
+  const refShouldClose = useRef(false);
   const refSubmitButton = useRef(null);
 
   const [selectedRoles, setSelectedRole] = useState([]);
@@ -196,7 +196,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
             {
                 if (onSaved != null)
                 {
-                    onSaved(refShouldClose.current);
+                  onSaved(refShouldClose.current, 2, companyId, response.data);
                 }
             }
 

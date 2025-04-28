@@ -30,7 +30,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
   const [editors, setEditors] = useState({});
   const refTimeoutToken = useRef(null);
 
-  const refShouldClose = useRef(null);
+  const refShouldClose = useRef(false);
   const refSubmitButton = useRef(null);
 
   const [editAddCompanyId, setEditAddCompanyId] = useState(null);
@@ -309,7 +309,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
             {
                 if (onSaved != null)
                 {
-                    onSaved(refShouldClose.current);
+                    onSaved(refShouldClose.current, 1, userId, response.data);
                 }
             }
 
@@ -575,9 +575,12 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
               }}          
               >
                 <Box sx={{padding:2}}>
-                  <UserManagement platformType={2} defaultIdentifier={editAddCompanyId} onSaved={async () => {
+                  <UserManagement platformType={2} defaultIdentifier={editAddCompanyId} onSaved={async (shouldClose, platformType, id, fields) => {
                     setEditAddCompanyId(null);
                     await fetchUserData();
+
+                    onSaved(shouldClose, platformType, id, fields);
+
                   }} />
                 </Box>
             </Drawer>
@@ -602,9 +605,11 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
               >
                 <Box sx={{padding:2}}>
 
-                  <UserManagement platformType={3} companyId={company != null ? company.id : -1} defaultIdentifier={editAddLocationId} onSaved={async () => {
+                  <UserManagement platformType={3} companyId={company != null ? company.id : -1} defaultIdentifier={editAddLocationId} onSaved={async (shouldClose, platformType, id, fields) => {
                     setEditAddLocationId(null);
                     await fetchUserData();
+
+                    onSaved(shouldClose, platformType, id, fields);
                   }} />
 
                 </Box>
