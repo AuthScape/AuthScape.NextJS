@@ -105,7 +105,12 @@ const LocationEditor = forwardRef(({locationId = null, companyId = null, platfor
   }, [locationId])
 
   const fields = [
-    "Title"
+    "Title",
+    "Address",
+    "City",
+    "State",
+    "ZipCode",
+    "IsDeactivated"
   ]
 
   const refreshTabOptions = async () => {

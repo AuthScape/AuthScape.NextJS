@@ -93,6 +93,7 @@ export default function PortalLayout({children, currentUser, pageProps}) {
           {name: "Permissions", icon: <BarChartRoundedIcon />, href: "/usermanagement/permissions", disabled: false},
           {name: "Users", icon: <MapRoundedIcon/>, href: "/usermanagement/users", disabled: false},
           {name: "Companies", icon: <MapRoundedIcon/>, href: "/usermanagement/companies", disabled: false},
+          {name: "Locations", icon: <MapRoundedIcon/>, href: "/usermanagement/locations", disabled: false},
           {name: "Examples", icon: <MapRoundedIcon/>, href: "/usermanagement/sandbox", disabled: false},
         ]
       },

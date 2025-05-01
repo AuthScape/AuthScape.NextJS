@@ -170,15 +170,65 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
         },
     ];
 
-    // useEffect(() => {
 
-    //     if (hasLoaded == false)
-    //     {
-    //         setHasLoaded(true);
-    //     }
-
-    // }, []);
-
+    const locationColumns = [
+        {
+            field: 'title',
+            headerName: 'Name',
+            flex: 1,
+            renderCell: (param) => {
+                return param.row.title; 
+            }
+        },
+        {
+            field: 'address',
+            headerName: 'Address',
+            flex: 1,    
+            renderCell: (param) => {
+                return param.row.address != null ? param.row.address : ""; 
+            }
+        },
+        {
+            field: 'city',
+            headerName: 'City',
+            flex: 1,    
+            renderCell: (param) => {
+                return param.row.city != null ? param.row.city : ""; 
+            }
+        },
+        {
+            field: 'state',
+            headerName: 'State',
+            flex: 1,    
+            renderCell: (param) => {
+                return param.row.state != null ? param.row.state : ""; 
+            }
+        },
+        {
+            field: 'zipCode',
+            headerName: 'ZipCode',
+            flex: 1,    
+            renderCell: (param) => {
+                return param.row.zipCode != null ? param.row.zipCode : ""; 
+            }
+        },
+        {
+            field: 'isDeactivated',
+            headerName: 'Account Status',
+            flex: 1,    
+            renderCell: (param) => {
+                return param.row.isDeactivated != null ? (!param.row.isDeactivated ? "Active" : "Deactive") : ""; 
+            }
+        },
+        {
+            field: 'company',
+            headerName: 'Company',
+            flex: 1,    
+            renderCell: (param) => {
+                return param.row.company != null ? param.row.company : ""; 
+            }
+        },
+    ];
 
     useEffect(() => {
 
@@ -213,7 +263,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
         }
         else if (platformType == 3)
         {
-
+            response = "/UserManagement/GetLocations";
         }
 
         return response;
@@ -264,11 +314,82 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
         }
         else if (platformType == 2)
         {
-            return companiesColumns;
+            let cols = [...companiesColumns, ...customFields.map((field, i) => {
+               
+                return {
+                    field: `customField${i + 1}`,
+                    headerName: field.name,
+                    flex: 1,
+                    valueGetter: (_, row) => {
+                        
+                        if (row.customFields)
+                        {
+                            let cf = row.customFields.find(f => f.customFieldId == field.id);
+                            if (cf) return cf.value;
+                        }
+
+                        return null;
+                    } 
+                };
+            }), {
+                field: '',
+                headerName: '',
+                flex: 1,
+                renderCell: 
+                    (param) => {
+                        return (
+                            <Button onClick={(e) =>{
+                                e.stopPropagation();
+                                setShowArchiveUserDialog(param.row);
+
+                            }}>
+                                Archive
+                            </Button>
+                        )
+                    }
+            }];
+
+            setColumns(cols);
+
         }
         else if (platformType == 3)
         {
-            return null;
+            let cols = [...locationColumns, ...customFields.map((field, i) => {
+               
+                return {
+                    field: `customField${i + 1}`,
+                    headerName: field.name,
+                    flex: 1,
+                    valueGetter: (_, row) => {
+                        
+                        if (row.customFields)
+                        {
+                            let cf = row.customFields.find(f => f.customFieldId == field.id);
+                            if (cf) return cf.value;
+                        }
+
+                        return null;
+                    } 
+                };
+            }), {
+                field: '',
+                headerName: '',
+                flex: 1,
+                renderCell: 
+                    (param) => {
+                        return (
+                            <Button onClick={(e) =>{
+                                e.stopPropagation();
+                                setShowArchiveUserDialog(param.row);
+
+                            }}>
+                                Archive
+                            </Button>
+                        )
+                    }
+            }];
+
+            setColumns(cols);
         }
     }
 
