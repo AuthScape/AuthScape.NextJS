@@ -4,10 +4,14 @@ import { Autocomplete, Avatar, Button, Drawer } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { Tab, Tabs, Stack } from '@mui/material';
 import { apiService } from 'authscape';
+import TextField from '@mui/material/TextField';
+import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
+import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid2';
 
 // remove when publishing
 import {renderCustomField, renderSystemField } from './EditorFields';
+import { UserManagement } from './UserManagement';
 
 const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = null}, ref) => {
 
@@ -20,6 +24,9 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
 
   const [selectedRoles, setSelectedRole] = useState([]);
   const [selectedPermission, setSelectedPermission] = useState([]);
+
+  const [inputCompanyValue, setInputCompanyValue] = useState('');
+  const [editAddLocationId, setEditAddLocationId] = useState(null);
 
   const [company, setCompany] = useState(null);
 
@@ -60,30 +67,6 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
         }
         setEditors({...editors});
       }
-
-        // assign all selected roles
-        if (response.data.roles != null)
-        {
-          let roleNames = [];
-          for (let index = 0; index < response.data.roles.length; index++) {
-            const role = response.data.roles[index];
-            
-            roleNames.push(role);
-          }
-          setSelectedRole(roleNames);
-        }
-
-        // assign all selected permissions
-        if (response.data.permissions != null)
-        {
-          let permissionNames = [];
-          for (let index = 0; index < response.data.permissions.length; index++) {
-            const permission = response.data.permissions[index];
-            
-            permissionNames.push(permission);
-          }
-          setSelectedPermission(permissionNames);
-        }
     }
 
     if (companyId != -1)
@@ -224,6 +207,50 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                 </Box> */}
 
 
+                  <Autocomplete
+                    id="LocationSelect"
+                    sx={{ paddingTop: 3 }}
+                    getOptionLabel={(option) => option.title || option}
+                    options={[...locations, { title: "Add Location", isAddOption: true }]} // Add option appended here
+                    autoComplete
+                    includeInputInList
+                    filterSelectedOptions
+                    value={location}
+                    noOptionsText="No locations"
+                    onChange={(event, newValue) => {
+                      if (newValue?.isAddOption) {
+  
+                        setEditAddLocationId(-1);
+  
+                      } else {
+                        
+                        setLocation(newValue); // Select an existing location
+                      }
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      // Optional: Update input handling logic
+                      setInputCompanyValue(newInputValue);
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Location" fullWidth />
+                    )}
+                    renderOption={(props, option) => (
+                      <li {...props} key={"location-" + option.title}>
+                        <Grid container alignItems="center">
+                          <Grid item sx={{ display: 'flex', width: 44 }}>
+                            <BusinessRoundedIcon sx={{ color: 'text.secondary' }} />
+                          </Grid>
+                          <Grid item sx={{ width: 'calc(100% - 44px)', wordWrap: 'break-word' }}>
+                            <Typography variant="body2" color={option.isAddOption ? "primary" : "text.secondary"}>
+                              {option.title}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </li>
+                    )}
+                  />
+
+
               </Grid>
               <Grid item size={8} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
                   <Stack spacing={2}>
@@ -263,6 +290,35 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
               </Grid>
             </Grid>
           </form>
+
+
+          <React.Fragment key={"right"}>
+            <Drawer
+              anchor={"right"}
+              open={editAddLocationId != null}
+              maxWidth={"lg"}
+              onClose={() => {
+                setEditAddLocationId(null);
+              }}
+              sx={{
+                "& .MuiDrawer-paper": {
+                  width: "80vw", // Set width to 80% of the viewport width
+                  maxWidth: "1000px", // Optional: Limit the maximum width
+                },
+              }}          
+              >
+                <Box sx={{padding:2}}>
+
+                  <UserManagement platformType={3} companyId={company != null ? company.id : -1} defaultIdentifier={editAddLocationId} onSaved={async (shouldClose, platformType, id, fields) => {
+                    setEditAddLocationId(null);
+                    await fetchUserData();
+
+                    onSaved(shouldClose, platformType, id, fields);
+                  }} />
+
+                </Box>
+            </Drawer>
+          </React.Fragment>
 
       </Box>
   )
