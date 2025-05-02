@@ -23,6 +23,12 @@ export default function Home({loadedUser, setIsLoading, currentUser, setOpenLogi
         homepage
       </Box>
 
+      {currentUser != null &&
+        <Box sx={{paddingTop:2, paddingBottom:2}}>
+        {currentUser.firstName} {currentUser.lastName}
+        </Box>
+      }
+
       <Button variant="contained" sx={{marginRight:1}} onClick={async () => {
             await authService().login();
         }}>Login</Button>
