@@ -21,7 +21,7 @@ import Grid from '@mui/material/Grid2';
 import {renderCustomField, renderSystemField } from './EditorFields';
 
 
-const LocationEditor = forwardRef(({locationId = null, companyId = null, platformType, onSaved = null}, ref) => {
+const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = null}, ref) => {
 
   const {control, register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
 
@@ -203,8 +203,14 @@ const LocationEditor = forwardRef(({locationId = null, companyId = null, platfor
 
             let response = await apiService().post("/UserManagement/UpdateLocation", {
                 id: locationId,
-                companyId: companyId,
+                companyId: location.companyId,
                 title: data.Title,
+
+                address: data.Address,
+                city: data.City,
+                state: data.State,
+                postalCode: data.ZipCode,
+
                 isDeactivated: false,
                 customFields: userCustomFields
             });

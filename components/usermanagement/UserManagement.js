@@ -23,6 +23,7 @@ import LocationEditor from './LocationsEditor';
 export const UserManagement = ({height = "50vh", platformType = 1, defaultIdentifier = null, companyId = null, onUploadCompleted = null, onAccountCreated = null, onSaved = null}) => {
 
     const [showUserDetails, setShowUserDetails] = useState(null);
+    
     const [showCustomSettings, setShowCustomSettings] = useState(false);
 
     const [showArchiveUserDialog, setShowArchiveUserDialog] = useState(null);
@@ -225,7 +226,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
             headerName: 'Company',
             flex: 1,    
             renderCell: (param) => {
-                return param.row.company != null ? param.row.company : ""; 
+                return param.row.company != null ? param.row.company.title : ""; 
             }
         },
     ];
@@ -637,7 +638,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                 searchByCompanyId: searchByCompanyId,
                                 searchByRoleId: searchByRoleId,
                             }} 
-                            onRowClick={(row) => {
+                            onRowClick={(row) => {                                
                                 setShowUserDetails(row.id);
                             }} />
                         }
@@ -695,8 +696,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                         />
                                     }
                                     {platformType == 3 &&
-                                        <LocationEditor 
-                                            companyId={companyId}
+                                        <LocationEditor
                                             locationId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
                                             platformType={platformType}
                                             ref={userEditorRef}
