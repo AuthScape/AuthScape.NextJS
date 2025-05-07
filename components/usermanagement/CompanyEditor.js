@@ -12,6 +12,7 @@ import Grid from '@mui/material/Grid2';
 // remove when publishing
 import {renderCustomField, renderSystemField } from './EditorFields';
 import { UserManagement } from './UserManagement';
+import { paddingBottom } from '@xstyled/styled-components';
 
 const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = null}, ref) => {
 
@@ -198,10 +199,10 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
 
                 {renderSystemField(companyId, company, control, errors, register, fields)}
 
-                {/* <Box sx={{fontWeight:"bold", paddingTop:1, paddingBottom: 1}}>
+                <Box sx={{fontWeight:"bold", paddingTop:1, paddingBottom: 1}}>
                   Locations
                 </Box>
-                
+                 {/*
                 <Box>
                   Need a way to add and view locations
                 </Box> */}
@@ -209,13 +210,13 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
 
                   <Autocomplete
                     id="LocationSelect"
-                    sx={{ paddingTop: 3 }}
+                    multiple={true}
                     getOptionLabel={(option) => option.title || option}
                     options={[...locations, { title: "Add Location", isAddOption: true }]} // Add option appended here
                     autoComplete
                     includeInputInList
                     filterSelectedOptions
-                    value={location}
+                    // value={location}
                     noOptionsText="No locations"
                     onChange={(event, newValue) => {
                       if (newValue?.isAddOption) {

@@ -33,8 +33,6 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
     const [allRoles, setAllRoles] = useState([]);
     const [allCompanies, setAllCompanies] = useState([]);
 
-    // const [hasLoaded, setHasLoaded] = useState(false);
-
 
     const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
     const [newPassword, setNewPassword] = useState(null);
@@ -46,7 +44,6 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
     const [searchByName, setSearchByName] = useState('');
     const [searchByCompanyId, setSearchByCompanyId] = useState(null);
     const [searchByRoleId, setSearchByRoleId] = useState(null);
-    const [fields, setFields] = useState([]);
     const [columns, setColumns] = useState([]);
 
     const filterLoaded = useRef(false);
@@ -57,7 +54,6 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
     const newFirstName = useRef();
     const newLastName = useRef();
     const newEmail = useRef();
-
 
     const userColumns = [
         {
@@ -135,7 +131,6 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
         // }
     ];
 
-
     const companiesColumns = [
         {
             field: 'logo',
@@ -170,7 +165,6 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
             }
         },
     ];
-
 
     const locationColumns = [
         {

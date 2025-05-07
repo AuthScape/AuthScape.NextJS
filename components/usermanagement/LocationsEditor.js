@@ -14,7 +14,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { EditorState, ContentState } from 'draft-js';
 import { Tab, Tabs, Stack } from '@mui/material';
 import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
-import { apiService } from 'authscape';
+import { apiService, NewMappingColumn } from 'authscape';
 import Grid from '@mui/material/Grid2';
 
 // remove when publishing
@@ -33,9 +33,11 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
   const [selectedRoles, setSelectedRole] = useState([]);
   const [selectedPermission, setSelectedPermission] = useState([]);
 
+  const [companyId, setCompanyId] = useState(null);
+
   const [locations, setLocations] = useState([]);
   const [location, setLocation] = useState(null);
-  const [inputLocationValue, setInputLocationValue] = useState('');
+  const [inputCompanyValue, setInputCompanyValue] = useState('');
 
   const [customFields, setCustomFields] = useState([]);
 
@@ -128,38 +130,47 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
   }
 
 
+  // useEffect(() => {
+
+  //   const fetchData = async () => {
+
+  //     if (location != null)
+  //     {
+
+  //       if (inputLocationValue == null || inputLocationValue == "")
+  //       {
+  //         let response = await apiService().get("/UserManagement/GetLocations?locationId=" + locationId);
+  //         if (response != null && response.status == 200)
+  //         {
+  //           setLocations(response.data);
+  //         }
+  //       }
+  //       else
+  //       {
+  //         let response = await apiService().get("/UserManagement/GetLocations?locationId=" + locationId + "&name=" + inputLocationValue);
+  //         if (response != null && response.status == 200)
+  //         {
+  //           setLocations(response.data);
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   if (location != null || locationId == -1)
+  //   {
+  //     fetchData();
+  //   }
+
+  // }, [location, locationId, inputLocationValue])
+
   useEffect(() => {
 
-    const fetchData = async () => {
-
-      if (location != null)
-      {
-
-        if (inputLocationValue == null || inputLocationValue == "")
-        {
-          let response = await apiService().get("/UserManagement/GetLocations?locationId=" + locationId);
-          if (response != null && response.status == 200)
-          {
-            setLocations(response.data);
-          }
-        }
-        else
-        {
-          let response = await apiService().get("/UserManagement/GetLocations?locationId=" + locationId + "&name=" + inputLocationValue);
-          if (response != null && response.status == 200)
-          {
-            setLocations(response.data);
-          }
-        }
-      }
-    }
-
-    if (location != null || locationId == -1)
+    if (inputCompanyValue != null)
     {
-      fetchData();
+      alert(inputCompanyValue);
     }
 
-  }, [location, locationId, inputLocationValue])
+  }, [inputCompanyValue]);
 
 
   const saveChanges = (shouldClose) => {
@@ -237,6 +248,51 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
                 </Box>
 
                 {renderSystemField(locationId, location, control, errors, register, fields)}
+
+
+                <Autocomplete
+                  id="companySelect"
+                  sx={{paddingTop: 2}}
+                  getOptionLabel={(option) => option.title || option}
+                  options={[...locations, { title: "Add Company", isAddOption: true }]} // Add option appended here
+                  autoComplete
+                  includeInputInList
+                  filterSelectedOptions
+                  value={companyId}
+                  noOptionsText="Company Not Found"
+                  onChange={(event, newValue) => {
+                    if (newValue?.isAddOption) {
+
+                      setEditAddLocationId(-1);
+
+                    } else {
+
+                      //setInputLocationValue(newValue);
+                      // setLocation(newValue); // Select an existing location
+                    }
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    
+                    setInputCompanyValue(newInputValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Company" fullWidth />
+                  )}
+                  renderOption={(props, option) => (
+                    <li {...props} key={"company-" + option.title}>
+                      <Grid container alignItems="center">
+                        <Grid item sx={{ display: 'flex', width: 44 }}>
+                          <BusinessRoundedIcon sx={{ color: 'text.secondary' }} />
+                        </Grid>
+                        <Grid item sx={{ width: 'calc(100% - 44px)', wordWrap: 'break-word' }}>
+                          <Typography variant="body2" color={option.isAddOption ? "primary" : "text.secondary"}>
+                            {option.title}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </li>
+                  )}
+                />
 
               </Grid>
               <Grid item size={8} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
