@@ -33,7 +33,7 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
   const [selectedRoles, setSelectedRole] = useState([]);
   const [selectedPermission, setSelectedPermission] = useState([]);
 
-  const [companyId, setCompanyId] = useState(null);
+  const [company, setCompany] = useState(null);
 
   const [locations, setLocations] = useState([]);
   const [location, setLocation] = useState(null);
@@ -65,6 +65,10 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
       if (response != null && response.status == 200)
       {
         setLocation(response.data);
+
+        // alert(JSON.stringify(response.data));
+
+        setCompany(response.data.company);
 
         if (response.data.customFields != null)
         {
@@ -129,45 +133,20 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
       }
   }
 
-
-  // useEffect(() => {
-
-  //   const fetchData = async () => {
-
-  //     if (location != null)
-  //     {
-
-  //       if (inputLocationValue == null || inputLocationValue == "")
-  //       {
-  //         let response = await apiService().get("/UserManagement/GetLocations?locationId=" + locationId);
-  //         if (response != null && response.status == 200)
-  //         {
-  //           setLocations(response.data);
-  //         }
-  //       }
-  //       else
-  //       {
-  //         let response = await apiService().get("/UserManagement/GetLocations?locationId=" + locationId + "&name=" + inputLocationValue);
-  //         if (response != null && response.status == 200)
-  //         {
-  //           setLocations(response.data);
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   if (location != null || locationId == -1)
-  //   {
-  //     fetchData();
-  //   }
-
-  // }, [location, locationId, inputLocationValue])
-
   useEffect(() => {
 
     if (inputCompanyValue != null)
     {
-      alert(inputCompanyValue);
+      const fetchData = async () => {
+
+        const response = await apiService().get("/UserManagement/GetCompaniesForLocation?searchBName=" + inputCompanyValue);
+        if (response != null && response.status == 200)
+        {
+          setLocations(response.data)
+        }
+
+      }
+      fetchData();
     }
 
   }, [inputCompanyValue]);
@@ -182,8 +161,6 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
   useImperativeHandle(ref, () => ({
     saveChanges,
   }));
-
-
 
   return (
       <Box>
@@ -214,7 +191,7 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
 
             let response = await apiService().post("/UserManagement/UpdateLocation", {
                 id: locationId,
-                companyId: location.companyId,
+                companyId: company.id, //location.companyId,
                 title: data.Title,
 
                 address: data.Address,
@@ -249,7 +226,6 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
 
                 {renderSystemField(locationId, location, control, errors, register, fields)}
 
-
                 <Autocomplete
                   id="companySelect"
                   sx={{paddingTop: 2}}
@@ -258,7 +234,7 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
                   autoComplete
                   includeInputInList
                   filterSelectedOptions
-                  value={companyId}
+                  value={company}
                   noOptionsText="Company Not Found"
                   onChange={(event, newValue) => {
                     if (newValue?.isAddOption) {
@@ -267,8 +243,8 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
 
                     } else {
 
-                      //setInputLocationValue(newValue);
-                      // setLocation(newValue); // Select an existing location
+                      setCompany(newValue);
+
                     }
                   }}
                   onInputChange={(event, newInputValue) => {

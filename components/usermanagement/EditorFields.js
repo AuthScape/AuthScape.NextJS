@@ -76,7 +76,6 @@ export const renderCustomField = (identifier, fieldObject, control, errors, regi
 
           return (
             <Grid key={index} item size={field.size ? field.size : 12}>
-              {/* {JSON.stringify(field)} */}
               <Controller
                 name={field.customFieldId}
                 control={control}
