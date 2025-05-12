@@ -407,7 +407,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
 
     const getAllCustomFields = async () => {
 
-        let res = await apiService().get(`/UserManagement/GetCustomFields?platformType=${platformType}`);
+        let res = await apiService().get(`/UserManagement/GetCustomFields?platformType=${platformType}&IsDatagrid=true`);
         getColumns(res.data);
 
     }

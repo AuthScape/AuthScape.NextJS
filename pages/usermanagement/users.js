@@ -29,8 +29,8 @@ export default function Users({}) {
                     return null;
                 }}
                 onSaved={(shouldClose, platformType, id, fields) => {
-                    alert(shouldClose + " - " + platformType + " - " + id);
-                    alert(JSON.stringify(fields));
+                    // alert(shouldClose + " - " + platformType + " - " + id);
+                    // alert(JSON.stringify(fields));
                 }}
             />
         </Box>
