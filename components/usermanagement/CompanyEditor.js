@@ -32,7 +32,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
   const [company, setCompany] = useState(null);
 
   const [locations, setLocations] = useState([]);
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState({});
   const [inputLocationValue, setInputLocationValue] = useState('');
 
   const [customFields, setCustomFields] = useState([]);
@@ -60,6 +60,10 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
       let response = await apiService().get("/UserManagement/GetCompany?companyId=" + companyId);
       if (response != null && response.status == 200)
       {
+
+        // alert(JSON.stringify(response.data.locations))
+        setLocation(response.data.locations);
+
         setCompany(response.data);
 
         if (response.data.customFields != null)
@@ -207,7 +211,6 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                   Need a way to add and view locations
                 </Box> */}
 
-
                   <Autocomplete
                     id="LocationSelect"
                     multiple={true}
@@ -216,7 +219,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                     autoComplete
                     includeInputInList
                     filterSelectedOptions
-                    // value={location}
+                    value={location}
                     noOptionsText="No locations"
                     onChange={(event, newValue) => {
                       if (newValue?.isAddOption) {
@@ -225,6 +228,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
   
                       } else {
                         
+                        alert(JSON.stringify(newValue))
                         setLocation(newValue); // Select an existing location
                       }
                     }}
