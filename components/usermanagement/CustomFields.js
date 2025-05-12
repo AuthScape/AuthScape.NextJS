@@ -62,6 +62,7 @@ export function CustomFields({platformType}) {
     const [fieldType, setFieldType] = useState(1);
     const [gridSize, setGridSize] = useState(1);
     const [isRequired, setIsRequired] = useState(false);
+    const [isColumnVisibleInDatagrid, setIsColumnVisibleInDatagrid] = useState(false);
     const [tabOptions, setTabOptions] = useState([]);
 
     const [tabSelection, setTabSelection] = useState(null);
@@ -90,6 +91,7 @@ export function CustomFields({platformType}) {
             setIsRequired(customFieldResponse.data.isRequired);
             setGridSize(customFieldResponse.data.gridSize);
             setTabSelection(customFieldResponse.data.tabId ? customFieldResponse.data.tabId : null);
+            setIsColumnVisibleInDatagrid(customFieldResponse.data.isColumnOnDatagrid);
         }
         
     }
@@ -241,6 +243,11 @@ export function CustomFields({platformType}) {
                     setIsRequired(event.target.checked)
                 }} />} label="Is Required" sx={{paddingBottom:2}} />
 
+
+                <FormControlLabel control={<Switch checked={isColumnVisibleInDatagrid} onChange={(event) => {
+                    setIsColumnVisibleInDatagrid(event.target.checked)
+                }} />} label="Is column visible in datagrid" sx={{paddingBottom:2}} />
+
                 <FormControl fullWidth sx={{paddingBottom:2}}>
                     <InputLabel id="demo-simple-select-label">Grid Size</InputLabel>
                     <Select
@@ -285,6 +292,7 @@ export function CustomFields({platformType}) {
                         fieldType: fieldType,
                         customFieldPlatformType: platformType,
                         isRequired: isRequired,
+                        isColumnVisibleInDatagrid: isColumnVisibleInDatagrid,
                         gridSize: gridSize,
                         tabSelection: tabSelection
                     });
@@ -361,6 +369,7 @@ export function CustomFields({platformType}) {
                     <TableCell>Tabs</TableCell>
                     <TableCell>Is Required</TableCell>
                     <TableCell>Grid Size</TableCell>
+                    <TableCell>Is Available In Datagrid</TableCell>
                 </TableRow>
                 </TableHead>
                 <TableBody>
@@ -389,6 +398,9 @@ export function CustomFields({platformType}) {
                         </TableCell>
                         <TableCell component="th" scope="row">
                             {row.gridSize}
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                            {row.isColumnOnDatagrid ? "Yes" : "No"}
                         </TableCell>
                         <TableCell component="th" scope="row">
                             <IconButton color={"error"} onClick={(event) => {

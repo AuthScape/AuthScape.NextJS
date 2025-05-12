@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Box } from '@mui/system';
-import { Autocomplete, Avatar, Button, Drawer } from '@mui/material';
+import { Autocomplete, Avatar, Button, Chip, Drawer } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { Tab, Tabs, Stack } from '@mui/material';
 import { apiService } from 'authscape';
@@ -12,7 +12,6 @@ import Grid from '@mui/material/Grid2';
 // remove when publishing
 import {renderCustomField, renderSystemField } from './EditorFields';
 import { UserManagement } from './UserManagement';
-import { paddingBottom } from '@xstyled/styled-components';
 
 const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = null}, ref) => {
 
@@ -61,9 +60,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
       if (response != null && response.status == 200)
       {
 
-        // alert(JSON.stringify(response.data.locations))
         setLocation(response.data.locations);
-
         setCompany(response.data);
 
         if (response.data.customFields != null)
@@ -172,12 +169,14 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
               }
                 
             });
+            
 
             let response = await apiService().post("/UserManagement/UpdateCompany", {
                 id: companyId,
                 title: data.Title,
                 isDeactivated: false,
-                customFields: userCustomFields
+                customFields: userCustomFields,
+                locations: location
             });
 
             if (response != null && response.status == 200)
@@ -206,10 +205,6 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                 <Box sx={{fontWeight:"bold", paddingTop:1, paddingBottom: 1}}>
                   Locations
                 </Box>
-                 {/*
-                <Box>
-                  Need a way to add and view locations
-                </Box> */}
 
                   <Autocomplete
                     id="LocationSelect"
@@ -219,6 +214,24 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                     autoComplete
                     includeInputInList
                     filterSelectedOptions
+                    renderTags={(value, getTagProps) =>
+                      value.map((option, index) => (
+                        <Chip
+                          {...getTagProps({ index })}
+                          sx={{height: 60}}
+                          label={
+                            <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'center' }}>
+                              <Typography variant="body1" style={{ fontWeight: 'bold' }}>
+                                {option.title}
+                              </Typography>
+                              <Typography variant="body2" color="textSecondary">
+                                {option.address}
+                              </Typography>
+                            </div>
+                          }
+                        />
+                      ))
+                    }
                     value={location}
                     noOptionsText="No locations"
                     onChange={(event, newValue) => {
@@ -228,7 +241,6 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
   
                       } else {
                         
-                        alert(JSON.stringify(newValue))
                         setLocation(newValue); // Select an existing location
                       }
                     }}

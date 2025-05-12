@@ -66,8 +66,6 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
       {
         setLocation(response.data);
 
-        // alert(JSON.stringify(response.data));
-
         setCompany(response.data.company);
 
         if (response.data.customFields != null)
@@ -191,7 +189,7 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
 
             let response = await apiService().post("/UserManagement/UpdateLocation", {
                 id: locationId,
-                companyId: company.id, //location.companyId,
+                companyId: company != null ? company.id : null,
                 title: data.Title,
 
                 address: data.Address,
@@ -215,11 +213,11 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
             
             <Grid container spacing={2} sx={{paddingTop:2}}>
               <Grid size={4} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
-                <Box sx={{textAlign:"center", display:"flex", justifyContent:"center", padding:2 }}>
+                {/* <Box sx={{textAlign:"center", display:"flex", justifyContent:"center", padding:2 }}>
                     <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg"  sx={{ width: 100, height: 100 }} />
-                </Box>
+                </Box> */}
 
-                <hr />
+                {/* <hr /> */}
                 <Box sx={{fontWeight:"bold", paddingBottom: 1}}>
                   About this Location
                 </Box>
