@@ -24,6 +24,7 @@ export default function Users({}) {
                     alert("uploaded user");
                 }}
                 onAccountCreated={(user) => {
+
                     alert(user.firstName + " " + user.lastName + " " + user.email);
 
                     return null;

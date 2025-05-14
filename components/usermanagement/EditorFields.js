@@ -198,10 +198,15 @@ export const renderSystemField = (identifier, fieldObject, control, errors, regi
             isRequied = false;
           }
 
+          if (field == "IsDeactivated") // we are doing this to make the naming the same (IsActive)
+          {
+            field = "IsActive";
+            result = !result;
+          }
+
           return (
           <Box key={index}>
-
-            {(field == "IsActive" || field == "isDeactivated") &&
+            {(field == "IsActive") &&
                 <Box>
                   <Controller name={field} 
                       control={control}
@@ -209,14 +214,14 @@ export const renderSystemField = (identifier, fieldObject, control, errors, regi
                           required: false,
                       }}
                       render={({renderField}) => 
-                      <FormControlLabel control={<Switch defaultChecked={result} />} label={field} {...register(field, { required: false })} {...renderField} />
+                        <FormControlLabel control={<Switch defaultChecked={result} />} label={field} {...register(field, { required: false })} {...renderField} />
                       }
                   />
                   {errors[field] && <Typography color={"red"}>{field} is required.</Typography>}
                 </Box>
             }
 
-            {(field != "IsActive" && field != "isDeactivated") &&
+            {(field != "IsActive" && field != "IsDeactivated") &&
             <Box>
                 <Controller name={field} 
                     control={control}

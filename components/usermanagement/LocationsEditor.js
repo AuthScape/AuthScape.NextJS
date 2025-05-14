@@ -197,7 +197,7 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
                 state: data.State,
                 postalCode: data.ZipCode,
 
-                isDeactivated: false,
+                isDeactivated: !data.IsActive,
                 customFields: userCustomFields
             });
 
