@@ -80,7 +80,8 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
   }, [companyId])
 
   const fields = [
-    "Title"
+    "Title",
+    "IsDeactivated"
   ]
 
   const refreshTabOptions = async () => {
@@ -174,7 +175,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
             let response = await apiService().post("/UserManagement/UpdateCompany", {
                 id: companyId,
                 title: data.Title,
-                isDeactivated: false,
+                isDeactivated: !data.IsActive,
                 customFields: userCustomFields,
                 locations: location
             });

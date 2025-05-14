@@ -22,7 +22,13 @@ export default function Companies({}) {
                 }}
                 onUploadCompleted={() => {
                     alert("uploaded user");
-                }} 
+                }}
+                onAccountCreated={(location) => {
+
+                    alert(JSON.stringify(location));
+
+                    return null;
+                }}
             />
         </Box>
     );
