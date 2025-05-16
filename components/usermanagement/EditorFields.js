@@ -18,7 +18,7 @@ const Editor = dynamic(
 );
 
 
-// import { RichTextEditor } from 'authscape';
+import { DropZone } from '../../components/dropzone';
 
 export const findTheValue = (fieldObject, field) => {
 
@@ -167,6 +167,25 @@ export const renderCustomField = (identifier, fieldObject, control, errors, regi
                             />
                         }
                         label={field.name}
+                      />
+                    )}
+
+
+                    {field.customFieldType === 6 && (
+                      <FormControlLabel sx={{
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center"
+                      }}
+                        control={
+                          <Box>
+                            <Box>{field.name}</Box>
+                            <DropZone {...register(field.customFieldId, { required: field.isRequired })} onDrop={() => {
+                              alert("File uploaded");
+                            }} />
+                          </Box>
+                        }
+                        // label={field.name}
                       />
                     )}
                   </>
