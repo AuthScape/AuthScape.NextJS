@@ -163,6 +163,7 @@ export default function PortalLayout({children, currentUser, pageProps}) {
           ]},
 
           {name: "Color Picker", icon: <DarkModeRoundedIcon/>, href: "/components/colorpicker" , disabled: false},
+          {name: "Drop Zone", icon: <DarkModeRoundedIcon/>, href: "/dropzone" , disabled: false},
 
 
           {name: "Add New Address", icon: <DarkModeRoundedIcon/>, href: "/address" , disabled: true},

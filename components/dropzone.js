@@ -56,9 +56,7 @@ const handleFilePick = () => {
 
 
 
-export const Dropzone = ({text = "Drag 'n' drop some files here, or click to select files", image = null, styleOverride = null, onDrop = null, maxFiles = 1, multiple = false, accept = {
-  'image/*': []
-}}) => {
+export const DropZone = ({text = "Drag 'n' drop some files here, or click to select files", image = null, styleOverride = null, onDrop = null, maxFiles = 1, multiple = false, accept = null}) => {
 
 
   if (styleOverride != null)
@@ -74,7 +72,7 @@ export const Dropzone = ({text = "Drag 'n' drop some files here, or click to sel
     isDragAccept,
     isDragReject
   } = useDropzone({
-        accept: accept,
+        accept: accept != null ? accept : "*",
         maxFiles: maxFiles,
         multiple: multiple,
         onDrop: files => {
@@ -96,24 +94,20 @@ export const Dropzone = ({text = "Drag 'n' drop some files here, or click to sel
     ...(isFocused ? focusedStyle : {}),
     ...(isDragAccept ? acceptStyle : {}),
     ...(isDragReject ? rejectStyle : {})
-  }), [
-    isFocused,
-    isDragAccept,
-    isDragReject
-  ]);
+  }), [isFocused, isDragAccept, isDragReject]);
 
   return (
     <>
-        <Script crossorigin src="https://js.live.net/v7.2/OneDrive.js" />
+        {/* <Script crossorigin src="https://js.live.net/v7.2/OneDrive.js" /> */}
         <Box className="container" sx={{cursor:"pointer"}}>
             
-            <Box onClick={() => {
+            {/* <Box onClick={() => {
                 handleFilePick();
             }}>
                 OneDrive
-            </Box>
+            </Box> */}
 
-            <Box {...getRootProps({style})}>
+            <Box {...getRootProps({style})} onClick={(event) => event.stopPropagation()}>
                 <input {...getInputProps()} />
                 <Box sx={{paddingBottom:1}}>
                 {image != null &&
