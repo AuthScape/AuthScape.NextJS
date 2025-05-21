@@ -1,7 +1,9 @@
 import Box from '@mui/material/Box';
-import React, {useMemo} from 'react';
+import React, {useMemo, useState} from 'react';
 import {useDropzone} from 'react-dropzone';
 import Script from 'next/script';
+import { Backdrop } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 
 let baseStyle = {
   flex: 1,
@@ -33,7 +35,7 @@ const rejectStyle = {
   borderColor: '#ff1744'
 };
 
-const handleFilePick = () => {
+const handleOneDriveFilePick = () => {
     const odOptions = {
       clientId: 'clientId',
       action: 'share',
@@ -55,9 +57,9 @@ const handleFilePick = () => {
 };
 
 
-
 export const DropZone = ({text = "Drag 'n' drop some files here, or click to select files", image = null, styleOverride = null, onDrop = null, maxFiles = 1, multiple = false, accept = null}) => {
 
+  const [loading, setLoading] = useState(false);
 
   if (styleOverride != null)
   {
@@ -75,16 +77,20 @@ export const DropZone = ({text = "Drag 'n' drop some files here, or click to sel
         accept: accept != null ? accept : "*",
         maxFiles: maxFiles,
         multiple: multiple,
-        onDrop: files => {
+        onDrop: async (files) => {
+
+          setLoading(true);
 
           if (multiple)
           {
-            onDrop(files);
+            await onDrop(files);
           }
           else
           {
-            onDrop(files[0]);
+            await onDrop(files[0]);
           }
+
+          setLoading(false);
           
         }
     });
@@ -99,6 +105,12 @@ export const DropZone = ({text = "Drag 'n' drop some files here, or click to sel
   return (
     <>
         {/* <Script crossorigin src="https://js.live.net/v7.2/OneDrive.js" /> */}
+
+        <Backdrop
+          sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+          open={loading}>
+          <CircularProgress color="inherit" sx={{marginRight:4}} /> Uploading...
+        </Backdrop>
         <Box className="container" sx={{cursor:"pointer"}}>
             
             {/* <Box onClick={() => {
@@ -107,7 +119,7 @@ export const DropZone = ({text = "Drag 'n' drop some files here, or click to sel
                 OneDrive
             </Box> */}
 
-            <Box {...getRootProps({style})} onClick={(event) => event.stopPropagation()}>
+            <Box {...getRootProps({style})} >
                 <input {...getInputProps()} />
                 <Box sx={{paddingBottom:1}}>
                 {image != null &&

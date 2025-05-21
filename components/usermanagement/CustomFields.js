@@ -184,6 +184,7 @@ export function CustomFields({platformType}) {
                         <MenuItem value={4}>Date</MenuItem>
                         <MenuItem value={5}>Yes / No</MenuItem>
                         <MenuItem value={6}>Image</MenuItem>
+                        <MenuItem value={7}>Select</MenuItem>
                     </Select>
                 </FormControl>
 
@@ -391,6 +392,7 @@ export function CustomFields({platformType}) {
                             {row.fieldType == 4 && "Date"}
                             {row.fieldType == 5 && "Yes / No"}
                             {row.fieldType == 6 && "Image"}
+                            {row.fieldType == 7 && "Select"}
                         </TableCell>
                         <TableCell component="th" scope="row">
                             {row.customFieldTab ? row.customFieldTab.name : ""}
