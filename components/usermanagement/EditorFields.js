@@ -63,7 +63,7 @@ const findCustomFieldValue = (fieldObject, field) => {
     return result;
 }
 
-export const renderCustomField = (identifier, fieldObject, control, errors, register, setValue, customFields, 
+export const renderCustomField = (platformType, identifier, fieldObject, control, errors, register, setValue, customFields, 
   editors, setEditors
 ) => {
 
@@ -172,21 +172,40 @@ export const renderCustomField = (identifier, fieldObject, control, errors, regi
 
 
                     {field.customFieldType === 6 && (
-                      <FormControlLabel sx={{
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center"
-                      }}
-                        control={
+                      // <FormControlLabel sx={{
+                      //   height: "100%",
+                      //   display: "flex",
+                      //   alignItems: "center"
+                      // }}
+                      //   control={
                           <Box>
                             <Box>{field.name}</Box>
-                            <DropZone {...register(field.customFieldId, { required: field.isRequired })} onDrop={() => {
-                              alert("File uploaded");
-                            }} />
+
+                              <DropZone {...register(field.customFieldId, { required: field.isRequired })} 
+                                image={value} 
+                                text={"Drag 'n' drop your logo here, or click to select your logo"} 
+                                onDrop={async (blob) => {
+                               
+                                  alert(identifier);
+                                  alert(identifier);
+
+
+                                // const data = new FormData();
+                                // data.append("file", blob);
+                                // data.append("companyId", companyId); 
+
+                                // const response = await apiService().post("/UserManagement/UploadLogo", data);
+                                // if (response != null && response.status == 200)
+                                // {
+                                //   fetchCompanyData();
+                                // }
+
+                              }} />
+
                           </Box>
-                        }
+                        // }
                         // label={field.name}
-                      />
+                      // />
                     )}
                   </>
                 )}

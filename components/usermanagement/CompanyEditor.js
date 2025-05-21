@@ -12,6 +12,7 @@ import Grid from '@mui/material/Grid2';
 // remove when publishing
 import {renderCustomField, renderSystemField } from './EditorFields';
 import { UserManagement } from './UserManagement';
+import { DropZone } from '../dropzone';
 
 const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = null}, ref) => {
 
@@ -38,6 +39,8 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
 
   const [user, setUser] = useState(null);
 
+  const [companyLogo, setCompanyLogo] = useState(null);
+
   const [tabOptions, setTabOptions] = useState([]);
 
 
@@ -50,15 +53,15 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
       setTabValue(newValue);
   };
 
-  useEffect(() => {
-
-    const fetchData = async () => {
+  const fetchCompanyData = async () => {
 
       await refreshTabOptions();
 
       let response = await apiService().get("/UserManagement/GetCompany?companyId=" + companyId);
       if (response != null && response.status == 200)
       {
+
+        setCompanyLogo(response.data.logo);
 
         setLocation(response.data.locations);
         setCompany(response.data);
@@ -69,13 +72,14 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
         }
         setEditors({...editors});
       }
-    }
+  }
+
+  useEffect(() => {
 
     if (companyId != -1)
     {
-      fetchData();
+      fetchCompanyData();
     }
-      
 
   }, [companyId])
 
@@ -193,7 +197,23 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
             <Grid container spacing={2} sx={{paddingTop:2}}>
               <Grid size={4} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
                 <Box sx={{textAlign:"center", display:"flex", justifyContent:"center", padding:2 }}>
-                    <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg"  sx={{ width: 100, height: 100 }} />
+
+                    {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg"  sx={{ width: 100, height: 100 }} /> */}
+                
+                    <DropZone image={companyLogo} text={"Drag 'n' drop your logo here, or click to select your logo"} onDrop={async (blob) => {
+                      
+                      const data = new FormData();
+                      data.append("file", blob);
+                      data.append("companyId", companyId); 
+
+                      const response = await apiService().post("/UserManagement/UploadLogo", data);
+                      if (response != null && response.status == 200)
+                      {
+                        fetchCompanyData();
+                      }
+
+                    }} />
+                
                 </Box>
 
                 <hr />
