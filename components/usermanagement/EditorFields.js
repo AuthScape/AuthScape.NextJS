@@ -1,4 +1,4 @@
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
 
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -95,24 +95,6 @@ export const renderCustomField = (identifier, fieldObject, control, errors, regi
                         value={value || ''}
                       />
                     )}
-                    {/* {(field.customFieldType == 2) && (
-                      <Box sx={{backgroundColor: "transparent", 
-                        
-                          '& .MuiButtonBase-root': {
-                            display: 'none'
-                          }
-                      }}>
-                        <Editor editorState={editors[field.customFieldId]} 
-                        onEditorStateChange={(newEditorState) => {
-                          setEditors({...editors, 
-                          [field.customFieldId]: newEditorState});
-                        }} />
-                       
-
-                      
-                      </Box>
-
-                    )} */}
                      {/* <RichTextEditor ref={textEditorRef} html={value} 
                         
                         {...register(field.customFieldId, { required: field.isRequired })}
@@ -128,7 +110,7 @@ export const renderCustomField = (identifier, fieldObject, control, errors, regi
                         
                     {
                       field.customFieldType === 3 && (
-                          <TextField
+                        <TextField
                           variant="outlined"
                           label={field.name}
                           type="number"
@@ -187,11 +169,21 @@ export const renderCustomField = (identifier, fieldObject, control, errors, regi
 
                     {field.customFieldType === 7 && (
                       <Box>
-                        <Box>{field.name}</Box>
-                          Hello world
+                          <FormControl fullWidth>
+                            <InputLabel id="demo-simple-select-label">{field.name}</InputLabel>
+                            <Select
+                              {...register(field.customFieldId, { required: field.isRequired })}
+                              label={field.name}
+                              value={value || ''}
+                              onChange={onChange}>
+                                {(field.properties != null && field.properties != "") && JSON.parse(field.properties).map((property) => {
+                                  return <MenuItem value={property.key}>{property.value}</MenuItem>
+                                })}
+                              
+                            </Select>
+                          </FormControl>
                       </Box>
                     )}
-
 
                   </>
                 )}
