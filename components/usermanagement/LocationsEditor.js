@@ -167,14 +167,14 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
             
             let userCustomFields = [];
 
-            customFields && customFields.forEach(customField => {
+            customFields && customFields.forEach(async (customField) => {
 
               let newValue = 
               // customField.customFieldType == 2 ? 
               // draftToHTML(editors[customField.customFieldId].getCurrentContent()) 
               // : 
               data[customField.customFieldId];
-              if (newValue != null)
+              if (newValue != null && typeof newValue === 'string')
               {
                 userCustomFields.push({
                     customFieldId: customField.customFieldId,
@@ -183,6 +183,31 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
                     customFieldType: customField.customFieldType,
                     value: newValue.toString()
                 });
+              }
+              else if (newValue instanceof Blob)
+              {
+                  const newBlob = new Blob([newValue], { type: newValue.type });
+                
+                  const data = new FormData();
+                  data.append("file", newBlob);
+                  data.append("identifier", locationId);
+
+                  data.append("platformType", 3); // company
+                  data.append("customFieldId", customField.customFieldId); 
+
+                  const response = await apiService().post("/UserManagement/UploadCustomFieldImage", data);
+                  if (response != null && response.status == 200)
+                  {
+
+                    userCustomFields.push({
+                        customFieldId: customField.customFieldId,
+                        name: customField.name,
+                        isRequired: customField.isRequired,
+                        customFieldType: customField.customFieldType,
+                        value: response.data
+                    });
+
+                  }
               }
                 
             });
