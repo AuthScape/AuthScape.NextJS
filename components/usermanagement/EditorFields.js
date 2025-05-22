@@ -17,8 +17,8 @@ const Editor = dynamic(
   { ssr: false }
 );
 
-
 import { DropZone } from '../../components/dropzone';
+import { apiService } from "authscape";
 
 export const findTheValue = (fieldObject, field) => {
 
@@ -63,7 +63,7 @@ const findCustomFieldValue = (fieldObject, field) => {
     return result;
 }
 
-export const renderCustomField = (platformType, identifier, fieldObject, control, errors, register, setValue, customFields, 
+export const renderCustomField = (identifier, fieldObject, control, errors, register, setValue, customFields, 
   editors, setEditors
 ) => {
 
@@ -170,43 +170,29 @@ export const renderCustomField = (platformType, identifier, fieldObject, control
                       />
                     )}
 
-
                     {field.customFieldType === 6 && (
-                      // <FormControlLabel sx={{
-                      //   height: "100%",
-                      //   display: "flex",
-                      //   alignItems: "center"
-                      // }}
-                      //   control={
-                          <Box>
-                            <Box>{field.name}</Box>
+                      <Box>
+                        <Box>{field.name}</Box>
+                          <DropZone {...register(field.customFieldId, { required: field.isRequired })} 
+                            image={value} 
+                            text={"Drag 'n' drop your logo here, or click to select your logo"} 
+                            onDrop={async (blob) => {
 
-                              <DropZone {...register(field.customFieldId, { required: field.isRequired })} 
-                                image={value} 
-                                text={"Drag 'n' drop your logo here, or click to select your logo"} 
-                                onDrop={async (blob) => {
-                               
-                                  alert(identifier);
-                                  alert(identifier);
+                              value = blob;
+                              onChange(blob);                                  
 
-
-                                // const data = new FormData();
-                                // data.append("file", blob);
-                                // data.append("companyId", companyId); 
-
-                                // const response = await apiService().post("/UserManagement/UploadLogo", data);
-                                // if (response != null && response.status == 200)
-                                // {
-                                //   fetchCompanyData();
-                                // }
-
-                              }} />
-
-                          </Box>
-                        // }
-                        // label={field.name}
-                      // />
+                          }} />
+                      </Box>
                     )}
+
+                    {field.customFieldType === 7 && (
+                      <Box>
+                        <Box>{field.name}</Box>
+                          Hello world
+                      </Box>
+                    )}
+
+
                   </>
                 )}
               />

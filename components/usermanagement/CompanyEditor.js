@@ -155,14 +155,14 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
             
             let userCustomFields = [];
 
-            customFields && customFields.forEach(customField => {
+            customFields && customFields.forEach(async (customField) => {
 
               let newValue = 
               // customField.customFieldType == 2 ? 
               // draftToHTML(editors[customField.customFieldId].getCurrentContent()) 
               // : 
               data[customField.customFieldId];
-              if (newValue != null)
+              if (newValue != null && typeof newValue === 'string')
               {
                 userCustomFields.push({
                     customFieldId: customField.customFieldId,
@@ -172,9 +172,35 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                     value: newValue.toString()
                 });
               }
+              else if (newValue instanceof Blob)
+              {
+                  const newBlob = new Blob([newValue], { type: newValue.type });
+                
+                  const data = new FormData();
+                  data.append("file", newBlob);
+                  data.append("identifier", companyId); 
+
+                  data.append("platformType", 2); // company
+                  data.append("customFieldId", customField.customFieldId); 
+
+                  const response = await apiService().post("/UserManagement/UploadCustomFieldImage", data);
+                  if (response != null && response.status == 200)
+                  {
+
+                    userCustomFields.push({
+                        customFieldId: customField.customFieldId,
+                        name: customField.name,
+                        isRequired: customField.isRequired,
+                        customFieldType: customField.customFieldType,
+                        value: response.data
+                    });
+
+                  }
+
+              }
                 
             });
-            
+
 
             let response = await apiService().post("/UserManagement/UpdateCompany", {
                 id: companyId,
@@ -198,9 +224,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
               <Grid size={4} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
                 <Box sx={{textAlign:"center", display:"flex", justifyContent:"center", padding:2 }}>
 
-                    {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg"  sx={{ width: 100, height: 100 }} /> */}
-                
-                    <DropZone image={companyLogo} text={"Drag 'n' drop your logo here, or click to select your logo"} onDrop={async (blob) => {
+                    <DropZone image={companyLogo != null ? companyLogo : ""} text={"Drag 'n' drop your logo here, or click to select your logo"} onDrop={async (blob) => {
                       
                       const data = new FormData();
                       data.append("file", blob);

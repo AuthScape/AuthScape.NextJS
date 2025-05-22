@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box';
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useEffect, useRef} from 'react';
 import {useDropzone} from 'react-dropzone';
 import Script from 'next/script';
 import { Backdrop } from '@mui/material';
@@ -60,6 +60,16 @@ const handleOneDriveFilePick = () => {
 export const DropZone = ({text = "Drag 'n' drop some files here, or click to select files", image = null, styleOverride = null, onDrop = null, maxFiles = 1, multiple = false, accept = null}) => {
 
   const [loading, setLoading] = useState(false);
+  const [tempUrl, setTempUrl] = useState(null);
+
+  const imageUrl = useRef(image);
+
+  // in the event the image hasn't loaded yet from the caller
+  useEffect(() => {
+
+    imageUrl.current = image;
+
+  }, [image]);
 
   if (styleOverride != null)
   {
@@ -79,18 +89,17 @@ export const DropZone = ({text = "Drag 'n' drop some files here, or click to sel
         multiple: multiple,
         onDrop: async (files) => {
 
-          setLoading(true);
-
           if (multiple)
           {
             await onDrop(files);
           }
           else
           {
+            const newUrl = URL.createObjectURL(files[0]);
+            imageUrl.current = newUrl;
+
             await onDrop(files[0]);
           }
-
-          setLoading(false);
           
         }
     });
@@ -106,11 +115,11 @@ export const DropZone = ({text = "Drag 'n' drop some files here, or click to sel
     <>
         {/* <Script crossorigin src="https://js.live.net/v7.2/OneDrive.js" /> */}
 
-        <Backdrop
+        {/* <Backdrop
           sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
-          open={loading}>
+          open={isLoading.current}>
           <CircularProgress color="inherit" sx={{marginRight:4}} /> Uploading...
-        </Backdrop>
+        </Backdrop> */}
         <Box className="container" sx={{cursor:"pointer"}}>
             
             {/* <Box onClick={() => {
@@ -122,8 +131,9 @@ export const DropZone = ({text = "Drag 'n' drop some files here, or click to sel
             <Box {...getRootProps({style})} >
                 <input {...getInputProps()} />
                 <Box sx={{paddingBottom:1}}>
-                {image != null &&
-                    <img src={image} width={200} height={200} style={{objectFit: "contain"}} />
+
+                {(imageUrl.current != null && imageUrl.current != "") &&
+                    <img src={imageUrl.current} width={200} height={200} style={{objectFit: "contain"}} />
                 }
                 </Box>
                 <Box>{text}</Box>

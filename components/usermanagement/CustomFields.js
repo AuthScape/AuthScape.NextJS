@@ -24,6 +24,8 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
+import Grid from '@mui/material/Grid2';
+import { paddingTop } from '@xstyled/styled-components';
 
 export function CustomFields({platformType}) {
 
@@ -158,6 +160,8 @@ export function CustomFields({platformType}) {
             onClose={() => {
                 setNewCustomFieldOpen(null);
             }}
+            fullWidth={true}
+            maxWidth={"md"}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description">
             <DialogTitle id="alert-dialog-title">
@@ -166,114 +170,158 @@ export function CustomFields({platformType}) {
             </DialogTitle>
             {/* {(newCustomFieldOpen != null && (newCustomFieldOpen != -1 && hasLoaded) || newCustomFieldOpen == -1) && */}
             <DialogContent>
-                <TextField inputRef={refName} label="Name" variant="outlined" fullWidth={true} InputLabelProps={{ shrink: true }} sx={{paddingBottom:2, marginTop:2}} />
-                
-                <FormControl fullWidth sx={{paddingBottom:2}}>
-                    <InputLabel id="demo-simple-select-label">Field Type</InputLabel>
-                    <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={fieldType}
-                        label="Field Type"
-                        onChange={(event) => {
-                            setFieldType(event.target.value);
-                        }}>
-                        <MenuItem value={1}>TextField</MenuItem>
-                        {/* <MenuItem value={2}>RichTextField</MenuItem> */}
-                        <MenuItem value={3}>Number</MenuItem>
-                        <MenuItem value={4}>Date</MenuItem>
-                        <MenuItem value={5}>Yes / No</MenuItem>
-                        <MenuItem value={6}>Image</MenuItem>
-                        <MenuItem value={7}>Select</MenuItem>
-                    </Select>
-                </FormControl>
 
-                <Box sx={{paddingBottom:2}}>
-                    <FormControl fullWidth>
-                        <InputLabel shrink id="tab-simple-select-label" sx={{
-                            backgroundColor: "white",
-                            px: "3px"
-                        }}>Tabs</InputLabel>
-                        <Select aria-expanded={true}
-                            labelId="tab-simple-select-label"
-                            id="tab-simple-select"
-                            renderValue={(selected) => 
-                                tabOptions.find(t => t.id == selected).name }
-                            //displayEmpty
-                            value={tabSelection}
-                            label={"tabs"}
+                <Grid container spacing={2}>
+                    <Grid size={6}>
+
+                        <Box>
+                        <TextField inputRef={refName} label="Name" variant="outlined" fullWidth={true} InputLabelProps={{ shrink: true }} sx={{paddingBottom:2, marginTop:2}} />
+                        
+                        <FormControl fullWidth sx={{paddingBottom:2}}>
+                            <InputLabel id="demo-simple-select-label">Field Type</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={fieldType}
+                                label="Field Type"
+                                onChange={(event) => {
+                                    setFieldType(event.target.value);
+                                }}>
+                                <MenuItem value={1}>TextField</MenuItem>
+                                {/* <MenuItem value={2}>RichTextField</MenuItem> */}
+                                <MenuItem value={3}>Number</MenuItem>
+                                <MenuItem value={4}>Date</MenuItem>
+                                <MenuItem value={5}>Yes / No</MenuItem>
+                                <MenuItem value={6}>Image</MenuItem>
+                                <MenuItem value={7}>Select</MenuItem>
+                            </Select>
+                        </FormControl>
+
+                        {fieldType == 7 &&
+                        <Box sx={{paddingBottom:2}}>
+                            This is a test
+                        </Box>
+                        }
+
+                        <Box sx={{paddingBottom:2}}>
+                            <FormControl fullWidth>
+                                <InputLabel shrink id="tab-simple-select-label" sx={{
+                                    backgroundColor: "white",
+                                    px: "3px"
+                                }}>Tabs</InputLabel>
+                                <Select aria-expanded={true}
+                                    labelId="tab-simple-select-label"
+                                    id="tab-simple-select"
+                                    renderValue={(selected) => 
+                                        tabOptions.find(t => t.id == selected).name }
+                                    //displayEmpty
+                                    value={tabSelection}
+                                    label={"tabs"}
+                                    
+                                    onChange={(event) => {
+                                        setTabSelection(event.target.value);
+                                    }}>
+                                        <MenuItem value={null}> <em>None</em> </MenuItem>
+                                        {tabOptions && tabOptions.map((tab) => {
+                                            return (
+                                                <MenuItem key={tab.id} value={tab.id}>
+                                                    <Stack direction={"row"}  sx={{
+                                                        alignItems: "center",
+                                                        justifyContent: "space-between",
+                                                        width: "100%"
+                                                    }}>
+                                                        <Box>
+                                                            <Typography>{tab.name}</Typography>
+                                                        </Box>
+                                                        {
+                                                            <Box>
+                                                                <IconButton color={"error"} onClick={(event) => {
+                                                                    event.stopPropagation();
+                                                                    setDeleteCustomTabOpen(tab);
+                                                                }}>
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            </Box>
+                                                        }
+                                                    </Stack>
+                                                </MenuItem>
+                                            )
+                                        })}
+                                </Select>
+                            </FormControl>
+                            <Box sx={{textAlign:"right"}}>
+                                <Button variant="text" onClick={() => {
+                                    setNewTabFieldOpen(-1);
+                                }}>Create Tab</Button>
+                            </Box>
+                        </Box>
+
+                        <FormControlLabel control={<Switch checked={isRequired} onChange={(event) => {
+                            setIsRequired(event.target.checked)
+                        }} />} label="Is Required" sx={{paddingBottom:2}} />
+
+
+                        <FormControlLabel control={<Switch checked={isColumnVisibleInDatagrid} onChange={(event) => {
+                            setIsColumnVisibleInDatagrid(event.target.checked)
+                        }} />} label="Is column visible in datagrid" sx={{paddingBottom:2}} />
+
+                        <FormControl fullWidth sx={{paddingBottom:2}}>
+                            <InputLabel id="demo-simple-select-label">Grid Size</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={gridSize}
+                                label="Grid Size"
+                                onChange={(event) => {
+                                    setGridSize(event.target.value);
+                                }}>
+                                <MenuItem value={1}>1</MenuItem>
+                                <MenuItem value={2}>2</MenuItem>
+                                <MenuItem value={3}>3</MenuItem>
+                                <MenuItem value={4}>4</MenuItem>
+                                <MenuItem value={5}>5</MenuItem>
+                                <MenuItem value={6}>6</MenuItem>
+                                <MenuItem value={7}>7</MenuItem>
+                                <MenuItem value={8}>8</MenuItem>
+                                <MenuItem value={9}>9</MenuItem>
+                                <MenuItem value={10}>10</MenuItem>
+                                <MenuItem value={11}>11</MenuItem>
+                                <MenuItem value={12}>12</MenuItem>
+                            </Select>
+                        </FormControl>
+                        </Box>
+
+                    </Grid>
+                    <Grid size={6}>
+                        <Box>
+                            Properties
+                        </Box>
+                        <Box>
+                            {fieldType == 6 &&
+                            <Box sx={{paddingTop:2}}>
+                                Image Size
+                                <Box>
+                                    <Stack direction="row" spacing={2}>
+                                        <TextField label="Width" variant="outlined" /> X
+                                        <TextField label="Height" variant="outlined" />
+                                    </Stack>
+                                </Box>
+                            </Box>
+                            }
                             
-                            onChange={(event) => {
-                                setTabSelection(event.target.value);
-                            }}>
-                                <MenuItem value={null}> <em>None</em> </MenuItem>
-                                {tabOptions && tabOptions.map((tab) => {
-                                    return (
-                                        <MenuItem key={tab.id} value={tab.id}>
-                                            <Stack direction={"row"}  sx={{
-                                                alignItems: "center",
-                                                justifyContent: "space-between",
-                                                width: "100%"
-                                            }}>
-                                                <Box>
-                                                    <Typography>{tab.name}</Typography>
-                                                </Box>
-                                                {
-                                                    <Box>
-                                                        <IconButton color={"error"} onClick={(event) => {
-                                                            event.stopPropagation();
-                                                            setDeleteCustomTabOpen(tab);
-                                                        }}>
-                                                            <DeleteIcon />
-                                                        </IconButton>
-                                                    </Box>
-                                                }
-                                            </Stack>
-                                        </MenuItem>
-                                    )
-                                })}
-                        </Select>
-                    </FormControl>
-                    <Box sx={{textAlign:"right"}}>
-                        <Button variant="text" onClick={() => {
-                            setNewTabFieldOpen(-1);
-                        }}>Create Tab</Button>
-                    </Box>
-                </Box>
+                            {fieldType == 7 &&
+                            <Box sx={{paddingTop:2}}>
+                                Select
+                                <Stack direction="row" spacing={2}>
+                                    <TextField label="Key" variant="outlined" />
+                                    <TextField label="Value" variant="outlined" />
+                                </Stack>
+                            </Box>
+                            }
+                        </Box>
+                    </Grid>
+                </Grid>
 
-                <FormControlLabel control={<Switch checked={isRequired} onChange={(event) => {
-                    setIsRequired(event.target.checked)
-                }} />} label="Is Required" sx={{paddingBottom:2}} />
-
-
-                <FormControlLabel control={<Switch checked={isColumnVisibleInDatagrid} onChange={(event) => {
-                    setIsColumnVisibleInDatagrid(event.target.checked)
-                }} />} label="Is column visible in datagrid" sx={{paddingBottom:2}} />
-
-                <FormControl fullWidth sx={{paddingBottom:2}}>
-                    <InputLabel id="demo-simple-select-label">Grid Size</InputLabel>
-                    <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={gridSize}
-                        label="Grid Size"
-                        onChange={(event) => {
-                            setGridSize(event.target.value);
-                        }}>
-                        <MenuItem value={1}>1</MenuItem>
-                        <MenuItem value={2}>2</MenuItem>
-                        <MenuItem value={3}>3</MenuItem>
-                        <MenuItem value={4}>4</MenuItem>
-                        <MenuItem value={5}>5</MenuItem>
-                        <MenuItem value={6}>6</MenuItem>
-                        <MenuItem value={7}>7</MenuItem>
-                        <MenuItem value={8}>8</MenuItem>
-                        <MenuItem value={9}>9</MenuItem>
-                        <MenuItem value={10}>10</MenuItem>
-                        <MenuItem value={11}>11</MenuItem>
-                        <MenuItem value={12}>12</MenuItem>
-                    </Select>
-                </FormControl>
             </DialogContent>
             {/* } */}
             <DialogActions>
