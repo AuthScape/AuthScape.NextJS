@@ -25,7 +25,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import Grid from '@mui/material/Grid2';
-import { paddingTop } from '@xstyled/styled-components';
+import { paddingBottom, paddingTop } from '@xstyled/styled-components';
 
 export function CustomFields({platformType}) {
 
@@ -67,6 +67,8 @@ export function CustomFields({platformType}) {
     const [isColumnVisibleInDatagrid, setIsColumnVisibleInDatagrid] = useState(false);
     const [tabOptions, setTabOptions] = useState([]);
 
+    const [selectProperties, setSelectProperties] = useState([]);
+
     const [tabSelection, setTabSelection] = useState(null);
 
     const refTabName = useRef(null);
@@ -94,6 +96,8 @@ export function CustomFields({platformType}) {
             setGridSize(customFieldResponse.data.gridSize);
             setTabSelection(customFieldResponse.data.tabId ? customFieldResponse.data.tabId : null);
             setIsColumnVisibleInDatagrid(customFieldResponse.data.isColumnOnDatagrid);
+
+            setSelectProperties(JSON.parse(customFieldResponse.data.properties))
         }
         
     }
@@ -299,23 +303,154 @@ export function CustomFields({platformType}) {
                         <Box>
                             {fieldType == 6 &&
                             <Box sx={{paddingTop:2}}>
-                                Image Size
-                                <Box>
-                                    <Stack direction="row" spacing={2}>
-                                        <TextField label="Width" variant="outlined" /> X
+
+                                <Grid size={6}>
+                                    Image Size
+                                </Grid>
+                                <Grid size={6} sx={{textAlign:"right"}}>
+                                    <Button variant="contained"
+                                        onClick={() => {
+
+                                            let newItem = {
+                                                id: Date.now(),
+                                                key: "",
+                                                value: ""
+                                            };
+
+                                            setSelectProperties(prevItems => {
+                                                return Array.isArray(prevItems) ? [...prevItems, newItem] : [newItem];
+                                            });
+
+                                        }}
+                                        >Add Option
+                                    </Button>
+                                </Grid>
+
+
+                                {selectProperties && selectProperties.map((propObj) => {
+
+                                    return (
+                                        <Stack key={propObj.id} direction="row" spacing={1} sx={{paddingTop:2}}>
+
+                                            <TextField 
+                                                label="Name"
+                                                defaultValue={propObj.name}
+                                                InputLabelProps={{ shrink: true }}
+                                                variant="outlined"
+                                                onChange={(val) => {
+                                                    propObj.name = val.currentTarget.value;
+                                                }}
+                                            />
+                                            
+                                            <TextField 
+                                                label="Width"
+                                                defaultValue={propObj.width}
+                                                InputLabelProps={{ shrink: true }}
+                                                variant="outlined"
+                                                onChange={(val) => {
+                                                    propObj.width = val.currentTarget.value;
+                                                }}
+                                            />
+
+                                            <TextField
+                                                label="Height"
+                                                defaultValue={propObj.height}
+                                                InputLabelProps={{ shrink: true }}
+                                                variant="outlined"
+                                                onChange={(val) => {
+                                                    propObj.height = val.currentTarget.value;
+                                                }}
+                                            />
+
+
+                                            <IconButton aria-label="delete" onClick={() => {
+
+                                                setSelectProperties(prevItems =>
+                                                    prevItems.filter(item => item.id !== propObj.id)
+                                                );
+                                            }}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Stack>
+                                    )
+
+                                })}
+
+
+
+                                
+                                {/* <Box>
+                                    <Stack direction="row" spacing={1}>
+                                        <TextField label="Name" variant="outlined" />
+                                        <TextField label="Width" variant="outlined" />
                                         <TextField label="Height" variant="outlined" />
                                     </Stack>
-                                </Box>
+                                </Box> */}
+
+
                             </Box>
                             }
                             
                             {fieldType == 7 &&
                             <Box sx={{paddingTop:2}}>
-                                Select
-                                <Stack direction="row" spacing={2}>
-                                    <TextField label="Key" variant="outlined" />
-                                    <TextField label="Value" variant="outlined" />
-                                </Stack>
+                                <Box sx={{paddingBottom:1}}>
+                                    <Grid container spacing={2}>
+                                        <Grid size={6}>
+                                            Select
+                                        </Grid>
+                                        <Grid size={6} sx={{textAlign:"right"}}>
+                                            <Button variant="contained"
+                                            onClick={() => {
+
+                                                let newItem = {
+                                                    id: Date.now(),
+                                                    key: "",
+                                                    value: ""
+                                                };
+
+                                                setSelectProperties(prevItems => {
+                                                    return Array.isArray(prevItems) ? [...prevItems, newItem] : [newItem];
+                                                });
+
+                                            }}
+                                            >Add Option</Button>
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+
+                                {selectProperties && selectProperties.map((propObj) => {
+
+                                    return (
+                                        <Stack key={propObj.id} direction="row" spacing={1} sx={{paddingTop:2}}>
+                                            <TextField label="Key" 
+                                                variant="outlined"
+                                                defaultValue={propObj.key} 
+                                                InputLabelProps={{ shrink: true }} 
+                                                onChange={(val) => {
+                                                    propObj.key = val.currentTarget.value;
+                                                }}
+                                                />
+                                            <TextField label="Value" 
+                                                variant="outlined" 
+                                                defaultValue={propObj.value} 
+                                                InputLabelProps={{ shrink: true }} 
+                                                onChange={(val) => {
+                                                    propObj.value = val.currentTarget.value;
+                                                }}
+                                                />
+                                            <IconButton aria-label="delete" onClick={() => {
+
+                                                setSelectProperties(prevItems =>
+                                                    prevItems.filter(item => item.id !== propObj.id)
+                                                );
+                                            }}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Stack>
+                                    )
+
+                                })}
+
                             </Box>
                             }
                         </Box>
@@ -329,6 +464,8 @@ export function CustomFields({platformType}) {
                     setNewCustomFieldOpen(null);
                 }}>Cancel</Button>
             <Button onClick={async () => {
+
+                    let properties = JSON.stringify(selectProperties);
 
                     let id = null;
                     if (newCustomFieldOpen != -1) 
@@ -344,12 +481,15 @@ export function CustomFields({platformType}) {
                         isRequired: isRequired,
                         isColumnVisibleInDatagrid: isColumnVisibleInDatagrid,
                         gridSize: gridSize,
-                        tabSelection: tabSelection
+                        tabSelection: tabSelection,
+                        properties: properties
                     });
 
                     await RefreshFields();
 
                     setNewCustomFieldOpen(null);
+
+
                 }} autoFocus>
                 Update
             </Button>
