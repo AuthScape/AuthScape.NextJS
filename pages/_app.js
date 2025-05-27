@@ -3,7 +3,6 @@ import "../styles/globals.css";
 import Layout from "../components/layout/portalLayout";
 import { AuthScapeApp } from "authscape";
 import "react-toastify/dist/ReactToastify.css";
-import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import "reactflow/dist/style.css";
 import { Backdrop, Box, CircularProgress, Typography } from "@mui/material";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
