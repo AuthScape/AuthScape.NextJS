@@ -4,7 +4,6 @@ import { useForm, Controller } from 'react-hook-form';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import Grid from '@mui/material/Grid2';
-import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 import dayjs from 'dayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';

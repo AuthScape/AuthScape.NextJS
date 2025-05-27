@@ -1,20 +1,12 @@
 import React, {useEffect, useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Box } from '@mui/system';
 import TextField from '@mui/material/TextField';
-import { Autocomplete, Avatar, Button, Drawer } from '@mui/material';
+import { Autocomplete, Button } from '@mui/material';
 import Typography from '@mui/material/Typography';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import Checkbox from '@mui/material/Checkbox';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemText from '@mui/material/ListItemText';
-import { useForm, Controller } from 'react-hook-form';
-import { EditorState, ContentState } from 'draft-js';
+import { useForm } from 'react-hook-form';
 import { Tab, Tabs, Stack } from '@mui/material';
 import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
-import { apiService, NewMappingColumn } from 'authscape';
+import { apiService } from 'authscape';
 import Grid from '@mui/material/Grid2';
 
 // remove when publishing
