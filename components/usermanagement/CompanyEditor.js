@@ -14,7 +14,7 @@ import {renderCustomField, renderSystemField } from './EditorFields';
 import { UserManagement } from './UserManagement';
 import { DropZone } from '../dropzone';
 
-const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = null}, ref) => {
+const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = null, onCustomTabs = null}, ref) => {
 
   const {control, register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
 
@@ -38,11 +38,11 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
   const [customFields, setCustomFields] = useState([]);
 
   const [user, setUser] = useState(null);
+  const [customTabs, setCustomTabs] = useState(null);
 
   const [companyLogo, setCompanyLogo] = useState(null);
 
   const [tabOptions, setTabOptions] = useState([]);
-
 
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
@@ -102,7 +102,6 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
       }
   }
 
-
   useEffect(() => {
 
     const fetchData = async () => {
@@ -141,12 +140,25 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
     refSubmitButton.current.click();
   }
 
-
   useImperativeHandle(ref, () => ({
     saveChanges,
   }));
 
+  useEffect(() => {
 
+    if (companyId != null && onCustomTabs != null)
+    {
+      const fetchData = async () => {
+        let tabs = await onCustomTabs(platformType, companyId)
+        if (tabs != null)
+        {
+          setCustomTabs(tabs);
+        }
+      }
+      fetchData();
+    }
+
+  }, [companyId]);
 
   return (
       <Box>
@@ -200,7 +212,6 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
               }
                 
             });
-
 
             let response = await apiService().post("/UserManagement/UpdateCompany", {
                 id: companyId,
@@ -323,6 +334,13 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                             <Tab key={tab.id} label={tab.name} value={tab.id} />
                           )
                         })}
+
+                        {customTabs != null && customTabs.map((tab, index) => {
+                          return (
+                            <Tab key={"custom-" + tab.id} label={tab.title} value={tab.id} />
+                          )
+                        })}
+
                       </Tabs>
                     </Box>
                     <Box>
@@ -341,6 +359,20 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                         </>
                       )
                     })}
+
+
+                    {customTabs != null && customTabs.map((tab, index) => {
+                        return (
+                          <>
+                            {tabValue === tab.id && 
+                              <Box>
+                                {tab.content}
+                              </Box>
+                            }
+                          </>
+                        )
+                    })}
+
                     </Box>
                   </Stack>
                  

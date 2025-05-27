@@ -21,7 +21,7 @@ import Grid from '@mui/material/Grid2';
 import {renderCustomField, renderSystemField } from './EditorFields';
 
 
-const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = null}, ref) => {
+const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = null, onCustomTabs = null}, ref) => {
 
   const {control, register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
 
@@ -42,6 +42,7 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
   const [customFields, setCustomFields] = useState([]);
 
   const [user, setUser] = useState(null);
+  const [customTabs, setCustomTabs] = useState(null);
 
   const [tabOptions, setTabOptions] = useState([]);
 
@@ -107,6 +108,23 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
       
 
   }, [locationId])
+
+
+  useEffect(() => {
+
+    if (locationId != null && onCustomTabs != null)
+    {
+      const fetchData = async () => {
+        let tabs = await onCustomTabs(platformType, locationId)
+        if (tabs != null)
+        {
+          setCustomTabs(tabs);
+        }
+      }
+      fetchData();
+    }
+
+  }, [locationId]);
 
   const fields = [
     "Title",
@@ -303,6 +321,12 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
                             <Tab key={tab.id} label={tab.name} value={tab.id} />
                           )
                         })}
+
+                        {customTabs != null && customTabs.map((tab, index) => {
+                          return (
+                            <Tab key={"custom-" + tab.id} label={tab.title} value={tab.id} />
+                          )
+                        })}
                       </Tabs>
                     </Box>
                     <Box>
@@ -320,6 +344,18 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
                         }
                         </>
                       )
+                    })}
+
+                    {customTabs != null && customTabs.map((tab, index) => {
+                        return (
+                          <>
+                            {tabValue === tab.id && 
+                              <Box>
+                                {tab.content}
+                              </Box>
+                            }
+                          </>
+                        )
                     })}
                     </Box>
                   </Stack>
