@@ -29,6 +29,16 @@ export default function Companies({}) {
 
                     return null;
                 }}
+
+                onCustomTabs={(platformId, identifier) => {
+
+                    return ([{
+                        id:  45,
+                        title: "Custom Tab",
+                        content: <div>Custom Content {platformId} - {identifier}</div>
+                    }])
+
+                }}
             />
         </Box>
     );

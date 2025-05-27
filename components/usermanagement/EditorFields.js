@@ -9,16 +9,7 @@ import dayjs from 'dayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-
-import dynamic from "next/dynamic";
-
-const Editor = dynamic(
-  () => import("react-draft-wysiwyg").then((mod) => mod.Editor),
-  { ssr: false }
-);
-
 import { DropZone } from '../../components/dropzone';
-import { apiService } from "authscape";
 
 export const findTheValue = (fieldObject, field) => {
 
@@ -80,7 +71,6 @@ export const renderCustomField = (identifier, fieldObject, control, errors, regi
                 name={field.customFieldId}
                 control={control}
                 defaultValue={result}
-                // defaultChecked={result}
                 rules={{ required: field.isRequired }}
                 render={({ field: { onChange, value } }) => (
                   <>
@@ -95,19 +85,22 @@ export const renderCustomField = (identifier, fieldObject, control, errors, regi
                         value={value || ''}
                       />
                     )}
-                     {/* <RichTextEditor ref={textEditorRef} html={value} 
-                        
-                        {...register(field.customFieldId, { required: field.isRequired })}
 
-                        onChange={(value) => {
-                          debugger;
-                        }}
-                         
-                        onSave={(html) => {
-                        
-                          onChange(html);
-                        }}/> */}
-                        
+                    {(field.customFieldType === 2) && (
+                      
+                        <TextField
+                          label={field.name}
+                          variant="outlined"
+                          margin="normal"
+                          fullWidth
+                          minRows={4}
+                          multiline={true}
+                          {...register(field.customFieldId, { required: field.isRequired })}
+                          onChange={onChange}
+                          value={value || ''}
+                        />
+                    )}
+
                     {
                       field.customFieldType === 3 && (
                         <TextField

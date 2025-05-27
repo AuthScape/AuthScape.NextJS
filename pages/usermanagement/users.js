@@ -33,6 +33,15 @@ export default function Users({}) {
                     // alert(shouldClose + " - " + platformType + " - " + id);
                     // alert(JSON.stringify(fields));
                 }}
+                onCustomTabs={(platformId, identifier) => {
+
+                    return ([{
+                        id:  45,
+                        title: "Custom Tab",
+                        content: <div>Custom Content {platformId} - {identifier}</div>
+                    }])
+
+                }}
             />
         </Box>
     );

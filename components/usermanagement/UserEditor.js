@@ -23,7 +23,7 @@ import CompanyEditor from './CompanyEditor';
 import { UserManagement } from './UserManagement';
 
 
-const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, ref) => {
+const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onCustomTabs = null}, ref) => {
 
   const {control, register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
 
@@ -53,6 +53,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
   const [customFields, setCustomFields] = useState([]);
 
   const [user, setUser] = useState(null);
+  const [customTabs, setCustomTabs] = useState(null);
 
   const [tabOptions, setTabOptions] = useState([]);
 
@@ -161,6 +162,24 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
     }
       
   }, [userId])
+
+
+  useEffect(() => {
+  
+      if (userId != null && onCustomTabs != null)
+      {
+        const fetchData = async () => {
+          let tabs = await onCustomTabs(platformType, userId)
+          if (tabs != null)
+          {
+            setCustomTabs(tabs);
+          }
+        }
+        fetchData();
+      }
+  
+  }, [userId]);
+
 
   const fields = [
     "FirstName",
@@ -548,11 +567,19 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                   <Stack spacing={2}>
                     <Box>
                       <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth" aria-label="basic tabs example" centered>
+                        
                         {tabOptions.map((tab, index) => {
                           return (
                             <Tab key={tab.id} label={tab.name} value={tab.id} />
                           )
                         })}
+
+                        {customTabs != null && customTabs.map((tab, index) => {
+                          return (
+                            <Tab key={"custom-" + tab.id} label={tab.title} value={tab.id} />
+                          )
+                        })}
+
                       </Tabs>
                     </Box>
                     <Box>
@@ -571,6 +598,19 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null}, re
                         </>
                       )
                     })}
+
+                    {customTabs != null && customTabs.map((tab, index) => {
+                        return (
+                          <>
+                            {tabValue === tab.id && 
+                              <Box>
+                                {tab.content}
+                              </Box>
+                            }
+                          </>
+                        )
+                    })}
+                    
                     </Box>
                   </Stack>
                  

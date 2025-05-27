@@ -21,7 +21,7 @@ import { CustomFields } from './CustomFields'; // remove when done
 import LocationEditor from './LocationsEditor';
 
 
-export const UserManagement = ({height = "50vh", platformType = 1, defaultIdentifier = null, companyId = null, onUploadCompleted = null, onAccountCreated = null, onSaved = null}) => {
+export const UserManagement = ({height = "50vh", platformType = 1, defaultIdentifier = null, companyId = null, onUploadCompleted = null, onAccountCreated = null, onSaved = null, onCustomTabs = null}) => {
 
     const [showUserDetails, setShowUserDetails] = useState(null);
     
@@ -814,6 +814,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                     {platformType == 1 &&
                                         <UserEditor
                                             platformType={platformType}
+                                            onCustomTabs={onCustomTabs}
                                             ref={userEditorRef}
                                             userId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
                                             onSaved={(shouldClose, platformType, userId, fields) => {
@@ -840,6 +841,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                     {platformType == 2 &&
                                         <CompanyEditor 
                                             companyId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
+                                            onCustomTabs={onCustomTabs}
                                             platformType={platformType}
                                             ref={userEditorRef}
                                             onSaved={(shouldClose, platformType, userId, fields) => {
@@ -862,6 +864,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                     {platformType == 3 &&
                                         <LocationEditor
                                             locationId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
+                                            onCustomTabs={onCustomTabs}
                                             platformType={platformType}
                                             ref={userEditorRef}
                                             onSaved={(shouldClose, platformType, userId, fields) => {
