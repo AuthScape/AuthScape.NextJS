@@ -307,21 +307,44 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onC
                     value: newValue.toString()
                 });
               }
+              else if (newValue != null && typeof newValue === 'boolean')
+              {
+                userCustomFields.push({
+                    customFieldId: customField.customFieldId,
+                    name: customField.name,
+                    isRequired: customField.isRequired,
+                    customFieldType: customField.customFieldType,
+                    value: newValue.toString()
+                });
+              }
+              else if (newValue != null && typeof newValue === 'object')
+              {
+                const dateObject = new Date(newValue);
+                const simpleDate = dateObject.toISOString().split('T')[0];
+
+                userCustomFields.push({
+                    customFieldId: customField.customFieldId,
+                    name: customField.name,
+                    isRequired: customField.isRequired,
+                    customFieldType: customField.customFieldType,
+                    value: simpleDate.toString()
+                });
+
+              }
               else if (newValue instanceof Blob)
               {
                   const newBlob = new Blob([newValue], { type: newValue.type });
                 
                   const data = new FormData();
                   data.append("file", newBlob);
-                  data.append("identifier", userId);
+                  data.append("identifier", companyId); 
 
-                  data.append("platformType", 1); // company
+                  data.append("platformType", 2); // company
                   data.append("customFieldId", customField.customFieldId); 
 
                   const response = await apiService().post("/UserManagement/UploadCustomFieldImage", data);
                   if (response != null && response.status == 200)
                   {
-
                     userCustomFields.push({
                         customFieldId: customField.customFieldId,
                         name: customField.name,
@@ -329,7 +352,6 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onC
                         customFieldType: customField.customFieldType,
                         value: response.data
                     });
-
                   }
               }
                 
