@@ -3,17 +3,17 @@ import Card from '../../components/marketplace/card';
 import Marketplace from '../../components/marketplace/Marketplace';
 
 
-export default function Index({setIsLoading}) {
+export default function Index({setIsLoading, oemCompanyId}) {
 
     return (
-        <Marketplace 
-            setIsLoading={setIsLoading}
-
-            cardView={(productData) => {
-                return (
-                    <Card product={productData} />
-                )
-            }}
+        <Marketplace
+          platformId={1}
+          cardGridSize={3}
+          setIsLoading={setIsLoading}
+          oemCompanyId={oemCompanyId}
+          cardView={(productData) => {
+            return <Card product={productData} />;
+          }}
         />
     )
 }
