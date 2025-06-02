@@ -19,7 +19,6 @@ import { styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import { useTheme, useMediaQuery } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
-import { paddingBottom, paddingTop } from "@xstyled/styled-components";
 
 const Marketplace = ({
   setIsLoading,
