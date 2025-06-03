@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { apiService } from "authscape";
 import {
   Checkbox,
@@ -8,6 +8,7 @@ import {
   AccordionDetails,
   Chip,
   TextField,
+  Button,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -19,6 +20,7 @@ import { styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import { useTheme, useMediaQuery } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
 const Marketplace = ({
   setIsLoading,
@@ -29,7 +31,8 @@ const Marketplace = ({
   cardGridSize = 3,
   pageSize = 12,
   smoothScrollEnable = true,
-  cardView = null
+  cardView = null,
+  expandAllCategoriesByDefault = true
 }) => {
   const router = useRouter();
   const theme = useTheme();
@@ -59,8 +62,12 @@ const Marketplace = ({
       .filter(Boolean)
       .flat();
   }, [router.query]);
+  
 
   // Local UI states
+  const textSearchRef = useRef(null);
+  const txtSearchBarRef = useRef(null);
+
   const [categories, setCategories] = useState(null);
   const [products, setProducts] = useState(null);
   const [total, setTotal] = useState(0);
@@ -161,6 +168,7 @@ const Marketplace = ({
         pageSize,
         searchParamFilters: filters,
         categoryFilters: categories,
+        textSearch: textSearchRef.current || "",
       });
 
       if (response?.status === 200) {
@@ -181,11 +189,21 @@ const Marketplace = ({
 
   // Initialize expanded categories from URL
   useEffect(() => {
-    if (router.isReady) {
-      const filterKeys = Object.keys(router.query).filter(key => key !== "page");
-      setExpandedCategories(filterKeys);
+    if (router.isReady && categories) {
+      if (expandAllCategoriesByDefault) {
+        // Open all categories
+        setExpandedCategories(categories.map(c => c.category));
+      } else {
+        // Only expand categories with filters in URL
+        const filterKeys = Object.keys(router.query).filter(key => key !== "page");
+        setExpandedCategories(filterKeys);
+      }
     }
-  }, [router.isReady]);
+  }, [router.isReady, categories, expandAllCategoriesByDefault]);
+
+
+
+
 
   // Fetch data when URL changes
   useEffect(() => {
@@ -225,9 +243,33 @@ const Marketplace = ({
     <Box>
       <Box sx={{ paddingLeft: 2, fontSize: 16, paddingBottom: 1 }}>
         <Grid container spacing={2}>          
-          <Grid size={10} sx={{ textAlign: "left" }}>
-            <TextField id="searchbar" label="Search" variant="outlined" fullWidth={true} />
+          <Grid size={10} sx={{ textAlign: "left", display: "flex", alignItems: "center" }}>
+            <TextField
+              id="searchbar"
+              label="Search for ..."
+              variant="outlined"
+              inputRef={txtSearchBarRef}
+              fullWidth={true}
+              onKeyDown={async (event) => {
+                if (event.key === "Enter") {
+                  textSearchRef.current = event.target.value;
+                  await fetchData();
+                }
+              }}
+              sx={{ flex: 1, borderRadius: "0px" }}
+            />
+            <Button
+              variant="contained"
+              startIcon={<SearchRoundedIcon />}
+              sx={{ height: "100%", borderRadius: "0px", marginLeft: "-1px" }}
+              onClick={async () => {
+                textSearchRef.current = txtSearchBarRef.current.value;
+                await fetchData();
+              }}>
+              Search
+            </Button>
           </Grid>
+
           <Grid size={2}>
             <Box sx={{ textAlign: "right", paddingTop:2 }}>
               {page} - {products != null && products.length * page} of {total} Results
