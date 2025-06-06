@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const HubSpotField = () => {
+const HubSpotField = ({portalId, formId}) => {
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://js.hsforms.net/forms/v2.js";
@@ -12,8 +12,8 @@ const HubSpotField = () => {
     script.onload = () => {
       if (window.hbspt) {
         window.hbspt.forms.create({
-          portalId: "47835682",
-          formId: "9dfdd1b9-b0ba-4802-b077-fc8364d96cbe",
+          portalId: portalId,
+          formId: formId,
           region: "na1",
           target: "#hubspotForm",
         });
