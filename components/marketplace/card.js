@@ -35,7 +35,7 @@ const ExpandMore = styled((props) => {
 
 export default function RecipeReviewCard({product}) {
   return (
-    <Card sx={{ maxWidth: 345, position:"relative", border: "1px solid lightgray", cursor:"pointer", height: "100%" }}>
+    <Card sx={{ width: "100%" }}>
 
       <Stack 
         direction="row"
