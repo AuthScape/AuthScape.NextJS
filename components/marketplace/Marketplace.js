@@ -502,7 +502,7 @@ const Marketplace = ({
 
                   return (
                     <Grid
-                      size={{ sm: 12, md: cardGridSize }}
+                      size={{ sm: 12, md: Number(productData.CardSize) }}
                       sx={{ width: "100%" }}
                       key={index}>
                       {cardView && cardView(productData)}
