@@ -279,7 +279,7 @@ const Marketplace = ({
             {/* Filter Chips */}
             {filters.length > 0 && (
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center" }}>
-                <Typography variant="subtitle1" sx={{ marginRight: 1 }}>Filters:</Typography>
+                <Typography variant="subtitle1" sx={{ marginRight: 1, marginBottom: 1  }}>Filters:</Typography>
                 {filters.map((filter, index) => (
                   <Chip
                     key={`${filter.category}-${filter.subcategory}-${filter.option}-${index}`}
