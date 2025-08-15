@@ -7,7 +7,7 @@ export default function Index({setIsLoading, oemCompanyId}) {
 
     return (
         <Marketplace
-          platformId={1}
+          platformId={2}
           expandAllCategoriesByDefault={true}
           setIsLoading={setIsLoading}
           oemCompanyId={oemCompanyId}
