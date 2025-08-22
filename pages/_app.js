@@ -68,6 +68,7 @@ function MyApp({ Component, pageProps }) {
         loadingLayout={loadingLayout}
         muiTheme={baselightTheme}
         enforceLoggedIn={true}
+        enableConsentDialog={true}
         pageProps={pageProps}
       />
     </>

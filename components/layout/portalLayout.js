@@ -133,6 +133,7 @@ export default function PortalLayout({children, currentUser, pageProps}) {
       {
         title: "Components and Modals",
         nav: [
+          {name: "Marketplace", icon: <BarChartRoundedIcon />, href: "/marketplace", disabled: false},
           {name: "Pricing", icon: <BarChartRoundedIcon />, href: "/pricing", disabled: true},
           {name: "Spreadsheet", icon: <DarkModeRoundedIcon/>, href: "/spreadsheet" , disabled: false},
           {name: "Tickets", icon: <DarkModeRoundedIcon/>, href: "/tickets" , disabled: false},
