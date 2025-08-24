@@ -12,6 +12,7 @@ import "react-querybuilder/dist/query-builder.css";
 import "../styles/reactGrid.scss";
 import "react-image-crop/dist/ReactCrop.css";
 import "@measured/puck/puck.css";
+import Head from "next/head";
 
 function MyApp({ Component, pageProps }) {
   const layout = ({ children, currentUser }) => {
@@ -61,17 +62,15 @@ function MyApp({ Component, pageProps }) {
   };
 
   return (
-    <>
-      <AuthScapeApp
-        Component={Component}
-        layout={layout}
-        loadingLayout={loadingLayout}
-        muiTheme={baselightTheme}
-        enforceLoggedIn={true}
-        enableConsentDialog={true}
-        pageProps={pageProps}
-      />
-    </>
+    <AuthScapeApp
+      Component={Component}
+      layout={layout}
+      loadingLayout={loadingLayout}
+      muiTheme={baselightTheme}
+      enforceLoggedIn={false}
+      enableConsentDialog={true}
+      pageProps={pageProps}
+    />
   );
 }
 

@@ -22,6 +22,8 @@ const SlugPage = ({
         <link rel="canonical" href={canonicalBaseUrl + urlPath} />
       </Head>
 
+      
+
       <RenderCustomPage
         oemCompanyId={oemCompanyId}
         urlPath={urlPath}
@@ -118,7 +120,6 @@ const SlugPage = ({
 export async function getServerSideProps({ params, req, resolvedUrl }) {
   const slug = params.slug;
 
-
   var props = await PrivateLabelPageModule(
     process.env.apiUri,
     req.headers.host
@@ -139,8 +140,8 @@ export async function getServerSideProps({ params, req, resolvedUrl }) {
   ) {
     const data = JSON.parse(pageInfo.data.content);
 
-    const pageTitle = data?.data?.root?.props?.title;
-    const pageDescription = data?.data?.root?.props?.description;
+    const pageTitle = pageInfo.data.title;
+    const pageDescription = pageInfo.data.description;
 
     props.pageResponse = data != null ? data : "";
     props.metaTitle = pageTitle != null ? pageTitle : "";
@@ -159,8 +160,9 @@ export async function getServerSideProps({ params, req, resolvedUrl }) {
     return props.redirect;
   }
 
+  props.canonicalBaseUrl = host;
   props.urlPath = resolvedUrl;
-  props.host = req.headers.host;
+
   return { props };
 }
 

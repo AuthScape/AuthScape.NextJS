@@ -1,6 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import { Sidebar, Menu, MenuItem, SubMenu  } from 'react-pro-sidebar';
-import Link from 'next/link'
 import { Avatar, Box, Button, IconButton, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
 import Image from 'next/image';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
@@ -9,6 +7,7 @@ import {apiService, authService, StripeConnect, ReactDraft} from 'authscape';
 
 import {Menu as MMenu} from '@mui/material';
 import {MenuItem as MMenuItem} from '@mui/material';
+import dynamic from 'next/dynamic';
 
 
 import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
@@ -18,6 +17,26 @@ import SettingsInputComponentRoundedIcon from '@mui/icons-material/SettingsInput
 import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
 import { useRouter } from 'next/navigation'
 import AppBar from '@mui/material/AppBar';
+
+
+const Sidebar = dynamic(
+  () => import('react-pro-sidebar').then((mod) => mod.Sidebar),
+  { ssr: false }
+);
+const Menu = dynamic(
+  () => import('react-pro-sidebar').then((mod) => mod.Menu),
+  { ssr: false }
+);
+const MenuItem = dynamic(
+  () => import('react-pro-sidebar').then((mod) => mod.MenuItem),
+  { ssr: false }
+);
+const SubMenu = dynamic(
+  () => import('react-pro-sidebar').then((mod) => mod.SubMenu),
+  { ssr: false }
+);
+
+
 
 export default function PortalLayout({children, currentUser, pageProps}) {
 

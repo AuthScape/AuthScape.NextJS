@@ -7,10 +7,10 @@ export default function Index({setIsLoading, oemCompanyId}) {
 
     return (
         <Marketplace
-          platformId={2}
+          platformId={1}
           expandAllCategoriesByDefault={true}
           setIsLoading={setIsLoading}
-          oemCompanyId={oemCompanyId}
+          //oemCompanyId={oemCompanyId}
           cardView={(productData) => {
             return <Card product={productData} />;
           }}
