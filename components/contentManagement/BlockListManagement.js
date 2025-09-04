@@ -92,12 +92,14 @@ const BlockListManagement = ({ minHeight, configLoad, oemCompanyId }) => {
       headerName: "Email",
       flex: 1,
       height: 200,
+      renderCell: (params) => params.value || "N/A",
     },
     {
       field: "keyword",
       headerName: "Key Word",
       flex: 1,
       height: 200,
+      renderCell: (params) => params.value || "N/A",
     },
     {
       field: "description",
