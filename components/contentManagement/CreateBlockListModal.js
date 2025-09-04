@@ -311,7 +311,7 @@ const CreateBlockListModal = ({ isOpen, handleClose, oemCompanyId }) => {
                         }}
                       />
                       <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                        Optional: Provide context or reason for blocking this {isEmailMode ? 'email' : 'keyword'}
+                     Provide context or reason for blocking this {isEmailMode ? 'email' : 'keyword'}
                       </Typography>
                     </>
                   )}
