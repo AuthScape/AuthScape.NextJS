@@ -5,6 +5,11 @@ body {
   font-family: Poppins !important;
 }
 
+[data-theme="dark"] body {
+  background-color: #121212;
+  color: #ffffff;
+}
+
 .MuiTypography-root {
   font-family: Poppins !important;
 }
@@ -16,6 +21,51 @@ a {
 
 * {
   box-sizing: border-box;
+}
+
+/* Custom scrollbar styling for a professional look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Dark mode scrollbar */
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #121212;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #424242;
+  border-radius: 10px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #616161;
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f5f5f5;
+}
+
+[data-theme="dark"] * {
+  scrollbar-color: #424242 #121212;
 }
 
 .gjs-editor-cont {
@@ -39,8 +89,68 @@ a {
   background-color: #f4f6f8;
 }
 
+[data-theme="dark"] .MuiDataGrid-columnHeader {
+  background-color: #2a2a2a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .MuiDataGrid-columnHeaderTitle {
   font-size: 14px;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .MuiDataGrid-columnHeaderTitle {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .MuiDataGrid-root {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .MuiDataGrid-cell {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .MuiDataGrid-row {
+  background-color: #1e1e1e;
+}
+
+[data-theme="dark"] .MuiDataGrid-row:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .MuiDataGrid-footerContainer {
+  border-top-color: rgba(255, 255, 255, 0.12);
+  background-color: #1e1e1e;
+}
+
+[data-theme="dark"] .MuiDataGrid-columnSeparator {
+  color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .MuiDataGrid-iconSeparator {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="dark"] .MuiDataGrid-sortIcon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="dark"] .MuiDataGrid-menuIcon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="dark"] .MuiDataGrid-filterIcon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="dark"] .MuiTablePagination-root {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .MuiDataGrid-selectedRowCount {
+  color: #ffffff;
 }
 
 

@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Box } from '@mui/system';
 import TextField from '@mui/material/TextField';
-import { Autocomplete, Button } from '@mui/material';
+import { Autocomplete, Button, useTheme } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import { useForm } from 'react-hook-form';
 import { Tab, Tabs, Stack } from '@mui/material';
@@ -16,6 +16,7 @@ import {renderCustomField, renderSystemField } from './EditorFields';
 const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = null, onCustomTabs = null}, ref) => {
 
   const {control, register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
+  const theme = useTheme();
 
   const [editors, setEditors] = useState({});
 
@@ -171,7 +172,11 @@ const LocationEditor = forwardRef(({locationId = null, platformType, onSaved = n
   }));
 
   return (
-      <Box>
+      <Box sx={{
+        backgroundColor: theme.palette.background.default,
+        minHeight: '100vh',
+        color: theme.palette.text.primary
+      }}>
 
           <form onSubmit={handleSubmit(async (data) => {
             

@@ -12,8 +12,8 @@ import TextsmsOutlinedIcon from '@mui/icons-material/TextsmsOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
 
-import containerStyles from 'authscape/dist/Container.module.css';
-import itemStyles from 'authscape/dist/Item.module.css';
+// import containerStyles from 'authscape/dist/Container.module.css';
+// import itemStyles from 'authscape/dist/Item.module.css';
 
 export default function Index({loadedUser}) {
 

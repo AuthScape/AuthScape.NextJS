@@ -2968,10 +2968,10 @@ authscape-usermanagement@^1.0.16:
     eslint-config-next "^14.1.0"
     react "^18.2.0"
 
-authscape@^1.0.712:
-  version "1.0.712"
-  resolved "https://registry.npmjs.org/authscape/-/authscape-1.0.712.tgz"
-  integrity sha512-0xDoGjVbjB0rEXRWaKJoczxJn2Ytt85jPpbih5CvM2730VUkbDzr1IA47UfPt+pZPmdDNNXqlSjWnjs/X2rjPQ==
+authscape@^1.0.734:
+  version "1.0.734"
+  resolved "https://registry.npmjs.org/authscape/-/authscape-1.0.734.tgz"
+  integrity sha512-DA9sYSYy48Z8Clx6DjlNhs1CBjODxNRXjhPiTmqw4Jdn48WfeInsXYkbSyJ4Ic3CN/IECjPivJNi3i2eHXNiEg==
   dependencies:
     "@microsoft/signalr" "^8.0.0"
     audit "^0.0.6"

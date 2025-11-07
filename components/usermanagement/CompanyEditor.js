@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Box } from '@mui/system';
-import { Autocomplete, Avatar, Button, Chip, Drawer } from '@mui/material';
+import { Autocomplete, Avatar, Button, Chip, Drawer, useTheme } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { Tab, Tabs, Stack } from '@mui/material';
 import { apiService } from 'authscape';
@@ -17,6 +17,7 @@ import { DropZone } from '../dropzone';
 const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = null, onCustomTabs = null}, ref) => {
 
   const {control, register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
+  const theme = useTheme();
 
   const [editors, setEditors] = useState({});
 
@@ -34,6 +35,9 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
   const [locations, setLocations] = useState([]);
   const [location, setLocation] = useState({});
   const [inputLocationValue, setInputLocationValue] = useState('');
+
+  const [domains, setDomains] = useState([]);
+  const [domainInput, setDomainInput] = useState('');
 
   const [customFields, setCustomFields] = useState([]);
 
@@ -64,6 +68,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
         setCompanyLogo(response.data.logo);
 
         setLocation(response.data.locations);
+        setDomains(response.data.domains || []);
         setCompany(response.data);
 
         if (response.data.customFields != null)
@@ -161,7 +166,11 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
   }, [companyId]);
 
   return (
-      <Box>
+      <Box sx={{
+        backgroundColor: theme.palette.background.default,
+        minHeight: '100vh',
+        color: theme.palette.text.primary
+      }}>
 
           <form onSubmit={handleSubmit(async (data) => {
             
@@ -241,7 +250,8 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                 title: data.Title,
                 isDeactivated: !data.IsActive,
                 customFields: userCustomFields,
-                locations: location
+                locations: location,
+                domains: domains
             });
 
             if (response != null && response.status == 200)
@@ -255,7 +265,12 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
           })} noValidate autoComplete="off">
             
             <Grid container spacing={2} sx={{paddingTop:2}}>
-              <Grid size={4} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
+              <Grid size={{ xs: 12, md: 4 }} sx={{
+                backgroundColor: theme.palette.background.paper,
+                borderRadius: 2,
+                border: `1px solid ${theme.palette.divider}`,
+                padding: 2
+              }}>
                 <Box sx={{textAlign:"center", display:"flex", justifyContent:"center", padding:2 }}>
 
                     <DropZone image={companyLogo != null ? companyLogo : ""} text={"Drag 'n' drop your logo here, or click to select your logo"} onDrop={async (blob) => {
@@ -346,9 +361,60 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
                     )}
                   />
 
+                <Box sx={{fontWeight:"bold", paddingTop:2, paddingBottom: 1}}>
+                  Email Domains
+                </Box>
+                <Typography variant="caption" color="textSecondary" sx={{display:"block", paddingBottom: 1}}>
+                  Add email domains (e.g., example.org, example.com) to automatically map users to this company when they sign up
+                </Typography>
+
+                  <Autocomplete
+                    id="DomainSelect"
+                    multiple
+                    freeSolo
+                    options={[]}
+                    value={domains}
+                    onChange={(event, newValue) => {
+                      // Validate and format domains
+                      const formattedDomains = newValue.map(domain => {
+                        let formatted = domain.trim().toLowerCase();
+                        // Add @ if not present
+                        if (formatted && !formatted.startsWith('@')) {
+                          formatted = '@' + formatted;
+                        }
+                        return formatted;
+                      }).filter(domain => domain.length > 1); // Remove empty or just @ domains
+
+                      setDomains(formattedDomains);
+                    }}
+                    renderTags={(value, getTagProps) =>
+                      value.map((option, index) => (
+                        <Chip
+                          {...getTagProps({ index })}
+                          label={option}
+                          color="primary"
+                          variant="outlined"
+                        />
+                      ))
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Email Domains"
+                        placeholder="Type domain and press Enter (e.g., example.org or example.com)"
+                        fullWidth
+                      />
+                    )}
+                  />
+
 
               </Grid>
-              <Grid item size={8} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
+              <Grid item size={{ xs: 12, md: 8 }} sx={{
+                backgroundColor: theme.palette.background.paper,
+                borderRadius: 2,
+                border: `1px solid ${theme.palette.divider}`,
+                padding: 2
+              }}>
                   <Stack spacing={2}>
                     <Box>
                       <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth" aria-label="basic tabs example" centered>

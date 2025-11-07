@@ -2,10 +2,10 @@ import Box from '@mui/material/Box';
 import React, {useMemo, useState, useEffect, useRef} from 'react';
 import {useDropzone} from 'react-dropzone';
 import Script from 'next/script';
-import { Backdrop } from '@mui/material';
+import { Backdrop, useTheme } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 
-let baseStyle = {
+const getBaseStyle = (theme) => ({
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
@@ -15,13 +15,13 @@ let baseStyle = {
   paddingBottom: "50px",
   borderWidth: 2,
   borderRadius: 2,
-  borderColor: '#eeeeee',
+  borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.23)' : '#eeeeee',
   borderStyle: 'dashed',
-  backgroundColor: '#fafafa',
-  color: '#bdbdbd',
+  backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#fafafa',
+  color: theme.palette.mode === 'dark' ? '#b0b0b0' : '#bdbdbd',
   outline: 'none',
   transition: 'border .24s ease-in-out'
-};
+});
 
 const focusedStyle = {
   borderColor: '#2196f3'
@@ -59,6 +59,7 @@ const handleOneDriveFilePick = () => {
 
 export const DropZone = ({text = "Drag 'n' drop some files here, or click to select files", image = null, styleOverride = null, onDrop = null, maxFiles = 1, multiple = false, accept = null}) => {
 
+  const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const [tempUrl, setTempUrl] = useState(null);
 
@@ -71,9 +72,11 @@ export const DropZone = ({text = "Drag 'n' drop some files here, or click to sel
 
   }, [image]);
 
+  let baseStyle = getBaseStyle(theme);
+
   if (styleOverride != null)
   {
-    let combined = { ...baseStyle, ...styleOverride } 
+    let combined = { ...baseStyle, ...styleOverride }
     baseStyle = combined;
   }
 
@@ -109,7 +112,7 @@ export const DropZone = ({text = "Drag 'n' drop some files here, or click to sel
     ...(isFocused ? focusedStyle : {}),
     ...(isDragAccept ? acceptStyle : {}),
     ...(isDragReject ? rejectStyle : {})
-  }), [isFocused, isDragAccept, isDragReject]);
+  }), [isFocused, isDragAccept, isDragReject, baseStyle]);
 
   return (
     <>

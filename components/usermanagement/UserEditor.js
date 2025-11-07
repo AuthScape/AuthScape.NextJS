@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Box, textAlign } from '@mui/system';
 import TextField from '@mui/material/TextField';
-import { Autocomplete, Avatar, Button, Drawer } from '@mui/material';
+import { Autocomplete, Avatar, Button, Drawer, useTheme } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
@@ -26,6 +26,7 @@ import { UserManagement } from './UserManagement';
 const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onCustomTabs = null}, ref) => {
 
   const {control, register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
+  const theme = useTheme();
 
   const [editors, setEditors] = useState({});
   const refTimeoutToken = useRef(null);
@@ -284,7 +285,11 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onC
 
 
   return (
-      <Box>
+      <Box sx={{
+        backgroundColor: theme.palette.background.default,
+        minHeight: '100vh',
+        color: theme.palette.text.primary
+      }}>
 
           <form onSubmit={handleSubmit(async (data) => {
             

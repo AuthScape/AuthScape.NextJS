@@ -13,19 +13,22 @@ import "../styles/reactGrid.scss";
 import "react-image-crop/dist/ReactCrop.css";
 import "@measured/puck/puck.css";
 import Head from "next/head";
+import { ThemeProvider } from "../contexts/ThemeContext";
 
 function MyApp({ Component, pageProps }) {
   const layout = ({ children, currentUser }) => {
     return (
-      <Box sx={{ height: "100vh" }}>
-        <Layout
-          currentUser={currentUser}
-          loadedUser={true}
-          pageProps={pageProps}
-        >
-          {children}
-        </Layout>
-      </Box>
+      <ThemeProvider>
+        <Box sx={{ height: "100vh", overflow: "hidden" }}>
+          <Layout
+            currentUser={currentUser}
+            loadedUser={true}
+            pageProps={pageProps}
+          >
+            {children}
+          </Layout>
+        </Box>
+      </ThemeProvider>
     );
   };
 
@@ -67,7 +70,7 @@ function MyApp({ Component, pageProps }) {
       layout={layout}
       loadingLayout={loadingLayout}
       muiTheme={baselightTheme}
-      enforceLoggedIn={false}
+      enforceLoggedIn={true}
       enableConsentDialog={true}
       pageProps={pageProps}
     />

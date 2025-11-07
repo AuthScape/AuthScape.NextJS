@@ -20,13 +20,13 @@ export default function Index({currentUser}) {
     return (
         <Box sx={{paddingTop:8}}>
 
-{JSON.stringify(currentUser)}
-<br/>
-
-
-            {currentUser.hasRole("Brand") == true ? "true" : "false"}
+            {JSON.stringify(currentUser)}
             <br/>
-            {currentUser.hasPermission("Inventory Management") == true ? "true" : "false"}
+
+
+            {currentUser != null && currentUser.hasRole("Brand") == true ? "true" : "false"}
+            <br/>
+            {currentUser != null && currentUser.hasPermission("Inventory Management") == true ? "true" : "false"}
         </Box>
     );
 }

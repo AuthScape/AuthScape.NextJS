@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react';
 import { Box } from '@mui/system';
-import { AppBar, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, InputLabel, Menu, MenuItem, Select, TextField, Toolbar, Tooltip, Typography } from '@mui/material';
+import { AppBar, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, InputLabel, Menu, MenuItem, Select, TextField, Toolbar, Tooltip, Typography, useTheme } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import UploadRoundedIcon from '@mui/icons-material/UploadRounded';
 import { EditableDatagrid, FileUploader, AutoSaveTextField, apiService } from 'authscape';
@@ -23,6 +23,7 @@ import LocationEditor from './LocationsEditor';
 
 export const UserManagement = ({height = "50vh", platformType = 1, defaultIdentifier = null, companyId = null, onUploadCompleted = null, onAccountCreated = null, onSaved = null, onCustomTabs = null}) => {
 
+    const theme = useTheme();
     const [showUserDetails, setShowUserDetails] = useState(null);
     
     const [showCustomSettings, setShowCustomSettings] = useState(false);
@@ -412,23 +413,27 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
         let results = [];
 
         let response = await apiService().get("/UserManagement/GetAllCompanies");
+        if (response != null && response.status == 200)
+        {
+            response.data.forEach(element => {
 
-        response.data.forEach(element => {
-
-            results.push({
-                label: element.title,
-                id: element.id
+                results.push({
+                    label: element.title,
+                    id: element.id
+                });
             });
-        });
 
-        setAllCompanies(results);
+            setAllCompanies(results);
+        }
     }
 
     const getAllCustomFields = async () => {
 
         let res = await apiService().get(`/UserManagement/GetCustomFields?platformType=${platformType}&IsDatagrid=true`);
-        getColumns(res.data);
-
+        if (res != null && res.status == 200)
+        {
+            getColumns(res.data);
+        }
     }
 
     const getAllRoles = async () => {
@@ -436,15 +441,18 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
         let results = [];
 
         let response = await apiService().get("/UserManagement/GetRoles");
-        response.data.forEach(element => {
+        if (response != null && response.status == 200)
+        {
+            response.data.forEach(element => {
 
-            results.push({
-                label: element.name,
-                id: element.id
+                results.push({
+                    label: element.name,
+                    id: element.id
+                });
             });
-        });
 
-        setAllRoles(results);
+            setAllRoles(results);
+        }
     }
 
     useEffect(() => {
@@ -807,7 +815,10 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                             }} />
                         }
 
-                        <Box>
+                        <Box sx={{
+                            backgroundColor: theme.palette.background.default,
+                            minHeight: '100vh'
+                        }}>
                             {(showUserDetails != null || defaultIdentifier != null) &&
                             <Grid item xs={12}>
                                 <Box sx={{ width: '100%' }}>

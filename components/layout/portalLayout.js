@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { Avatar, Box, Button, IconButton, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
+import { Avatar, Box, Button, IconButton, Stack, Toolbar, Tooltip, Typography, useMediaQuery } from '@mui/material';
 import Image from 'next/image';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
@@ -8,13 +8,53 @@ import {apiService, authService, StripeConnect, ReactDraft} from 'authscape';
 import {Menu as MMenu} from '@mui/material';
 import {MenuItem as MMenuItem} from '@mui/material';
 import dynamic from 'next/dynamic';
+import { useTheme } from '../../contexts/ThemeContext';
+import HeaderBar from './HeaderBar';
 
 
+import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
+import InboxRoundedIcon from '@mui/icons-material/InboxRounded';
+import ChatRoundedIcon from '@mui/icons-material/ChatRounded';
+import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
+import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded';
+import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
+import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
+import CodeRoundedIcon from '@mui/icons-material/CodeRounded';
+import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
-import MapRoundedIcon from '@mui/icons-material/MapRounded';
-import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
-import SettingsInputComponentRoundedIcon from '@mui/icons-material/SettingsInputComponentRounded';
+import ViewKanbanRoundedIcon from '@mui/icons-material/ViewKanbanRounded';
+import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
+import AttachMoneyRoundedIcon from '@mui/icons-material/AttachMoneyRounded';
 import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
+import ErrorRoundedIcon from '@mui/icons-material/ErrorRounded';
+import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
+import BlockRoundedIcon from '@mui/icons-material/BlockRounded';
+import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded';
+import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
+import LoginRoundedIcon from '@mui/icons-material/LoginRounded';
+import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded';
+import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
+import LockResetRoundedIcon from '@mui/icons-material/LockResetRounded';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
+import GroupAddRoundedIcon from '@mui/icons-material/GroupAddRounded';
+import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded';
+import TableChartRoundedIcon from '@mui/icons-material/TableChartRounded';
+import ConfirmationNumberRoundedIcon from '@mui/icons-material/ConfirmationNumberRounded';
+import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded';
+import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
+import MapRoundedIcon from '@mui/icons-material/MapRounded';
+import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
+import AccountBalanceWalletRoundedIcon from '@mui/icons-material/AccountBalanceWalletRounded';
+import PaymentRoundedIcon from '@mui/icons-material/PaymentRounded';
+import PaletteRoundedIcon from '@mui/icons-material/PaletteRounded';
+import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
+import BrandingWatermarkRoundedIcon from '@mui/icons-material/BrandingWatermarkRounded';
+import PieChartRoundedIcon from '@mui/icons-material/PieChartRounded';
+import PublicRoundedIcon from '@mui/icons-material/PublicRounded';
+import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
+import ExtensionRoundedIcon from '@mui/icons-material/ExtensionRounded';
+import SupportRoundedIcon from '@mui/icons-material/SupportRounded';
 import { useRouter } from 'next/navigation'
 import AppBar from '@mui/material/AppBar';
 
@@ -41,140 +81,102 @@ const SubMenu = dynamic(
 export default function PortalLayout({children, currentUser, pageProps}) {
 
   const router = useRouter()
+  const { mode } = useTheme();
+  const isMobile = useMediaQuery('(max-width:900px)');
 
   const [collapsed, setCollapsed] = useState(false);
   const [toggled, setToggled] = useState(false);
   const [broken, setBroken] = useState(false);
 
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const stringToColor = (string) => {
-    let hash = 0;
-    let i;
-  
-    /* eslint-disable no-bitwise */
-    for (i = 0; i < string.length; i += 1) {
-      hash = string.charCodeAt(i) + ((hash << 5) - hash);
-    }
-  
-    let color = '#';
-  
-    for (i = 0; i < 3; i += 1) {
-      const value = (hash >> (i * 8)) & 0xff;
-      color += `00${value.toString(16)}`.slice(-2);
-    }
-    /* eslint-enable no-bitwise */
-  
-    return color;
-  }
-
-  const stringAvatar = (name) => {
-    return {
-      sx: {
-        bgcolor: stringToColor(name),
-      },
-      children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
-    };
-  }
-
-
 
   const navigationLayout = {
     rtl: false,
     broken: false,
-    theme: "light", // dark
+    theme: mode, // Uses the theme from context
     menu: [
       {
         title: "Dashboard",
         nav: [
-          {name: "Dashboard", icon: <ShoppingCartRoundedIcon/>, href: "/", disabled: true}
+          {name: "Dashboard", icon: <DashboardRoundedIcon/>, href: "/", disabled: true}
         ]
       },
       {
         title: "Communication",
         nav: [
-          {name: "Inbox", icon: <ShoppingCartRoundedIcon/>, href: "/inbox", disabled: true},
-          {name: "Chat", icon: <ShoppingCartRoundedIcon/>, href: "/chat", disabled: true}
+          {name: "Inbox", icon: <InboxRoundedIcon/>, href: "/inbox", disabled: true},
+          {name: "Chat", icon: <ChatRoundedIcon/>, href: "/chat", disabled: true}
         ]
       },
       {
         title: "User Management",
         nav: [
-          {name: "Roles", icon: <BarChartRoundedIcon />, href: "/usermanagement/roles", disabled: false},
-          {name: "Permissions", icon: <BarChartRoundedIcon />, href: "/usermanagement/permissions", disabled: false},
-          {name: "Users", icon: <MapRoundedIcon/>, href: "/usermanagement/users", disabled: false},
-          {name: "Companies", icon: <MapRoundedIcon/>, href: "/usermanagement/companies", disabled: false},
-          {name: "Locations", icon: <MapRoundedIcon/>, href: "/usermanagement/locations", disabled: false},
-          {name: "Examples", icon: <MapRoundedIcon/>, href: "/usermanagement/sandbox", disabled: false},
+          {name: "Roles", icon: <SecurityRoundedIcon />, href: "/usermanagement/roles", disabled: false},
+          {name: "Permissions", icon: <GroupRoundedIcon />, href: "/usermanagement/permissions", disabled: false},
+          {name: "Users", icon: <PeopleRoundedIcon/>, href: "/usermanagement/users", disabled: false},
+          {name: "Companies", icon: <BusinessRoundedIcon/>, href: "/usermanagement/companies", disabled: false},
+          {name: "Locations", icon: <LocationOnRoundedIcon/>, href: "/usermanagement/locations", disabled: false},
+          {name: "Examples", icon: <CodeRoundedIcon/>, href: "/usermanagement/sandbox", disabled: false},
         ]
       },
       {
         title: "Pages",
         nav: [
-          {name: "Profile", icon: <BarChartRoundedIcon />, href: "/profile", disabled: true},
-          // {name: "Mapping", icon: <DarkModeRoundedIcon/>, href: "/mapping", disabled: false},
-          {name: "Analytics", icon: <DarkModeRoundedIcon/>, href: "/analytics", disabled: false},
-          {name: "Kanban", icon: <DarkModeRoundedIcon/>, href: "/kanban", disabled: false},
-          {name: "FAQ", icon: <MapRoundedIcon/>, href: "/faq", disabled: false},
+          {name: "Profile", icon: <AccountCircleRoundedIcon />, href: "/profile", disabled: true},
+          {name: "Analytics", icon: <BarChartRoundedIcon/>, href: "/analytics", disabled: false},
+          {name: "Kanban", icon: <ViewKanbanRoundedIcon/>, href: "/kanban", disabled: false},
+          {name: "FAQ", icon: <HelpRoundedIcon/>, href: "/faq", disabled: false},
 
-          {name: "Pricing", icon: <MapRoundedIcon/>, subnav: [
+          {name: "Pricing", icon: <AttachMoneyRoundedIcon/>, subnav: [
             {name: "Plans", href:"/pricing/plans" },
             {name: "Products", href:"/pricing/product" },
           ]},
 
-          {name: "Error", icon: <SettingsInputComponentRoundedIcon/>, href: "/404"},
-          {name: "Coming Soon", icon: <ShoppingCartRoundedIcon/>, href: "/comingsoon", disabled: true},
-          {name: "Not Authorized", icon: <ShoppingCartRoundedIcon/>, href: "/NA", disabled: true},
-          
-          {name: "Products", icon: <ShoppingCartRoundedIcon/>, href: "/products", disabled: true},
-          {name: "Mail", icon: <ShoppingCartRoundedIcon/>, href: "/mail", disabled: false},
+          {name: "Error", icon: <ErrorRoundedIcon/>, href: "/404"},
+          {name: "Coming Soon", icon: <AccessTimeRoundedIcon/>, href: "/comingsoon", disabled: true},
+          {name: "Not Authorized", icon: <BlockRoundedIcon/>, href: "/NA", disabled: true},
+
+          {name: "Products", icon: <InventoryRoundedIcon/>, href: "/products", disabled: true},
+          {name: "Mail", icon: <EmailRoundedIcon/>, href: "/mail", disabled: false},
         ]
       },
       {
         title: "Authentication",
         nav: [
-          {name: "Login", icon: <BarChartRoundedIcon />, href: "/login"},
-          {name: "Register", icon: <MapRoundedIcon/>, href: "/signup"},
-          {name: "Verify Email", icon: <DarkModeRoundedIcon/>, href: "/verify", disabled: true},
-          {name: "Reset Password", icon: <SettingsInputComponentRoundedIcon/>, href: "/resetpassword", disabled: true},
-          {name: "Forgot Password", icon: <ShoppingCartRoundedIcon/>, href: "/forgotpassword", disabled: true},
-          {name: "Invite User", icon: <ShoppingCartRoundedIcon/>, href: "/authentication/invite", disabled: false},
+          {name: "Login", icon: <LoginRoundedIcon />, href: "/login"},
+          {name: "Register", icon: <PersonAddRoundedIcon/>, href: "/signup"},
+          {name: "Verify Email", icon: <VerifiedRoundedIcon/>, href: "/verify", disabled: true},
+          {name: "Reset Password", icon: <LockResetRoundedIcon/>, href: "/resetpassword", disabled: true},
+          {name: "Forgot Password", icon: <LockRoundedIcon/>, href: "/forgotpassword", disabled: true},
+          {name: "Invite User", icon: <GroupAddRoundedIcon/>, href: "/authentication/invite", disabled: false},
         ]
       },
       {
         title: "Components and Modals",
         nav: [
-          {name: "Marketplace", icon: <BarChartRoundedIcon />, href: "/marketplace", disabled: false},
-          {name: "Pricing", icon: <BarChartRoundedIcon />, href: "/pricing", disabled: true},
-          {name: "Spreadsheet", icon: <DarkModeRoundedIcon/>, href: "/spreadsheet" , disabled: false},
-          {name: "Tickets", icon: <DarkModeRoundedIcon/>, href: "/tickets" , disabled: false},
-          {name: "Calendar", icon: <DarkModeRoundedIcon/>, href: "/calendar" , disabled: false},
-          {name: "Toasts", icon: <DarkModeRoundedIcon/>, href: "/toasts" , disabled: false},
+          {name: "Marketplace", icon: <StorefrontRoundedIcon />, href: "/marketplace", disabled: false},
+          {name: "Pricing", icon: <AttachMoneyRoundedIcon />, href: "/pricing", disabled: true},
+          {name: "Spreadsheet", icon: <TableChartRoundedIcon/>, href: "/spreadsheet" , disabled: false},
+          {name: "Tickets", icon: <ConfirmationNumberRoundedIcon/>, href: "/tickets" , disabled: false},
+          {name: "Calendar", icon: <CalendarMonthRoundedIcon/>, href: "/calendar" , disabled: false},
+          {name: "Toasts", icon: <NotificationsRoundedIcon/>, href: "/toasts" , disabled: false},
 
           {name: "Mapping", icon: <MapRoundedIcon/>, subnav: [
             {name: "Upload", href:"/mapping" },
             {name: "Datasources", href:"/mapping/Datasources" },
           ]},
 
-          {name: "Content Management", icon: <MapRoundedIcon/>, subnav: [
+          {name: "Content Management", icon: <ArticleRoundedIcon/>, subnav: [
             {name: "Pages", href:"/contentManagement" },
             {name: "Example Page", href:"/contentManagement/1" },
           ]},
 
-          {name: "Wallet", icon: <MapRoundedIcon/>, subnav: [
+          {name: "Wallet", icon: <AccountBalanceWalletRoundedIcon/>, subnav: [
             {name: "Invoice", href:"/wallet/Invoice" },
             {name: "Store Credit", href:"/wallet/storeCredit", disabled: true },
           ]},
 
-          {name: "Stripe", icon: <MapRoundedIcon/>, subnav: [
+          {name: "Stripe", icon: <PaymentRoundedIcon/>, subnav: [
             {name: "Stripe Connect", href:"/stripe/stripeConnect", disabled: false },
             {name: "Stripe Payment Link", href:"/stripe/stripePaymentLink", disabled: true },
             {name: "Stripe Subscription", href:"/stripe/stripeSubscription", disabled: false },
@@ -182,22 +184,21 @@ export default function PortalLayout({children, currentUser, pageProps}) {
             {name: "Add To Wallet", href:"/stripe/stripeAddPaymentToWallet" },
           ]},
 
-          {name: "Color Picker", icon: <DarkModeRoundedIcon/>, href: "/components/colorpicker" , disabled: false},
-          {name: "Drop Zone", icon: <DarkModeRoundedIcon/>, href: "/dropzone" , disabled: false},
+          {name: "Color Picker", icon: <PaletteRoundedIcon/>, href: "/components/colorpicker" , disabled: false},
+          {name: "Drop Zone", icon: <CloudUploadRoundedIcon/>, href: "/dropzone" , disabled: false},
 
-
-          {name: "Add New Address", icon: <DarkModeRoundedIcon/>, href: "/address" , disabled: true},
-          {name: "Refer and Earn", icon: <SettingsInputComponentRoundedIcon/>, href: "/refer", disabled: true},
-          {name: "Edit User", icon: <ShoppingCartRoundedIcon/>, href: "/profile", disabled: true},
-          {name: "Enable One Time Password", icon: <ShoppingCartRoundedIcon/>, href: "/otp", disabled: true},
-          {name: "Enable Two Factor", icon: <ShoppingCartRoundedIcon/>, href: "/enabletwofactor", disabled: true},
+          {name: "Add New Address", icon: <LocationOnRoundedIcon/>, href: "/address" , disabled: true},
+          {name: "Refer and Earn", icon: <AttachMoneyRoundedIcon/>, href: "/refer", disabled: true},
+          {name: "Edit User", icon: <AccountCircleRoundedIcon/>, href: "/profile", disabled: true},
+          {name: "Enable One Time Password", icon: <LockRoundedIcon/>, href: "/otp", disabled: true},
+          {name: "Enable Two Factor", icon: <SecurityRoundedIcon/>, href: "/enabletwofactor", disabled: true},
         ]
       },
       {
         title: "General",
         nav: [
-          {name: "Private Label", icon: <BarChartRoundedIcon />, subnav: [{name: "Manage", href:"/privateLabel", disabled: false }]},
-          {name: "Charts", icon: <BarChartRoundedIcon />, subnav: [
+          {name: "Private Label", icon: <BrandingWatermarkRoundedIcon />, subnav: [{name: "Manage", href:"/privateLabel", disabled: false }]},
+          {name: "Charts", icon: <PieChartRoundedIcon />, subnav: [
             {name: "Area Charts", href:"/charts/areaChart", disabled: false },
             {name: "Bar Charts", href:"/charts/barChart", disabled: false },
             {name: "Bubble Charts", href:"/charts/bubbleChart", disabled: false },
@@ -209,13 +210,13 @@ export default function PortalLayout({children, currentUser, pageProps}) {
             {name: "Wordtree Chart (in dev)", href:"/charts/wordTreeChart", disabled: false },
             {name: "Sankey Chart (in dev)", href:"/charts/sankeyChart", disabled: false },
           ]},
-          {name: "Maps", icon: <MapRoundedIcon/>, href: "/maps", disabled: false},
+          {name: "Maps", icon: <PublicRoundedIcon/>, href: "/maps", disabled: false},
           {name: "Themes", icon: <DarkModeRoundedIcon/>, href: "/themes", disabled: true},
-          {name: "Components", icon: <SettingsInputComponentRoundedIcon/>, href:"/components", disabled: true},
+          {name: "Components", icon: <ExtensionRoundedIcon/>, href:"/components", disabled: true},
           {name: "E-commerce", icon: <ShoppingCartRoundedIcon/>, href:"/ecommerce", disabled: true},
-          {name: "Calendar", icon: <ShoppingCartRoundedIcon/>, href: "/calendar", disabled: true},
-          {name: "Invoice", icon: <ShoppingCartRoundedIcon/>, href: "/invoices", disabled: true},
-          {name: "Support", icon: <ShoppingCartRoundedIcon/>, href: "/support", disabled: true}
+          {name: "Calendar", icon: <CalendarMonthRoundedIcon/>, href: "/calendar", disabled: true},
+          {name: "Invoice", icon: <ArticleRoundedIcon/>, href: "/invoices", disabled: true},
+          {name: "Support", icon: <SupportRoundedIcon/>, href: "/support", disabled: true}
         ]
       },
     ]
@@ -250,34 +251,34 @@ export default function PortalLayout({children, currentUser, pageProps}) {
     light: {
       sidebar: {
         backgroundColor: '#ffffff',
-        color: '#607489',
+        color: '#475569',
       },
       menu: {
-        menuContent: '#fbfcfd',
-        icon: '#0098e5',
+        menuContent: '#f8fafc',
+        icon: '#2196f3',
         hover: {
-          backgroundColor: '#c5e4ff',
-          color: '#44596e',
+          backgroundColor: '#1976d2',
+          color: '#ffffff',
         },
         disabled: {
-          color: '#9fb6cf',
+          color: '#cbd5e1',
         },
       },
     },
     dark: {
       sidebar: {
-        backgroundColor: '#0b2948',
-        color: '#8ba1b7',
+        backgroundColor: '#1e1e1e',
+        color: '#e0e0e0',
       },
       menu: {
-        menuContent: '#082440',
-        icon: '#59d0ff',
+        menuContent: '#1e1e1e',
+        icon: '#42a5f5',
         hover: {
-          backgroundColor: '#00458b',
-          color: '#b6c8d9',
+          backgroundColor: '#1976d2',
+          color: '#ffffff',
         },
         disabled: {
-          color: '#3e5e7e',
+          color: '#757575',
         },
       },
     },
@@ -310,7 +311,17 @@ export default function PortalLayout({children, currentUser, pageProps}) {
       '&:hover': {
         backgroundColor: hexToRgba(themes[navigationLayout.theme].menu.hover.backgroundColor, navigationLayout.image != null ? 0.8 : 1),
         color: themes[navigationLayout.theme].menu.hover.color,
+        borderRadius: '8px',
+        transition: 'all 0.2s ease-in-out',
       },
+      '&.ps-active': {
+        backgroundColor: hexToRgba(themes[navigationLayout.theme].menu.hover.backgroundColor, 1),
+        color: themes[navigationLayout.theme].menu.hover.color,
+        borderRadius: '8px',
+      },
+      margin: '4px 8px',
+      padding: '8px 12px',
+      borderRadius: '8px',
     },
     label: ({ open }) => ({
       fontWeight: open ? 600 : undefined,
@@ -336,7 +347,7 @@ export default function PortalLayout({children, currentUser, pageProps}) {
       >
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
-          <div style={{ flex: 1, marginBottom: '32px' }}>
+          <div style={{ flex: 1, marginBottom: '32px', overflowY: 'auto', overflowX: 'hidden' }}>
             <div style={{ padding: '0 24px', marginBottom: '8px' }}>
               <Box sx={{paddingTop:2, paddingBottom:1}}>
                 <Stack direction="row" spacing={2}>
@@ -421,44 +432,15 @@ export default function PortalLayout({children, currentUser, pageProps}) {
         </div>
       </Sidebar>
 
-      <main style={{flex:1}}>
-        <div style={{ padding: '0px 0px', color: '#44596e' }}>
-          <div style={{ marginBottom: '16px' }}>
-            {broken && (
+      <main style={{flex:1, overflowY: 'auto', height: '100vh', display: 'flex', flexDirection: 'column'}}>
+        <HeaderBar
+          currentUser={currentUser}
+          onMenuClick={() => setToggled(!toggled)}
+          isMobile={isMobile}
+        />
 
-              <AppBar position="static">
-                <Toolbar>
-                  <Button variant="text" color='inherit' className="sb-button" onClick={() => setToggled(!toggled)}>
-                    <MenuRoundedIcon />
-                  </Button>
-                  <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                    News
-                  </Typography>
-
-                  <IconButton onClick={handleClick} sx={{ p: 0, paddingRight:2, fontSize:30 }}>
-                    {currentUser != null &&
-                    <Avatar {...stringAvatar(currentUser.firstName + " " + currentUser.lastName)} alt={currentUser.firstName + " " + currentUser.lastName} sx={{ width: 45, height: 45, fontSize:18 }}></Avatar> 
-                    }
-                  </IconButton>
-
-                </Toolbar>
-              </AppBar>
-            )}
-          </div>
-
-          {/* {!broken &&
-          <Box sx={{ position:"absolute", right:20, top:20,  }}>
-            <Tooltip title="Account">
-                <IconButton onClick={handleClick} sx={{ p: 0, fontSize:30 }}>
-                  {currentUser != null &&
-                  <Avatar {...stringAvatar(currentUser.firstName + " " + currentUser.lastName)} alt={currentUser.firstName + " " + currentUser.lastName} sx={{ width: 45, height: 45, fontSize:18 }} ></Avatar> 
-                  }
-                </IconButton>
-            </Tooltip>
-          </Box>
-          } */}
-
-          <Box sx={{p:2}}>
+        <Box sx={{flex: 1, overflowY: 'auto'}}>
+          <Box sx={{p: { xs: 1.5, sm: 2, md: 3 }}}>
 
 {/* 
             OEM is {pageProps.oemCompanyId == 1 ? "enabled" : "disabled"}<br/>
@@ -467,28 +449,9 @@ export default function PortalLayout({children, currentUser, pageProps}) {
 
             {children}
           </Box>
-
-        </div>
+        </Box>
       </main>
     </div>
-
-    <MMenu
-      id="basic-menu"
-      anchorEl={anchorEl}
-      open={open}
-      onClose={handleClose}
-      MenuListProps={{
-        'aria-labelledby': 'basic-button',
-      }}>
-      <MMenuItem onClick={handleClose}>Profile</MMenuItem>
-      <MMenuItem onClick={handleClose}>My account</MMenuItem>
-      <MMenuItem onClick={async () => {
-
-        await authService().logout();
-        handleClose();
-
-      }}>Logout</MMenuItem>
-    </MMenu>
 
     </>
   )
