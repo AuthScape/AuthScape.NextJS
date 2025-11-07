@@ -12,8 +12,8 @@ import TextsmsOutlinedIcon from '@mui/icons-material/TextsmsOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
 
-// import containerStyles from 'authscape/dist/Container.module.css';
-// import itemStyles from 'authscape/dist/Item.module.css';
+import containerStyles from 'authscape-kanban/dist/Container.module.css';
+import itemStyles from 'authscape-kanban/dist/Item.module.css';
 
 export default function Index({loadedUser}) {
 
@@ -97,12 +97,12 @@ export default function Index({loadedUser}) {
         <title>AuthScape | Kanban</title>
       </Head>
 
-      <Kanban 
+      <Kanban
         Menu={menu}
         identifier={1}
         CardTemplate={cardTemplate}
         containerStyles={containerStyles}
-        itemStyles={itemStyles} 
+        itemStyles={itemStyles}
         onCardChangedState={(columnId, cardId) => {
 
           alert(columnId + " = " + cardId);

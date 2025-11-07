@@ -387,7 +387,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onC
           })} noValidate autoComplete="off">
             
             <Grid container spacing={2} sx={{paddingTop:2}}>
-              <Grid size={4} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
+              <Grid size={4} sx={{backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.paper : "#f5f8fa", borderRadius:2, border: `1px solid ${theme.palette.divider}`, padding:2}}>
                 <Box sx={{textAlign:"center", display:"flex", justifyContent:"center", padding:2 }}>
                     <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg"  sx={{ width: 100, height: 100 }} />
                 </Box>
@@ -590,7 +590,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onC
                 </Box>
 
               </Grid>
-              <Grid item size={8} sx={{backgroundColor:"#f5f8fa", borderRadius:2, border: "1px solid lightgray", padding:2}}>
+              <Grid item size={8} sx={{backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.paper : "#f5f8fa", borderRadius:2, border: `1px solid ${theme.palette.divider}`, padding:2}}>
                   <Stack spacing={2}>
                     <Box>
                       <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth" aria-label="basic tabs example" centered>
