@@ -3,7 +3,11 @@
     "allow": [
       "Bash(test:*)",
       "Bash(nul)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(npm install:*)",
+      "Bash(timeout 5 echo:*)"
     ],
     "deny": [],
     "ask": []
