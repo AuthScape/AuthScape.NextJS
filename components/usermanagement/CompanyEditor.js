@@ -68,7 +68,7 @@ const CompanyEditor = forwardRef(({companyId = null, platformType, onSaved = nul
         setCompanyLogo(response.data.logo);
 
         setLocation(response.data.locations);
-        setDomains(response.data.domains || []);
+        setDomains(response.data.emailDomains || []);
         setCompany(response.data);
 
         if (response.data.customFields != null)
