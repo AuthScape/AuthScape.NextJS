@@ -290,13 +290,13 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
         {
            
             let cols = [...userColumns, ...customFields.map((field, i) => {
-               
+
                 return {
                     field: `customField${i + 1}`,
                     headerName: field.name,
                     flex: 1,
                     valueGetter: (_, row) => {
-                        
+
                         if (row.customFields)
                         {
                             let cf = row.customFields.find(f => f.customFieldId == field.id);
@@ -304,7 +304,15 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                         }
 
                         return null;
-                    } 
+                    },
+                    valueFormatter: (value) => {
+                        // Format Yes/No fields (customFieldType === 5)
+                        if (field.customFieldType === 5) {
+                            if (value === "true" || value === true) return "Yes";
+                            if (value === "false" || value === false || value === null || value === undefined || value === "") return "No";
+                        }
+                        return value;
+                    }
                 };
             }), {
                 field: '',
@@ -330,13 +338,13 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
         else if (platformType == 2)
         {
             let cols = [...companiesColumns, ...customFields.map((field, i) => {
-               
+
                 return {
                     field: `customField${i + 1}`,
                     headerName: field.name,
                     flex: 1,
                     valueGetter: (_, row) => {
-                        
+
                         if (row.customFields)
                         {
                             let cf = row.customFields.find(f => f.customFieldId == field.id);
@@ -344,7 +352,15 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                         }
 
                         return null;
-                    } 
+                    },
+                    valueFormatter: (value) => {
+                        // Format Yes/No fields (customFieldType === 5)
+                        if (field.customFieldType === 5) {
+                            if (value === "true" || value === true) return "Yes";
+                            if (value === "false" || value === false || value === null || value === undefined || value === "") return "No";
+                        }
+                        return value;
+                    }
                 };
             }), {
                 field: '',
@@ -370,13 +386,13 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
         else if (platformType == 3)
         {
             let cols = [...locationColumns, ...customFields.map((field, i) => {
-               
+
                 return {
                     field: `customField${i + 1}`,
                     headerName: field.name,
                     flex: 1,
                     valueGetter: (_, row) => {
-                        
+
                         if (row.customFields)
                         {
                             let cf = row.customFields.find(f => f.customFieldId == field.id);
@@ -384,7 +400,15 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                         }
 
                         return null;
-                    } 
+                    },
+                    valueFormatter: (value) => {
+                        // Format Yes/No fields (customFieldType === 5)
+                        if (field.customFieldType === 5) {
+                            if (value === "true" || value === true) return "Yes";
+                            if (value === "false" || value === false || value === null || value === undefined || value === "") return "No";
+                        }
+                        return value;
+                    }
                 };
             }), {
                 field: '',
@@ -1164,23 +1188,88 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                         }}>Cancel</Button>
                         <Button onClick={async () => {
 
-                            if (platformType == 1)
+                            let newId = null;
+
+                            if (platformType == 1) // user
                             {
-                                onAccountCreated({
-                                    firstName: newFirstName.current.value,
-                                    lastName: newLastName.current.value,
-                                    email: newEmail.current.value
-                                });
+                                const firstName = newFirstName.current.value;
+                                const lastName = newLastName.current.value;
+                                const email = newEmail.current.value;
+
+                                // Validate input
+                                if (firstName.trim().length == 0 || lastName.trim().length == 0 ||
+                                    (email.trim().length == 0 ||
+                                    !(/(.+)@(.+){2,}\.(.+){2,}/.test(email)))) {
+                                    alert("Please type first name, last name, and proper email.");
+                                    return;
+                                }
+
+                                try {
+                                    // Make API call to create the user
+                                    const response = await apiService().post('/UserManagement/CreateAccount', {
+                                        firstName: firstName,
+                                        lastName: lastName,
+                                        email: email
+                                    });
+
+                                    console.log('Create user response:', response);
+                                    console.log('Response status:', response.status);
+                                    console.log('Response data:', response.data);
+                                    console.log('Response data type:', typeof response.data);
+                                    console.log('Response data JSON:', JSON.stringify(response.data));
+
+                                    if (response.data) {
+                                        console.log('Response data keys:', Object.keys(response.data));
+                                        console.log('userId in data:', response.data.userId);
+                                    }
+
+                                    newId = response.data.userId;
+                                    console.log('New user ID:', newId);
+
+                                    // Close the dialog
+                                    setShowContactDialog(false);
+
+                                    // Refresh the datagrid to show the new user
+                                    setDataGridRefreshKey(dataGridRefreshKey + 1);
+
+                                    // Navigate to the newly created user
+                                    if (newId != null) {
+                                        console.log('Navigating to user:', newId);
+                                        setShowUserDetails(newId);
+                                    } else {
+                                        console.error('User ID is null, cannot navigate');
+                                    }
+
+                                    // Notify parent component that a user was created
+                                    if (onAccountCreated) {
+                                        onAccountCreated({
+                                            firstName: firstName,
+                                            lastName: lastName,
+                                            email: email,
+                                            userId: newId
+                                        });
+                                    }
+                                } catch (error) {
+                                    console.error('Error creating user:', error);
+                                    alert('Error creating user: ' + (error.message || 'Unknown error'));
+                                    return;
+                                }
                             }
-                            if (platformType == 2) // company
+                            else if (platformType == 2) // company
                             {
-                                onAccountCreated({
+                                newId = await onAccountCreated({
                                     companyName: newCompanyName.current.value
                                 });
+
+                                setShowContactDialog(false);
+
+                                if (newId != null) {
+                                    setShowUserDetails(newId);
+                                }
                             }
-                            if (platformType == 3) // location
+                            else if (platformType == 3) // location
                             {
-                                onAccountCreated({
+                                newId = await onAccountCreated({
                                     Name: newLocationName.current.value,
                                     address: newLocationAddress.current.value,
                                     city: newLocationCity.current.value,
@@ -1188,8 +1277,13 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                     postalCode: newLocationPostalCode.current.value,
                                     companyId: company.id
                                 });
+
+                                setShowContactDialog(false);
+
+                                if (newId != null) {
+                                    setShowUserDetails(newId);
+                                }
                             }
-                            setShowContactDialog(false);
 
                         }}>
                             Create Account
