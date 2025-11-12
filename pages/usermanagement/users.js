@@ -24,10 +24,9 @@ export default function Users({}) {
                     alert("uploaded user");
                 }}
                 onAccountCreated={(user) => {
-
-                    alert(user.firstName + " " + user.lastName + " " + user.email);
-
-                    return null;
+                    // User was created successfully
+                    // user object contains: firstName, lastName, email, userId
+                    console.log('User created:', user);
                 }}
                 onSaved={(shouldClose, platformType, id, fields) => {
                     // alert(shouldClose + " - " + platformType + " - " + id);

@@ -38,7 +38,7 @@
     "@stripe/react-stripe-js": "^1.9.0",
     "@stripe/stripe-js": "^1.32.0",
     "@xstyled/styled-components": "^3.8.0",
-    "authscape": "^1.0.734",
+    "authscape": "^1.0.738",
     "authscape-contentmanagement": "^1.0.1",
     "authscape-kanban": "^1.0.28",
     "authscape-spreadsheet": "^1.0.56",
