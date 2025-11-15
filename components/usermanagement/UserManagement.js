@@ -50,6 +50,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
     const [columns, setColumns] = useState([]);
 
     const [activeState, setActiveState] = useState(true);
+    const [emailConfirmedState, setEmailConfirmedState] = useState(null);
 
     const filterLoaded = useRef(false);
 
@@ -251,7 +252,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
         {
             setDataGridRefreshKey(dataGridRefreshKey + 1);
         }
-    }, [searchByName, columns, activeState]);
+    }, [searchByName, columns, activeState, emailConfirmedState]);
 
     useEffect(() => {
 
@@ -685,7 +686,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
 
 
 
-                                <Grid size={3}>
+                                <Grid size={1.5}>
 
                                     <FormControl fullWidth>
                                         <InputLabel id="demo-simple-select-label">State</InputLabel>
@@ -704,10 +705,45 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                                 {
                                                     setActiveState(true);
                                                 }
+                                                setDataGridRefreshKey(dataGridRefreshKey + 1);
 
                                             }}>
                                             <MenuItem value={0}>Deactivated</MenuItem>
                                             <MenuItem value={1}>Activated</MenuItem>
+                                        </Select>
+                                    </FormControl>
+
+                                </Grid>
+
+                                <Grid size={1.5}>
+
+                                    <FormControl fullWidth>
+                                        <InputLabel id="email-confirmed-label">Email Confirmed</InputLabel>
+                                        <Select
+                                            labelId="email-confirmed-label"
+                                            id="email-confirmed-select"
+                                            value={emailConfirmedState === null ? 2 : (emailConfirmedState ? 1 : 0)}
+                                            label="Email Confirmed"
+                                            onChange={(evn) => {
+
+                                                if (evn.target.value == 0)
+                                                {
+                                                    setEmailConfirmedState(false);
+                                                }
+                                                else if (evn.target.value == 1)
+                                                {
+                                                    setEmailConfirmedState(true);
+                                                }
+                                                else
+                                                {
+                                                    setEmailConfirmedState(null);
+                                                }
+                                                setDataGridRefreshKey(dataGridRefreshKey + 1);
+
+                                            }}>
+                                            <MenuItem value={2}>All</MenuItem>
+                                            <MenuItem value={0}>Not Confirmed</MenuItem>
+                                            <MenuItem value={1}>Confirmed</MenuItem>
                                         </Select>
                                     </FormControl>
 
@@ -831,8 +867,8 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                 searchByCompanyId: searchByCompanyId,
                                 searchByRoleId: searchByRoleId,
                                 name: searchByName,
-
-                                isActive: activeState
+                                isActive: activeState,
+                                emailConfirmed: emailConfirmedState
                             }} 
                             onRowClick={(row) => {                                
                                 setShowUserDetails(row.id);

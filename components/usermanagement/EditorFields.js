@@ -212,24 +212,53 @@ export const renderSystemField = (identifier, fieldObject, control, errors, regi
             result = !result;
           }
 
+          // Skip EmailConfirmed as it will be rendered with IsActive
+          if (field == "EmailConfirmed") {
+            return null;
+          }
+
           return (
           <Box key={index}>
-            {(field == "IsActive") &&
-                <Box>
-                  <Controller name={field} 
-                      control={control}
-                      rules={{
-                          required: false,
-                      }}
-                      render={({renderField}) => 
-                        <FormControlLabel control={<Switch defaultChecked={result} />} label={field} {...register(field, { required: false })} {...renderField} />
-                      }
-                  />
-                  {errors[field] && <Typography color={"red"}>{field} is required.</Typography>}
-                </Box>
+            {field == "IsActive" &&
+                <Grid container spacing={2}>
+                  <Grid size={6}>
+                    <Controller name="IsActive"
+                        control={control}
+                        rules={{
+                            required: false,
+                        }}
+                        render={({renderField}) =>
+                          <FormControlLabel
+                            control={<Switch defaultChecked={result} />}
+                            label="Is Active"
+                            {...register("IsActive", { required: false })}
+                            {...renderField}
+                          />
+                        }
+                    />
+                    {errors["IsActive"] && <Typography color={"red"}>Is Active is required.</Typography>}
+                  </Grid>
+                  <Grid size={6}>
+                    <Controller name="EmailConfirmed"
+                        control={control}
+                        rules={{
+                            required: false,
+                        }}
+                        render={({renderField}) =>
+                          <FormControlLabel
+                            control={<Switch defaultChecked={findTheValue(fieldObject, "EmailConfirmed")} />}
+                            label="Email Confirmed"
+                            {...register("EmailConfirmed", { required: false })}
+                            {...renderField}
+                          />
+                        }
+                    />
+                    {errors["EmailConfirmed"] && <Typography color={"red"}>Email Confirmed is required.</Typography>}
+                  </Grid>
+                </Grid>
             }
 
-            {(field != "IsActive" && field != "IsDeactivated") &&
+            {(field != "IsActive" && field != "IsDeactivated" && field != "EmailConfirmed") &&
             <Box>
                 <Controller name={field} 
                     control={control}

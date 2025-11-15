@@ -186,6 +186,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onC
     "FirstName",
     "LastName",
     "IsActive",
+    "EmailConfirmed",
     "Email",
     "PhoneNumber"
   ]
@@ -362,6 +363,10 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onC
                 
             });
 
+            console.log('Form data:', data);
+            console.log('EmailConfirmed value:', data.EmailConfirmed);
+            console.log('IsActive value:', data.IsActive);
+
             let response = await apiService().put("/UserManagement/UpdateUser", {
                 id: userId,
                 firstName: data.FirstName,
@@ -371,10 +376,13 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onC
                 email: data.Email,
                 phoneNumber: data.PhoneNumber,
                 isActive: data.IsActive,
+                emailConfirmed: data.EmailConfirmed,
                 roles: selectedRoles != "" ? selectedRoles : null,
                 permissions: selectedPermission != "" ? selectedPermission : null,
                 customFields: userCustomFields
             });
+
+            console.log('Update response:', response);
 
             if (response != null && response.status == 200)
             {
