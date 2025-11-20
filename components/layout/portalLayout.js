@@ -111,8 +111,6 @@ export default function PortalLayout({children, currentUser, pageProps}) {
       {
         title: "User Management",
         nav: [
-          {name: "Roles", icon: <SecurityRoundedIcon />, href: "/usermanagement/roles", disabled: false},
-          {name: "Permissions", icon: <GroupRoundedIcon />, href: "/usermanagement/permissions", disabled: false},
           {name: "Users", icon: <PeopleRoundedIcon/>, href: "/usermanagement/users", disabled: false},
           {name: "Companies", icon: <BusinessRoundedIcon/>, href: "/usermanagement/companies", disabled: false},
           {name: "Locations", icon: <LocationOnRoundedIcon/>, href: "/usermanagement/locations", disabled: false},

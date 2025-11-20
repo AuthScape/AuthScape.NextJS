@@ -59,6 +59,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
 
     const [companies, setCompanies] = useState([]);
     const [company, setCompany] = useState(null);
+    const [showAddCompanyDialog, setShowAddCompanyDialog] = useState(false);
 
 
     const newCompanyName = useRef();
@@ -1181,7 +1182,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                         onChange={(event, newValue) => {
                                             if (newValue?.isAddOption) {
 
-                                            setEditAddLocationId(-1);
+                                            setShowAddCompanyDialog(true);
 
                                             } else {
 
@@ -1333,10 +1334,84 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                     }
 
                     <CSVUsersUpload showDialog={uploadUsersShowDialog} platformType={platformType} onClose={() => {
-                        
+
                         setDataGridRefreshKey(dataGridRefreshKey + 1);
                         setUploadUsersShowDialog(false);
                     }} />
+
+                    <Dialog
+                        open={showAddCompanyDialog}
+                        onClose={() => {
+                            setShowAddCompanyDialog(false);
+                        }}
+                        aria-labelledby="add-company-dialog-title"
+                        aria-describedby="add-company-dialog-description">
+                        <DialogTitle id="add-company-dialog-title">
+                            Add New Company
+                        </DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id="add-company-dialog-description">
+                                Please provide the company name to create a new company.
+                            </DialogContentText>
+
+                            <Grid container spacing={2} sx={{paddingTop:2}}>
+                                <Grid size={12}>
+                                    <TextField inputRef={newCompanyName} label="Company Name" variant="outlined" fullWidth={true} />
+                                </Grid>
+                            </Grid>
+
+                        </DialogContent>
+                        <DialogActions>
+                        <Button onClick={() => {
+                            setShowAddCompanyDialog(false);
+                        }}>Cancel</Button>
+                        <Button onClick={async () => {
+
+                            const companyName = newCompanyName.current.value;
+
+                            if (companyName.trim().length == 0) {
+                                alert("Please enter a company name.");
+                                return;
+                            }
+
+                            try {
+                                let newId = null;
+                                if (onAccountCreated) {
+                                    newId = await onAccountCreated({
+                                        companyName: companyName
+                                    });
+                                }
+
+                                setShowAddCompanyDialog(false);
+
+                                // Refresh the companies list
+                                const response = await apiService().get("/UserManagement/GetCompaniesForLocation?searchBName=" + companyName);
+                                if (response != null && response.status == 200)
+                                {
+                                    setCompanies(response.data);
+
+                                    // Set the newly created company as selected
+                                    const newCompany = response.data.find(c => c.title === companyName);
+                                    if (newCompany) {
+                                        setCompany(newCompany);
+                                    }
+                                }
+
+                                // Clear the input
+                                if (newCompanyName.current) {
+                                    newCompanyName.current.value = '';
+                                }
+
+                            } catch (error) {
+                                console.error('Error creating company:', error);
+                                alert('Error creating company: ' + (error.message || 'Unknown error'));
+                            }
+
+                        }}>
+                            Create Company
+                        </Button>
+                        </DialogActions>
+                    </Dialog>
                 </Box>
             </Box>
         </Box>

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { Box } from '@mui/system';
-// import Tickets from '../../components/tickets/Tickets';
-import Tickets from 'authscape-tickets';
+import Tickets from '../../components/tickets/tickets';
+// import Tickets from 'authscape-tickets';
 
 export default function Home({setIsLoading, currentUser}) {
 
