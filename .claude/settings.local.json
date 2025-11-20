@@ -7,7 +7,9 @@
       "Bash(dir:*)",
       "Bash(findstr:*)",
       "Bash(npm install:*)",
-      "Bash(timeout 5 echo:*)"
+      "Bash(timeout 5 echo:*)",
+      "Bash(del \"c:\\Development\\AuthScape\\AuthScape.NextJS\\pages\\usermanagement\\roles.js\")",
+      "Bash(del \"c:\\Development\\AuthScape\\AuthScape.NextJS\\pages\\usermanagement\\permissions.js\")"
     ],
     "deny": [],
     "ask": []

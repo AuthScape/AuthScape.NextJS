@@ -182,14 +182,22 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onC
   }, [userId]);
 
 
-  const fields = [
-    "FirstName",
-    "LastName",
-    "IsActive",
-    "EmailConfirmed",
-    "Email",
-    "PhoneNumber"
-  ]
+  const fields = platformType === 1
+    ? [
+        "FirstName",
+        "LastName",
+        "IsActive",
+        "EmailConfirmed",
+        "Email",
+        "PhoneNumber"
+      ]
+    : [
+        "FirstName",
+        "LastName",
+        "IsActive",
+        "Email",
+        "PhoneNumber"
+      ]
 
   function a11yProps(index) {
     return {
