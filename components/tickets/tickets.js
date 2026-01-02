@@ -1,24 +1,18 @@
 import React, {useEffect, useState, useRef} from 'react';
 import { Grid, Chip, alpha, Stack, Divider } from '@mui/material';
 import { Box } from '@mui/system';
-import {
-  DataGrid,
-  GridActionsCellItem,
-} from "@mui/x-data-grid";
-import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
-import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Select from '@mui/material/Select';
 import { useRouter } from 'next/router';
-import { YesNoDialog, apiService, EditableDatagrid } from 'authscape';
+import { apiService, EditableDatagrid } from 'authscape';
 import { TicketDetail } from './ticketDetail';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
-import { AppBar, Toolbar, Typography, Button, Card, CardContent, useTheme } from '@mui/material';
+import { Typography, Button, Card, CardContent, useTheme } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import ConfirmationNumberRoundedIcon from '@mui/icons-material/ConfirmationNumberRounded';
 import FilterListRoundedIcon from '@mui/icons-material/FilterListRounded';
@@ -29,7 +23,6 @@ import InputAdornment from '@mui/material/InputAdornment';
 export default function Tickets({setIsLoading, currentUser, customTabName = null, customTabElement = null }) {
 
   const theme = useTheme();
-  const [archiveTicketId, setArchiveTicketId] = useState(null);
   const [ticketStatuses, setTicketStatuses] = useState([]);
   const [ticketTypes, setTicketTypes] = useState([]);
   const [ticketTypeId, setTicketTypeId] = useState(null);
@@ -174,34 +167,6 @@ export default function Tickets({setIsLoading, currentUser, customTabName = null
         </Typography>
       )
     },
-    {
-      field: "actions",
-      type: "actions",
-      width: 100,
-      headerName: "Actions",
-      cellClassName: "actions",
-      getActions: ({ id, row }) => {
-        return [
-          <GridActionsCellItem key={id}
-            icon={<VisibilityRoundedIcon />}
-            label="View"
-            onClick={() => {
-              setSelectedTicketId(row.id);
-            }}
-            showInMenu={false}
-          />,
-          <GridActionsCellItem key={id}
-            icon={<DeleteRoundedIcon />}
-            label="Delete"
-            className="textPrimary"
-            onClick={() => {
-              setArchiveTicketId(row.id);
-            }}
-            showInMenu={false}
-          />,
-        ];
-      },
-    }
   ];
 
   useEffect(() => {
@@ -391,6 +356,9 @@ export default function Tickets({setIsLoading, currentUser, customTabName = null
             ticketTypeId: ticketTypeId
           }}
           columns={columns}
+          onRowClick={(params) => {
+            setSelectedTicketId(params.row.id);
+          }}
           sx={{
             border: 'none',
             '& .MuiDataGrid-cell:focus': {
@@ -435,35 +403,28 @@ export default function Tickets({setIsLoading, currentUser, customTabName = null
     >
       <DialogContent sx={{ p: 0 }}>
         <Box sx={{ width:"100%" }}>
-            <TicketDetail ticketId={selectedTicketId} setIsLoading={setIsLoading} currentUser={currentUser} customTabName={customTabName} customTabElement={customTabElement} GoBackToViewTickets={() =>
-            {
-              let newKey = dataGridRefreshKey + 1;
-              setDataGridRefreshKey(newKey);
-              setSelectedTicketId(null);
-            }} />
+            <TicketDetail
+              ticketId={selectedTicketId}
+              setIsLoading={setIsLoading}
+              currentUser={currentUser}
+              customTabName={customTabName}
+              customTabElement={customTabElement}
+              GoBackToViewTickets={() => {
+                let newKey = dataGridRefreshKey + 1;
+                setDataGridRefreshKey(newKey);
+                setSelectedTicketId(null);
+              }}
+              onDeleteTicket={async () => {
+                await apiService().delete("/Ticket/ArchiveTicket?id=" + selectedTicketId);
+                let newKey = dataGridRefreshKey + 1;
+                setDataGridRefreshKey(newKey);
+                setSelectedTicketId(null);
+              }}
+            />
         </Box>
       </DialogContent>
     </Dialog>
 
-
-    <YesNoDialog open={archiveTicketId != null ? true : false} title={"Remove Ticket"} message={"Are you sure you want to close this ticket?"}
-      YesAction={async () => {
-        await apiService().delete("/Ticket/ArchiveTicket?id=" + archiveTicketId);
-
-        let newKey = dataGridRefreshKey + 1;
-        setDataGridRefreshKey(newKey);
-        setArchiveTicketId(null);
-        setSelectedTicketId(null);
-
-      }}
-      NoAction={() => {
-
-        let newKey = dataGridRefreshKey + 1;
-        setDataGridRefreshKey(newKey);
-        setArchiveTicketId(null);
-        setSelectedTicketId(null);
-
-      }} />
 
     <Dialog
       open={showNewTicketDialog}

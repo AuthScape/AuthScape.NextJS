@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import { Box, alpha } from '@mui/system';
 import Grid from '@mui/material/Grid';
 import Tabs from '@mui/material/Tabs';
@@ -10,7 +10,7 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import { Button, Card, CardContent, Stack, Chip, Paper, Divider, Avatar, useTheme } from "@mui/material";
+import { Button, Card, CardContent, Stack, Chip, Paper, Divider, Avatar, useTheme, CircularProgress } from "@mui/material";
 import InsertDriveFileRoundedIcon from '@mui/icons-material/InsertDriveFileRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
@@ -19,12 +19,17 @@ import UpdateRoundedIcon from '@mui/icons-material/UpdateRounded';
 import PriorityHighRoundedIcon from '@mui/icons-material/PriorityHighRounded';
 import CategoryRoundedIcon from '@mui/icons-material/CategoryRounded';
 import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
+import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
+import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
-import { apiService } from 'authscape';
+import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import { apiService, RichTextEditor } from 'authscape';
 import IconButton from '@mui/material/IconButton';
 import {Comments} from './comments';
 
-export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewTickets = null, customTabName = null, customTabElement = null}) => {
+export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewTickets = null, customTabName = null, customTabElement = null, onDeleteTicket = null}) => {
 
   const theme = useTheme();
   const [value, setValue] = useState(0);
@@ -37,9 +42,61 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
   const [customTabPayload, setCustomTabPayload] = useState(null);
 
   const [ticketDescription, setTicketDescription] = useState(null);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+
+  const [companyList, setCompanyList] = useState([]);
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [locationList, setLocationList] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   const [createdByList, setCreatedByList] = useState([]);
   const [selectedCreatedBy, setSelectedCreatedBy] = useState(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append('TicketId', ticketId);
+      formData.append('File', file);
+
+      const response = await apiService().post('/Ticket/AddAttachment', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response != null && response.status == 200) {
+        setTicketAttachments([...ticketAttachments, response.data]);
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Error uploading file');
+    } finally {
+      setUploadingFile(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (!confirm('Are you sure you want to delete this attachment?')) return;
+
+    try {
+      const response = await apiService().delete('/Ticket/DeleteAttachment?attachmentId=' + attachmentId);
+      if (response != null && response.status == 200) {
+        setTicketAttachments(ticketAttachments.filter(a => a.id !== attachmentId));
+      }
+    } catch (error) {
+      console.error('Error deleting attachment:', error);
+      alert('Error deleting attachment');
+    }
+  };
 
   useEffect(() => {
 
@@ -59,6 +116,14 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
         setTicketAttachments(response.data.attachments);
         setCustomTabPayload(response.data.customTabPayload);
         setTicketDescription(response.data.description);
+
+        // Set company and location if available
+        if (response.data.companyId) {
+          setSelectedCompany({ id: response.data.companyId, title: response.data.companyName });
+        }
+        if (response.data.locationId) {
+          setSelectedLocation({ id: response.data.locationId, name: response.data.locationName });
+        }
       }
     }
 
@@ -109,6 +174,26 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
     }
   }
 
+  const refreshCompanyList = async (query) => {
+    let response = await apiService().get("/UserManagement/GetCompanies?name=" + (query || ''));
+    if (response != null && response.status == 200)
+    {
+      setCompanyList(response.data);
+    }
+  }
+
+  const refreshLocationList = async (query, companyId = null) => {
+    let url = "/UserManagement/GetLocations?name=" + (query || '');
+    if (companyId) {
+      url += "&companyId=" + companyId;
+    }
+    let response = await apiService().get(url);
+    if (response != null && response.status == 200)
+    {
+      setLocationList(response.data);
+    }
+  }
+
   const getPriorityColor = (priority) => {
     switch(priority) {
       case 4: return 'error';
@@ -129,7 +214,7 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
     }
   };
 
-  const DownloadFile = ({fileName, uri}) => {
+  const DownloadFile = ({fileName, uri, attachmentId, onDelete}) => {
 
     return (
       <Card
@@ -141,12 +226,31 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
           minWidth: 200,
           textAlign:"center",
           transition: 'all 0.2s',
+          position: 'relative',
           '&:hover': {
             borderColor: theme.palette.primary.main,
             transform: 'translateY(-2px)',
             boxShadow: theme.shadows[4]
           }
         }}>
+          {onDelete && (
+            <IconButton
+              size="small"
+              onClick={() => onDelete(attachmentId)}
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                bgcolor: alpha(theme.palette.error.main, 0.1),
+                color: 'error.main',
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.error.main, 0.2)
+                }
+              }}
+            >
+              <DeleteRoundedIcon fontSize="small" />
+            </IconButton>
+          )}
           <Stack spacing={2} alignItems="center">
             <Box
               sx={{
@@ -212,10 +316,10 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
               }
             }}
             sx={{
-              bgcolor: alpha(theme.palette.error.main, 0.1),
-              color: 'error.main',
+              bgcolor: alpha(theme.palette.grey[500], 0.1),
+              color: 'text.secondary',
               '&:hover': {
-                bgcolor: alpha(theme.palette.error.main, 0.2)
+                bgcolor: alpha(theme.palette.grey[500], 0.2)
               }
             }}
           >
@@ -250,18 +354,89 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
               </Box>
 
               <TabPanel value={value} index={0}>
-                <Box sx={{
-                  whiteSpace:"pre-wrap",
-                  '& img': {
-                    maxWidth: '100%',
-                    borderRadius: 1
-                  }
-                }}>
-                  <Box dangerouslySetInnerHTML={{
-                      __html: ticketDescription,
-                  }}>
+                {isEditingDescription ? (
+                  <Box>
+                    <RichTextEditor
+                      html={ticketDescription || ''}
+                      onSave={async (html) => {
+                        setTicketDescription(html);
+                        setIsEditingDescription(false);
+                        await apiService().put("/ticket/UpdateDescription", {
+                          id: ticket.id,
+                          description: html
+                        });
+                      }}
+                    />
+                    <Button
+                      variant="outlined"
+                      onClick={() => setIsEditingDescription(false)}
+                      sx={{ mt: 2, borderRadius: 2 }}
+                    >
+                      Cancel
+                    </Button>
                   </Box>
-                </Box>
+                ) : (
+                  <Box>
+                    <Box sx={{
+                      whiteSpace:"pre-wrap",
+                      '& img': {
+                        maxWidth: '100%',
+                        borderRadius: 1
+                      },
+                      minHeight: 100,
+                      position: 'relative',
+                      p: 2,
+                      borderRadius: 2,
+                      border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                      bgcolor: alpha(theme.palette.background.default, 0.5),
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        borderColor: theme.palette.primary.main,
+                        bgcolor: alpha(theme.palette.primary.main, 0.02),
+                        '& .edit-overlay': {
+                          opacity: 1
+                        }
+                      }
+                    }}
+                    onClick={() => setIsEditingDescription(true)}
+                    >
+                      <Box
+                        className="edit-overlay"
+                        sx={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          opacity: 0,
+                          transition: 'opacity 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 1.5,
+                          bgcolor: alpha(theme.palette.primary.main, 0.1),
+                          color: 'primary.main',
+                          fontSize: '0.75rem',
+                          fontWeight: 500
+                        }}
+                      >
+                        <EditRoundedIcon sx={{ fontSize: 14 }} />
+                        Click to edit
+                      </Box>
+                      {ticketDescription ? (
+                        <Box dangerouslySetInnerHTML={{
+                            __html: ticketDescription,
+                        }}>
+                        </Box>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                          No description provided. Click to add one...
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                )}
               </TabPanel>
 
               <TabPanel value={value} index={1}>
@@ -279,11 +454,33 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
               <TabPanel value={value} index={3}>
                 {ticket != null &&
                   <>
+                    <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        style={{ display: 'none' }}
+                      />
+                      <Button
+                        variant="contained"
+                        startIcon={uploadingFile ? <CircularProgress size={20} color="inherit" /> : <CloudUploadRoundedIcon />}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingFile}
+                        sx={{ borderRadius: 2 }}
+                      >
+                        {uploadingFile ? 'Uploading...' : 'Upload Attachment'}
+                      </Button>
+                    </Box>
                     {ticketAttachments.length > 0 ? (
                       <Grid container spacing={2}>
                         {ticketAttachments.map((attachment, index) => (
-                          <Grid item xs={12} sm={6} md={4} key={index}>
-                            <DownloadFile fileName={attachment.name} uri={attachment.url} />
+                          <Grid item xs={12} sm={6} md={4} key={attachment.id || index}>
+                            <DownloadFile
+                              fileName={attachment.name}
+                              uri={attachment.url}
+                              attachmentId={attachment.id}
+                              onDelete={handleDeleteAttachment}
+                            />
                           </Grid>
                         ))}
                       </Grid>
@@ -418,6 +615,79 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
                         </Select>
                       </FormControl>
                     </Box>
+
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <BusinessRoundedIcon sx={{ fontSize: 14 }} />
+                        Company
+                      </Typography>
+                      <Autocomplete
+                        size="small"
+                        value={selectedCompany}
+                        options={companyList}
+                        getOptionLabel={(option) => option.title || ''}
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                        onChange={async (event, newValue) => {
+                          setSelectedCompany(newValue);
+                          // Clear location when company changes
+                          setSelectedLocation(null);
+                          setLocationList([]);
+
+                          await apiService().put("/ticket/UpdateCompany", {
+                            id: ticket.id,
+                            companyId: newValue?.id || null,
+                            companyName: newValue?.title || null
+                          });
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            placeholder="Select company..."
+                            onChange={(e) => refreshCompanyList(e.target.value)}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 1.5
+                              }
+                            }}
+                          />
+                        )}
+                      />
+                    </Box>
+
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <LocationOnRoundedIcon sx={{ fontSize: 14 }} />
+                        Location
+                      </Typography>
+                      <Autocomplete
+                        size="small"
+                        value={selectedLocation}
+                        options={locationList}
+                        getOptionLabel={(option) => option.name || ''}
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                        onChange={async (event, newValue) => {
+                          setSelectedLocation(newValue);
+
+                          await apiService().put("/ticket/UpdateLocation", {
+                            id: ticket.id,
+                            locationId: newValue?.id || null,
+                            locationName: newValue?.name || null
+                          });
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            placeholder="Select location..."
+                            onChange={(e) => refreshLocationList(e.target.value, selectedCompany?.id)}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 1.5
+                              }
+                            }}
+                          />
+                        )}
+                      />
+                    </Box>
                   </Stack>
                 </CardContent>
               </Card>
@@ -537,6 +807,23 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
                   </Stack>
                 </CardContent>
               </Card>
+
+              {onDeleteTicket && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  fullWidth
+                  startIcon={<DeleteRoundedIcon />}
+                  onClick={() => {
+                    if (confirm('Are you sure you want to delete this ticket?')) {
+                      onDeleteTicket();
+                    }
+                  }}
+                  sx={{ borderRadius: 2 }}
+                >
+                  Delete Ticket
+                </Button>
+              )}
             </Stack>
           </Grid>
         </Grid>

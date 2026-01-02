@@ -56,6 +56,7 @@ export function Comments({ticketId, isNote, isDisabled, currentUser}) {
                 ticketId: ticketId,
                 name: currentUser.firstName,
                 message: message,
+                createdByUserId: currentUser.id,
                 isNote: isNote
             });
 
