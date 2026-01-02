@@ -11,7 +11,6 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemText from '@mui/material/ListItemText';
 import { useForm, Controller } from 'react-hook-form';
-import { EditorState, ContentState } from 'draft-js';
 import { Tab, Tabs, Stack } from '@mui/material';
 import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
 import { apiService } from 'authscape';
