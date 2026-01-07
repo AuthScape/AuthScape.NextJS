@@ -1,8 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
 import { createConfig } from "./configClient";
 import { ContentEngine } from "./ContentEngine";
+import { ContentManagementLayout } from "./v2";
 import Head from "next/head";
 import { Box, Typography } from "@mui/material";
+
+// Feature flag for new UI - set to true to enable the modernized UI
+const USE_NEW_UI = true;
 
 export const ContentManagement = ({ oemCompanyId, setIsLoading, minHeight="65vh", customFields }) => {
   const [config, setConfig] = useState(null);
@@ -98,16 +102,28 @@ export const ContentManagement = ({ oemCompanyId, setIsLoading, minHeight="65vh"
         <title>Content Management</title>
         <meta name="title" content={"Content Management"} />
       </Head>
-      <ContentEngine
-        config={config}
-        minHeight={minHeight}
-        oemCompanyId={oemCompanyId}
-        loadedUser={true}
-        configLoad={configLoad}
-        notification={(content) => {
-          // alert(content);
-        }}
-      />
+      {USE_NEW_UI ? (
+        <ContentManagementLayout
+          config={config}
+          minHeight={minHeight}
+          oemCompanyId={oemCompanyId}
+          configLoad={configLoad}
+          notification={(content) => {
+            // Can be used for notifications if needed
+          }}
+        />
+      ) : (
+        <ContentEngine
+          config={config}
+          minHeight={minHeight}
+          oemCompanyId={oemCompanyId}
+          loadedUser={true}
+          configLoad={configLoad}
+          notification={(content) => {
+            // alert(content);
+          }}
+        />
+      )}
     </>
   );
 };

@@ -11,6 +11,7 @@ const SlugPage = ({
   metaDescription,
   setIsLoading,
   pageResponse,
+  pageId,
 }) => {
 
   return (
@@ -22,7 +23,7 @@ const SlugPage = ({
         <link rel="canonical" href={canonicalBaseUrl + urlPath} />
       </Head>
 
-      
+
 
       <RenderCustomPage
         oemCompanyId={oemCompanyId}
@@ -32,6 +33,7 @@ const SlugPage = ({
         metaDescription={metaDescription}
         setIsLoading={setIsLoading}
         pageResponse={pageResponse}
+        pageId={pageId}
         customFields={{
           
           Poop: {
@@ -146,6 +148,7 @@ export async function getServerSideProps({ params, req, resolvedUrl }) {
     props.pageResponse = data != null ? data : "";
     props.metaTitle = pageTitle != null ? pageTitle : "";
     props.metaDescription = pageDescription != null ? pageDescription : "";
+    props.pageId = pageInfo.data.id || null;
   }
 
   var host = req.headers.host;

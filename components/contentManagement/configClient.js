@@ -20,6 +20,9 @@ import { apiService } from "authscape";
 import {ColorPickerField} from "./customFields/colorpickerField";
 import { Box, Typography } from "@mui/material";
 
+// Import new Puck components
+import { puckComponents, puckCategories } from "./puckComponents";
+
 
 const fetchImageAssets = async (oemCompanyId) => {
 
@@ -782,15 +785,84 @@ const createConfig = async (oemCompanyId, setIsLoading) => {
                 );
                 },
             },
+            // Merge new Puck components
+            ...puckComponents,
         },
         categories: {
-            Basic: {
-                label: "Image",
-                components: ["Image", "Text", "Button", "Divider"],
+            // Heroes & Landing
+            Heroes: {
+                title: "Heroes",
+                components: ["HeroBasic", "HeroSplit", "HeroVideo", "HeroSlider", "HeroImage", "HeroAnimated"],
             },
+            // Layout & Structure
             Layout: {
-                label: "Layout",
-                components: ["Columns", "Container", "Box", "Space"],
+                title: "Layout",
+                components: ["Section", "Row", "Spacer", "Grid", "Stack", "FlexBox", "Columns", "Container", "Box"],
+            },
+            // Typography & Text
+            Typography: {
+                title: "Typography",
+                components: ["Heading", "Paragraph", "RichText", "Text", "Quote", "List", "Badge", "Highlight"],
+            },
+            // Cards & Content Blocks
+            Cards: {
+                title: "Cards",
+                components: ["Card", "FeatureCard", "PricingCard", "TestimonialCard", "TeamCard", "BlogCard", "ProductCard", "ServiceCard", "PortfolioCard", "ComparisonCard"],
+            },
+            // Media & Images
+            Media: {
+                title: "Media",
+                components: ["Image", "Video", "Gallery", "Carousel", "ImageCompare", "Icon", "Avatar", "AudioPlayer", "LottieAnimation"],
+            },
+            // Call to Action
+            CallToAction: {
+                title: "Call to Action",
+                components: ["CTABanner", "Newsletter", "AnnouncementBar", "FloatingCTA", "CTACard", "Button"],
+            },
+            // Social & Trust
+            Social: {
+                title: "Social & Trust",
+                components: ["SocialLinks", "ShareButtons", "TrustBadges", "ReviewStars", "ClientLogos", "TestimonialSlider"],
+            },
+            // Navigation
+            Navigation: {
+                title: "Navigation",
+                components: ["Accordion", "Tabs", "Breadcrumb", "StepIndicator", "ScrollToTop", "TableOfContents"],
+            },
+            // Data Display
+            DataDisplay: {
+                title: "Data Display",
+                components: ["Stats", "Timeline", "ProgressBar", "CircularProgress", "Countdown", "Counter", "Metric", "SkillBars"],
+            },
+            // Interactive Elements
+            Interactive: {
+                title: "Interactive",
+                components: ["Modal", "Tooltip", "Popover", "Alert", "Toast", "Drawer"],
+            },
+            // Forms
+            Forms: {
+                title: "Forms",
+                components: ["ContactUs", "hubspotForm", "FormInput", "FormTextArea", "FormSelect", "FormCheckbox", "FormRadioGroup", "FormDatePicker", "FormFileUpload", "FormBuilder"],
+            },
+            // Content Blocks
+            Content: {
+                title: "Content Blocks",
+                components: ["FAQ", "Features", "Steps", "ContentBlock", "Testimonials", "PricingTable"],
+            },
+            // E-Commerce
+            ECommerce: {
+                title: "E-Commerce",
+                components: ["MarketplaceEmbed", "ShoppingCart"],
+            },
+            // Maps & Location
+            Maps: {
+                title: "Maps & Location",
+                components: ["MapEmbed", "ContactInfo", "LocationCard"],
+            },
+            // Utility
+            Utility: {
+                title: "Utility",
+                components: ["Divider", "HTMLEmbed", "IFrame", "CodeBlock", "Anchor"],
             },
         },
     }

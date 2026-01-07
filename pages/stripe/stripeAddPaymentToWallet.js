@@ -1,111 +1,75 @@
-import React, {useEffect, useState, useRef} from 'react';
-import { Box } from '@mui/system';
-// import StripePayment, { WhiteLabelPageModule } from 'authscape';
-import { Button, TextField } from '@mui/material';
-import Wallet from '../../components/stripe/wallet';
+import React from 'react';
+import { Box, Typography, Paper } from '@mui/material';
+import { PaymentComponent } from '../../components/stripe';
 
-export default function Home({setIsLoading, currentUser, oemCompanyId}) {
+export default function AddToWalletDemo({ currentUser }) {
+  return (
+    <Box>
+      <Typography variant="h5" sx={{ mb: 3 }}>
+        Add To Wallet Demo
+      </Typography>
 
-    const amountRef = useRef(null);
-    const invoiceRef = useRef(null);
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        This component allows users to manage their saved payment methods (cards and bank accounts).
+        Users can add new payment methods, remove existing ones, and set a default payment method.
+      </Typography>
 
+      <Paper sx={{ p: 3 }}>
+        <PaymentComponent
+          currentUser={currentUser}
+          paymentMethodType={3} // 3 = Card, 1 = ACH
+          onPaymentMethodAdded={(paymentMethod) => {
+            alert('Payment method added: ' + paymentMethod);
+          }}
+          onPaymentMethodRemoved={(paymentMethodId) => {
+            alert('Payment method removed: ' + paymentMethodId);
+          }}
+          onDefaultSet={(paymentMethodId) => {
+            alert('Default payment method set: ' + paymentMethodId);
+          }}
+          onError={(error) => {
+            alert('Error: ' + error);
+          }}
+          allowRemove={true}
+          allowSetDefault={true}
+          title="Payment Methods"
+        />
+      </Paper>
 
-    const [amount, setAmount] = useState(null);
-    const [invoiceId, setInvoiceId] = useState(null);
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Usage Example</Typography>
+        <Paper sx={{ p: 2, backgroundColor: '#f5f5f5' }}>
+          <pre style={{ margin: 0, fontSize: 12, overflow: 'auto' }}>
+{`import { PaymentComponent } from 'components/stripe';
 
-    return (
-        <Box>
-            <Box sx={{paddingBottom:2}}>
-                Stripe Pay
-            </Box>
+<PaymentComponent
+  currentUser={currentUser}
+  paymentMethodType={3} // 3 = Card, 1 = ACH
+  onPaymentMethodAdded={(pm) => console.log('Added:', pm)}
+  onPaymentMethodRemoved={(id) => console.log('Removed:', id)}
+  onDefaultSet={(id) => console.log('Default set:', id)}
+  onError={(error) => console.error('Error:', error)}
+  allowRemove={true}
+  allowSetDefault={true}
+  title="Payment Methods"
+/>`}
+          </pre>
+        </Paper>
+      </Box>
 
-            <Wallet
-                currentUser={currentUser} // if you want to attach to a users account
-                amount={amount} // the amount you want to charge
-                invoiceId={invoiceId}
-                isSubscription={false}
-                //payButtonText={"Pay"}
-                onResponse={async (response, id, paymentMethod) => {
-
-                    switch (response) {
-                        case 'succeeded':
-                            alert("succeeded: " + id + " paymentMethod: " + paymentMethod);
-                        break;
-
-                        case 'paid':
-                            alert("paid: " + " paymentIntent: " + id);
-                        break;
-                
-                        case 'processing':
-                            alert("processing: " + id);
-                        break;
-                
-                        case 'requires_payment_method':
-                            alert("requires_payment_method");
-                        break;
-                
-                        default:
-                            alert("failed");
-                        break;
-                    }
-                }}
-            />
-
-            <hr />
-
-            <Box sx={{paddingTop:3}}>
-
-                <Box>
-                    Assign a price to change the state of the payment interface
-                </Box>
-
-                <Box sx={{marginTop:2}}>
-                    <TextField inputRef={amountRef} label="Price" variant="outlined" />
-                </Box>
-
-                <Box sx={{marginTop:1}}>
-                    <Button variant="contained" onClick={() => {
-
-                        if (amountRef.current.value == null || amountRef.current.value == "")
-                        {
-                            setAmount(null);
-                        }
-                        else
-                        {
-                            setAmount(amountRef.current.value);
-                        }
-
-                    }}>Change Price</Button>
-                </Box>
-
-                <hr />
-
-                <Box sx={{marginTop:2}}>
-                    <TextField inputRef={invoiceRef} label="InvoiceId" variant="outlined" />
-                </Box>
-
-                <Box sx={{marginTop:1}}>
-                    <Button variant="contained" onClick={() => {
-
-                        if (invoiceRef.current.value == null || invoiceRef.current.value == "")
-                        {
-                            setInvoiceId(null);
-                        }
-                        else
-                        {
-                            setInvoiceId(invoiceRef.current.value);
-                        }
-
-                    }}>Set Invoice</Button>
-                </Box>
-            </Box>
-
-
-        </Box>
-    )
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>ACH Bank Account Example</Typography>
+        <Paper sx={{ p: 2, backgroundColor: '#f5f5f5' }}>
+          <pre style={{ margin: 0, fontSize: 12, overflow: 'auto' }}>
+{`<PaymentComponent
+  currentUser={currentUser}
+  paymentMethodType={1} // 1 = ACH Bank Account
+  onPaymentMethodAdded={(pm) => console.log('Bank added:', pm)}
+  title="Bank Accounts"
+/>`}
+          </pre>
+        </Paper>
+      </Box>
+    </Box>
+  );
 }
-
-// export async function getServerSideProps({req, res }) {
-//     var props = await WhiteLabelPageModule(process.env.apiUri, req.headers.host)
-//     return { props: props };
-// }
