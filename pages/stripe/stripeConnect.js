@@ -1,31 +1,51 @@
-import React, {useEffect, useState} from 'react';
-import { Box } from '@mui/system';
-import { Button } from '@mui/material';
-import { apiService } from 'authscape';
+import React from 'react';
+import { Box, Typography, Paper } from '@mui/material';
+import { StripeConnectComponent } from '../../components/stripe';
 
-export default function Home({loadedUser, setIsLoading, currentUser}) {
-
-//   const [paymentLink, setPaymentLink] = useState("");
-
+export default function StripeConnectDemo({ currentUser }) {
   return (
     <Box>
-        Stripe Connect
+      <Typography variant="h5" sx={{ mb: 3 }}>
+        Stripe Connect Demo
+      </Typography>
 
-        <Box sx={{paddingTop:2}}>
-          <Button variant="contained" onClick={async () => {
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        This component allows vendors/merchants to connect their Stripe account for receiving payments.
+        Requires an authenticated user.
+      </Typography>
 
-              let email = "Brandonzuech%2Bconnected@gmail.com";
+      <Paper sx={{ p: 3 }}>
+        <StripeConnectComponent
+          currentUser={currentUser}
+          onOnboardingComplete={(accountId) => {
+            alert('Onboarding complete! Account ID: ' + accountId);
+          }}
+          onOnboardingError={(error) => {
+            alert('Onboarding error: ' + error);
+          }}
+          showAccountStatus={true}
+        />
+      </Paper>
 
-              let response = await apiService().get("/TestStripe/Connect?email=" + email);
-              if (response != null && response.status == 200)
-              {
-                alert(response.data);
-              }
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Usage Example</Typography>
+        <Paper sx={{ p: 2, backgroundColor: '#f5f5f5' }}>
+          <pre style={{ margin: 0, fontSize: 12, overflow: 'auto' }}>
+{`import { StripeConnectComponent } from 'components/stripe';
 
-              alert(response.status)
-
-          }}>Stripe Connect</Button>
-        </Box>
+<StripeConnectComponent
+  currentUser={currentUser}
+  onOnboardingComplete={(accountId) => {
+    console.log('Connected:', accountId);
+  }}
+  onOnboardingError={(error) => {
+    console.error('Error:', error);
+  }}
+  showAccountStatus={true}
+/>`}
+          </pre>
+        </Paper>
+      </Box>
     </Box>
-  )
+  );
 }
