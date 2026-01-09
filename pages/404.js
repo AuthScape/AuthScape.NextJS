@@ -5,7 +5,7 @@ export default function FourOhFour() {
     <h1>404 - Page Not Found</h1>
     <Link href="/">
       
-        Go back home
+        ERROR!!!! Go back home.
       
     </Link>
   </>;
