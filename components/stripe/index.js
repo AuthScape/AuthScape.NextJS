@@ -31,6 +31,7 @@ export { default as useStripeSetup } from './shared/useStripeSetup';
 export { default as StripeElementsWrapper } from './shared/StripeElementsWrapper';
 export { default as PaymentMethodCard } from './shared/PaymentMethodCard';
 export { default as PaymentMethodSelector, useHasPaymentMethods } from './shared/PaymentMethodSelector';
+export { default as AchVerificationDialog } from './shared/AchVerificationDialog';
 
 // Legacy exports (for backwards compatibility with existing wallet/subscription imports)
 export { default as Wallet } from './wallet';
