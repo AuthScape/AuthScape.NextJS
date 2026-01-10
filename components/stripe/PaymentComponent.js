@@ -12,6 +12,7 @@ import {
   DialogActions,
   IconButton,
   CircularProgress,
+  Alert,
 } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import CloseIcon from '@mui/icons-material/Close';
@@ -20,6 +21,7 @@ import { apiService } from 'authscape';
 import useStripeSetup from './shared/useStripeSetup';
 import StripeElementsWrapper from './shared/StripeElementsWrapper';
 import PaymentMethodCard from './shared/PaymentMethodCard';
+import AchVerificationDialog from './shared/AchVerificationDialog';
 
 /**
  * Internal form component for adding a new payment method
@@ -51,17 +53,29 @@ const AddPaymentForm = ({
         redirect: 'if_required',
       });
 
+      // For ACH bank accounts, Stripe returns an "error" with type requires_action
+      // This is expected behavior for micro-deposit verification flow
       if (error) {
-        setErrorMessage(error.message);
-        setIsProcessing(false);
-        if (onError) onError(error.message);
-        return;
+        // Check if this is the expected ACH micro-deposit verification flow
+        const isAchVerificationFlow =
+          error.setup_intent?.status === 'requires_action' ||
+          (error.type === 'validation_error' && error.message?.includes('requires_action'));
+
+        if (!isAchVerificationFlow) {
+          // This is a real error
+          setErrorMessage(error.message);
+          setIsProcessing(false);
+          if (onError) onError(error.message);
+          return;
+        }
+        // For ACH verification flow, continue to retrieve and save the SetupIntent
       }
 
       const response = await stripe.retrieveSetupIntent(clientSecret);
       const setupIntent = response.setupIntent;
 
-      if (setupIntent.status === 'succeeded') {
+      // Handle both succeeded and requires_action (ACH micro-deposit verification)
+      if (setupIntent.status === 'succeeded' || setupIntent.status === 'requires_action') {
         const addResponse = await apiService().post('/Payment/AddPaymentMethod', {
           walletId: walletId,
           paymentMethodType: paymentMethodType,
@@ -69,7 +83,19 @@ const AddPaymentForm = ({
         });
 
         if (addResponse != null && addResponse.status === 200) {
-          if (onSuccess) onSuccess(addResponse.data);
+          if (onSuccess) {
+            // Pass along verification info if present
+            const responseData = addResponse.data;
+            if (setupIntent.status === 'requires_action') {
+              onSuccess({
+                ...responseData,
+                requiresVerification: true,
+                message: 'Bank account saved. Please check your bank statement for micro-deposit verification.',
+              });
+            } else {
+              onSuccess(responseData);
+            }
+          }
         } else {
           setErrorMessage('Failed to save payment method.');
           if (onError) onError('Failed to save payment method');
@@ -146,6 +172,9 @@ export default function PaymentComponent({
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [removeConfirmMethod, setRemoveConfirmMethod] = useState(null);
   const [isRemoving, setIsRemoving] = useState(false);
+  const [verifyingMethod, setVerifyingMethod] = useState(null);
+  const [achVerificationData, setAchVerificationData] = useState(null);
+  const [pendingVerificationMessage, setPendingVerificationMessage] = useState(null);
 
   const {
     stripePromise,
@@ -187,17 +216,65 @@ export default function PaymentComponent({
   useEffect(() => {
     if (currentUser != null) {
       fetchPaymentMethods();
+      checkAchVerificationStatus();
     } else {
       setIsLoadingMethods(false);
     }
   }, [currentUser, fetchPaymentMethods]);
 
-  const handleAddSuccess = async (walletPaymentMethodId) => {
+  // Check if there are any ACH payment methods that need verification
+  const checkAchVerificationStatus = async () => {
+    try {
+      const response = await apiService().get('/Payment/GetUnverifiedACHPaymentMethods');
+      if (response != null && response.status === 200 && response.data) {
+        setAchVerificationData(response.data);
+      }
+    } catch (err) {
+      console.error('Error checking ACH verification status:', err);
+    }
+  };
+
+  const handleVerifyClick = (paymentMethod) => {
+    setVerifyingMethod(paymentMethod);
+  };
+
+  const handleVerificationSuccess = async () => {
+    setVerifyingMethod(null);
+    setPendingVerificationMessage('Bank account verified successfully!');
+    await fetchPaymentMethods();
+    await checkAchVerificationStatus();
+    setTimeout(() => setPendingVerificationMessage(null), 5000);
+  };
+
+  const handleVerificationError = (error) => {
+    if (onError) onError(error);
+  };
+
+  const handleAddSuccess = async (result) => {
     setShowAddDialog(false);
     await fetchPaymentMethods();
     await refreshStripe();
+
+    // Check if this was an ACH that needs verification
+    if (result?.requiresVerification) {
+      // Store the client secret for verification
+      setAchVerificationData({
+        needsVerification: true,
+        clientSecret: result.clientSecret,
+        hostedVerificationUrl: result.hostedVerificationUrl,
+        microdepositType: result.microdepositType,
+      });
+
+      setPendingVerificationMessage(
+        result.message || 'Bank account saved. Please verify with micro-deposits to use it for payments.'
+      );
+      setTimeout(() => setPendingVerificationMessage(null), 10000);
+    } else {
+      await checkAchVerificationStatus();
+    }
+
     if (onPaymentMethodAdded) {
-      onPaymentMethodAdded(walletPaymentMethodId);
+      onPaymentMethodAdded(result);
     }
   };
 
@@ -262,24 +339,54 @@ export default function PaymentComponent({
         </Typography>
       )}
 
+      {/* Verification pending message */}
+      {pendingVerificationMessage && (
+        <Alert severity="info" sx={{ mb: 2 }} onClose={() => setPendingVerificationMessage(null)}>
+          {pendingVerificationMessage}
+        </Alert>
+      )}
+
+      {/* ACH verification needed banner */}
+      {achVerificationData?.needsVerification && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          You have a bank account that needs verification. Click the "Verify Bank Account" button on the card to complete setup.
+        </Alert>
+      )}
+
       {isLoadingMethods ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
           <CircularProgress />
         </Box>
       ) : (
         <Grid container spacing={2}>
-          {paymentMethods.map((pm) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={pm.id}>
-              <PaymentMethodCard
-                paymentMethod={pm}
-                isDefault={pm.id === defaultPaymentMethodId || pm.isDefault}
-                allowRemove={allowRemove}
-                allowSetDefault={allowSetDefault}
-                onRemove={() => setRemoveConfirmMethod(pm)}
-                onSetDefault={handleSetDefault}
-              />
-            </Grid>
-          ))}
+          {paymentMethods.map((pm) => {
+            // Determine if this bank account needs verification
+            const isACH = pm.bankName != null || pm.accountType != null;
+            // Check if this specific payment method is in the unverified list
+            const unverifiedMethod = achVerificationData?.unverifiedMethods?.find(
+              (um) => um.paymentMethodId === pm.paymentMethodId || um.walletPaymentMethodId === pm.id
+            );
+            const needsVerification = isACH && unverifiedMethod != null;
+
+            return (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={pm.id}>
+                <PaymentMethodCard
+                  paymentMethod={{
+                    ...pm,
+                    requiresVerification: needsVerification,
+                    // Pass along the client secret for this specific method
+                    verificationClientSecret: unverifiedMethod?.clientSecret,
+                  }}
+                  isDefault={pm.id === defaultPaymentMethodId || pm.isDefault}
+                  allowRemove={allowRemove}
+                  allowSetDefault={allowSetDefault}
+                  onRemove={() => setRemoveConfirmMethod(pm)}
+                  onSetDefault={handleSetDefault}
+                  onVerify={needsVerification ? () => handleVerifyClick({ ...pm, ...unverifiedMethod }) : undefined}
+                />
+              </Grid>
+            );
+          })}
 
           {/* Add New Card Button */}
           <Grid item xs={12} sm={6} md={4} lg={3}>
@@ -404,6 +511,17 @@ export default function PaymentComponent({
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* ACH Verification Dialog */}
+      <AchVerificationDialog
+        open={verifyingMethod != null}
+        onClose={() => setVerifyingMethod(null)}
+        onVerified={handleVerificationSuccess}
+        onError={handleVerificationError}
+        clientSecret={verifyingMethod?.clientSecret}
+        stripePromise={stripePromise}
+        paymentMethod={verifyingMethod}
+      />
     </Box>
   );
 }

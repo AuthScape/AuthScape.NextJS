@@ -32,27 +32,39 @@ const HoldCardForm = ({
     }
 
     try {
-      const { error } = await stripe.confirmSetup({
+      const { error, setupIntent: confirmedSetupIntent } = await stripe.confirmSetup({
         elements,
         redirect: 'if_required',
       });
 
+      // For ACH bank accounts, Stripe returns an "error" with type requires_action
+      // This is expected behavior for micro-deposit verification flow
       if (error) {
-        setErrorMessage(error.message);
-        setIsProcessing(false);
-        if (onError) {
-          onError(error.message);
+        // Check if this is the expected ACH micro-deposit verification flow
+        if (error.type === 'validation_error' && error.message?.includes('requires_action')) {
+          // This is expected for ACH - continue to retrieve the SetupIntent
+        } else if (error.setup_intent?.status === 'requires_action') {
+          // SetupIntent requires action (ACH verification) - this is not a real error
+        } else {
+          // This is a real error
+          setErrorMessage(error.message);
+          setIsProcessing(false);
+          if (onError) {
+            onError(error.message);
+          }
+          return;
         }
-        return;
       }
 
-      // Retrieve the SetupIntent to get the payment method
+      // Retrieve the SetupIntent to get the payment method and current status
       const response = await stripe.retrieveSetupIntent(clientSecret);
       const setupIntent = response.setupIntent;
 
       switch (setupIntent.status) {
         case 'succeeded':
-          // Save the payment method to the user's wallet
+        case 'requires_action':
+          // For ACH/bank accounts, 'requires_action' means micro-deposit verification is needed
+          // We still save the payment method - it will be verified later via micro-deposits
           const addResponse = await apiService().post('/Payment/AddPaymentMethod', {
             walletId: walletId,
             paymentMethodType: paymentMethodType,
@@ -60,8 +72,22 @@ const HoldCardForm = ({
           });
 
           if (addResponse != null && addResponse.status === 200) {
-            if (onCardSaved) {
-              onCardSaved(setupIntent.id, setupIntent.payment_method, addResponse.data);
+            const responseData = addResponse.data;
+
+            // Check if this requires verification (ACH micro-deposits)
+            if (responseData.requiresVerification) {
+              // Payment method saved but needs verification
+              if (onCardSaved) {
+                onCardSaved(setupIntent.id, setupIntent.payment_method, {
+                  ...responseData,
+                  requiresVerification: true,
+                  message: 'Bank account saved. Please check your email for micro-deposit verification instructions.',
+                });
+              }
+            } else {
+              if (onCardSaved) {
+                onCardSaved(setupIntent.id, setupIntent.payment_method, responseData);
+              }
             }
           } else {
             setErrorMessage('Failed to save payment method. Please try again.');
