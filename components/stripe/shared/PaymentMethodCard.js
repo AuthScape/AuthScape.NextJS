@@ -39,7 +39,7 @@ export default function PaymentMethodCard({
       }}
       onClick={() => {
         if (allowSetDefault && !isDefault && onSetDefault && !needsVerification) {
-          onSetDefault(paymentMethod.id);
+          onSetDefault(paymentMethod.id, paymentMethod.walletId);
         }
       }}
     >
@@ -97,42 +97,35 @@ export default function PaymentMethodCard({
         </Typography>
       </Box>
 
-      {/* Card Number - centered */}
+      {/* Card Number and Account Type - centered area */}
       <Box
         sx={{
           position: 'absolute',
-          top: '50%',
+          top: showVerifyButton ? '40%' : '50%',
           left: 0,
           right: 0,
-          transform: needsVerification && isACH ? 'translateY(-60%)' : 'translateY(-50%)',
+          transform: 'translateY(-50%)',
           textAlign: 'center',
         }}
       >
         <Typography variant="body1" sx={{ color: 'white', fontSize: 16, letterSpacing: 2 }}>
           **** **** **** {paymentMethod.last4}
         </Typography>
+        {isACH && (
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', display: 'block', mt: 0.5 }}>
+            {paymentMethod.accountType}
+          </Typography>
+        )}
       </Box>
 
-      {/* Expiry / Account Type - bottom right */}
-      {!(needsVerification && isACH && onVerify) && (
+      {/* Expiry - bottom right (only for cards) */}
+      {!isACH && (
         <Box sx={{ position: 'absolute', bottom: 12, right: 12, textAlign: 'right' }}>
           <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', display: 'block' }}>
-            {isACH ? 'Account Type' : 'EXPIRES'}
+            EXPIRES
           </Typography>
           <Typography variant="body2" sx={{ color: 'white' }}>
-            {isACH ? paymentMethod.accountType : `${paymentMethod.expMonth}/${paymentMethod.expYear}`}
-          </Typography>
-        </Box>
-      )}
-
-      {/* Account Type shown above verify button when verification needed */}
-      {needsVerification && isACH && onVerify && (
-        <Box sx={{ position: 'absolute', bottom: 60, right: 12, textAlign: 'right' }}>
-          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', display: 'block' }}>
-            Account Type
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'white' }}>
-            {paymentMethod.accountType}
+            {paymentMethod.expMonth}/{paymentMethod.expYear}
           </Typography>
         </Box>
       )}

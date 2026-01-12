@@ -40,7 +40,20 @@ export default function AchVerificationDialog({
   stripePromise,
   paymentMethod,
 }) {
-  const [tabValue, setTabValue] = useState(0);
+  // Determine which verification method based on microdepositType
+  // 'descriptor_code' means only descriptor code works, 'amounts' means only amounts work
+  const microdepositType = paymentMethod?.microdepositType;
+  const isDescriptorCodeOnly = microdepositType === 'descriptor_code';
+  const isAmountsOnly = microdepositType === 'amounts';
+
+  // Default tab based on microdeposit type
+  const getDefaultTab = () => {
+    if (isDescriptorCodeOnly) return 1; // Descriptor code tab
+    if (isAmountsOnly) return 0; // Amounts tab
+    return 0; // Default to amounts
+  };
+
+  const [tabValue, setTabValue] = useState(getDefaultTab());
   const [amount1, setAmount1] = useState('');
   const [amount2, setAmount2] = useState('');
   const [descriptorCode, setDescriptorCode] = useState('');
@@ -48,14 +61,28 @@ export default function AchVerificationDialog({
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
+  // Update tab when paymentMethod changes
+  React.useEffect(() => {
+    setTabValue(getDefaultTab());
+  }, [paymentMethod?.microdepositType]);
+
   const handleTabChange = (event, newValue) => {
+    // Only allow tab change if not locked to a specific type
+    if (isDescriptorCodeOnly || isAmountsOnly) {
+      return; // Don't allow switching if locked to a specific method
+    }
     setTabValue(newValue);
     setError(null);
   };
 
   const handleVerify = async () => {
-    console.log('Verifying ACH - clientSecret:', clientSecret);
-    console.log('Verifying ACH - paymentMethod:', paymentMethod);
+    console.log('=== ACH VERIFICATION DEBUG ===');
+    console.log('clientSecret:', clientSecret);
+    console.log('paymentMethod object:', JSON.stringify(paymentMethod, null, 2));
+    console.log('microdepositType:', microdepositType);
+    console.log('isDescriptorCodeOnly:', isDescriptorCodeOnly);
+    console.log('isAmountsOnly:', isAmountsOnly);
+    console.log('tabValue:', tabValue);
 
     if (!clientSecret) {
       setError('Missing verification token. Please try adding the bank account again.');
@@ -81,16 +108,21 @@ export default function AchVerificationDialog({
 
       let result;
 
-      if (tabValue === 0) {
+      // Determine which method to use based on microdepositType
+      // Stripe test mode: descriptor_code uses SM1111, amounts uses 32 and 45
+      const useDescriptorCode = tabValue === 1;
+
+      if (!useDescriptorCode) {
         // Verify with amounts
         if (!amount1 || !amount2) {
           setError('Please enter both deposit amounts.');
           setIsVerifying(false);
           return;
         }
-        console.log('Verifying with amounts:', [parseInt(amount1), parseInt(amount2)]);
+        const amounts = [parseInt(amount1), parseInt(amount2)];
+        console.log('Calling stripe.verifyMicrodepositsForSetup with amounts:', amounts);
         result = await stripe.verifyMicrodepositsForSetup(clientSecret, {
-          amounts: [parseInt(amount1), parseInt(amount2)],
+          amounts: amounts,
         });
       } else {
         // Verify with descriptor code
@@ -99,17 +131,29 @@ export default function AchVerificationDialog({
           setIsVerifying(false);
           return;
         }
-        console.log('Verifying with descriptor code:', descriptorCode.toUpperCase());
+        const code = descriptorCode.toUpperCase().trim();
+        console.log('Calling stripe.verifyMicrodepositsForSetup with descriptor_code:', code);
         result = await stripe.verifyMicrodepositsForSetup(clientSecret, {
-          descriptor_code: descriptorCode.toUpperCase(),
+          descriptor_code: code,
         });
       }
 
-      console.log('Verification result:', result);
+      console.log('Verification result:', JSON.stringify(result, null, 2));
 
       if (result.error) {
         console.error('Verification error:', result.error);
-        setError(result.error.message);
+
+        // If verification failed with "does not match" error, show helpful message
+        const errorMsg = result.error.message;
+        if (errorMsg?.includes('does not match')) {
+          if (useDescriptorCode) {
+            setError(`${errorMsg} - Try using the "Deposit Amounts" tab with amounts 32 and 45 instead.`);
+          } else {
+            setError(`${errorMsg} - Try using the "Descriptor Code" tab with code SM1111 instead.`);
+          }
+        } else {
+          setError(errorMsg);
+        }
         if (onError) onError(result.error.message);
       } else if (result.setupIntent?.status === 'succeeded') {
         setSuccess(true);
@@ -176,10 +220,16 @@ export default function AchVerificationDialog({
               </Box>
             )}
 
-            <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
+            {/* Always show both tabs - let user try either method */}
+            <Tabs value={tabValue} onChange={(e, v) => { setTabValue(v); setError(null); }} sx={{ mb: 2 }}>
               <Tab label="Deposit Amounts" />
               <Tab label="Descriptor Code" />
             </Tabs>
+            {microdepositType && (
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                Stripe recommends: {microdepositType === 'descriptor_code' ? 'Descriptor Code' : 'Deposit Amounts'}
+              </Typography>
+            )}
 
             {tabValue === 0 ? (
               <Box sx={{ display: 'flex', gap: 2 }}>
@@ -227,10 +277,37 @@ export default function AchVerificationDialog({
 
             <Alert severity="info" sx={{ mt: 2 }}>
               <Typography variant="body2">
-                <strong>Test Mode:</strong> Use amounts <strong>32</strong> and <strong>45</strong>, or
-                descriptor code <strong>SM1111</strong> to simulate successful verification.
+                <strong>Test Mode:</strong>{' '}
+                {tabValue === 0 ? (
+                  <>Enter amounts <strong>32</strong> and <strong>45</strong> (in cents) to simulate successful verification.</>
+                ) : (
+                  <>Enter descriptor code <strong>SM11AA</strong> to simulate successful verification.</>
+                )}
               </Typography>
+              {microdepositType && (
+                <Typography variant="caption" display="block" sx={{ mt: 1, color: 'text.secondary' }}>
+                  Stripe requires: {microdepositType === 'descriptor_code' ? 'Descriptor Code' : 'Deposit Amounts'}
+                </Typography>
+              )}
             </Alert>
+
+            {/* Hosted verification fallback */}
+            {paymentMethod?.hostedVerificationUrl && (
+              <Alert severity="warning" sx={{ mt: 2 }}>
+                <Typography variant="body2">
+                  Having trouble? You can also{' '}
+                  <a
+                    href={paymentMethod.hostedVerificationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontWeight: 'bold' }}
+                  >
+                    verify on Stripe's hosted page
+                  </a>
+                  {' '}instead.
+                </Typography>
+              </Alert>
+            )}
           </>
         )}
       </DialogContent>
