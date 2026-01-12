@@ -80,6 +80,7 @@ const AddPaymentForm = ({
           walletId: walletId,
           paymentMethodType: paymentMethodType,
           stripePaymentMethod: setupIntent.payment_method,
+          stripeSetupIntentId: setupIntent.id, // Store SetupIntent ID for ACH verification
         });
 
         if (addResponse != null && addResponse.status === 200) {
@@ -296,10 +297,11 @@ export default function PaymentComponent({
     }
   };
 
-  const handleSetDefault = async (paymentMethodId) => {
+  const handleSetDefault = async (paymentMethodId, walletId) => {
     try {
       const response = await apiService().post('/Payment/SetDefaultPaymentMethod', {
         paymentMethodId: paymentMethodId,
+        walletId: walletId,
       });
       if (response != null && response.status === 200) {
         setDefaultPaymentMethodId(paymentMethodId);
@@ -413,7 +415,10 @@ export default function PaymentComponent({
                   backgroundColor: '#1565C0',
                 },
               }}
-              onClick={() => setShowAddDialog(true)}
+              onClick={async () => {
+                await refreshStripe(); // Get fresh SetupIntent
+                setShowAddDialog(true);
+              }}
             >
               <Typography variant="body1" sx={{ fontSize: 18, color: 'white' }}>
                 <AddRoundedIcon sx={{ position: 'relative', top: 6 }} /> ADD NEW PAYMENT METHOD

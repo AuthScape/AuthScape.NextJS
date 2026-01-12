@@ -58,16 +58,28 @@ export default function PaymentMethodSelector({
         }
       }
 
-      setPaymentMethods(allMethods);
+      // Deduplicate payment methods based on paymentMethodId (Stripe's ID)
+      // If duplicates exist, prefer the one marked as default
+      const seen = new Map();
+      for (const method of allMethods) {
+        const key = method.paymentMethodId || `${method.last4}-${method.brand || method.bankName}`;
+        const existing = seen.get(key);
+        if (!existing || method.isDefault) {
+          seen.set(key, method);
+        }
+      }
+      const uniqueMethods = Array.from(seen.values());
+
+      setPaymentMethods(uniqueMethods);
       // Auto-select default method if none selected
-      if (!selectedId && allMethods.length > 0) {
-        const defaultMethod = allMethods.find((pm) => pm.isDefault);
+      if (!selectedId && uniqueMethods.length > 0) {
+        const defaultMethod = uniqueMethods.find((pm) => pm.isDefault);
         if (defaultMethod) {
           setSelectedMethodId(defaultMethod.id);
           if (onSelect) onSelect(defaultMethod);
         } else {
-          setSelectedMethodId(allMethods[0].id);
-          if (onSelect) onSelect(allMethods[0]);
+          setSelectedMethodId(uniqueMethods[0].id);
+          if (onSelect) onSelect(uniqueMethods[0]);
         }
       }
     } catch (err) {

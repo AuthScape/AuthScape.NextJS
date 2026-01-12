@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../styles/globals.css";
 import Layout from "../components/layout/portalLayout";
 import { AuthScapeApp } from "authscape";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "reactflow/dist/style.css";
 import { Backdrop, Box, CircularProgress, Typography } from "@mui/material";
@@ -65,15 +66,29 @@ function MyApp({ Component, pageProps }) {
   };
 
   return (
-    <AuthScapeApp
-      Component={Component}
-      layout={layout}
-      loadingLayout={loadingLayout}
-      muiTheme={baselightTheme}
-      enforceLoggedIn={true}
-      enableConsentDialog={true}
-      pageProps={pageProps}
-    />
+    <>
+      <AuthScapeApp
+        Component={Component}
+        layout={layout}
+        loadingLayout={loadingLayout}
+        muiTheme={baselightTheme}
+        enforceLoggedIn={true}
+        enableConsentDialog={true}
+        pageProps={pageProps}
+      />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+    </>
   );
 }
 

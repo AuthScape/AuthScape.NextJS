@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
-import { Box, Button, Typography, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, CircularProgress, Tabs, Tab } from '@mui/material';
 import CreditCardRoundedIcon from '@mui/icons-material/CreditCardRounded';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import { apiService } from 'authscape';
 import useStripeSetup from './shared/useStripeSetup';
 import StripeElementsWrapper from './shared/StripeElementsWrapper';
+import PaymentMethodSelector, { useHasPaymentMethods } from './shared/PaymentMethodSelector';
 
 /**
  * Internal form component that handles Stripe SetupIntent confirmation
@@ -164,6 +166,7 @@ const HoldCardForm = ({
  * @param {function} props.onError - Callback: (error) => void
  * @param {string} props.buttonText - Custom button text (default: "Save Card")
  * @param {string} props.description - Custom description text
+ * @param {boolean} props.allowSavedPaymentMethods - Allow selecting existing saved payment methods (default: true)
  */
 export default function HoldCardComponent({
   currentUser = null,
@@ -175,13 +178,25 @@ export default function HoldCardComponent({
   onError,
   buttonText = 'Save Card',
   description = 'Enter your payment details below. Your card will be saved for future use.',
+  allowSavedPaymentMethods = true,
 }) {
+  const [paymentTab, setPaymentTab] = useState(0);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const { hasPaymentMethods, isLoading: isLoadingPaymentMethods } = useHasPaymentMethods(
+    allowSavedPaymentMethods ? currentUser : null,
+    null // null = all payment types (cards + ACH)
+  );
+
   const {
     stripePromise,
     clientSecret,
     walletId,
     isLoading,
     error,
+    refresh: refreshStripe,
   } = useStripeSetup({
     currentUser,
     logOffUserName,
@@ -191,29 +206,122 @@ export default function HoldCardComponent({
     amount: null, // null = SetupIntent (no charge)
   });
 
+  // Handle selecting an existing payment method
+  const handleSelectExistingPaymentMethod = async () => {
+    if (!selectedPaymentMethod) return;
+
+    setIsProcessing(true);
+    setErrorMessage(null);
+
+    try {
+      // Call onCardSaved with the existing payment method details
+      if (onCardSaved) {
+        onCardSaved(null, selectedPaymentMethod.paymentMethodId, {
+          id: selectedPaymentMethod.id,
+          isExisting: true,
+          brand: selectedPaymentMethod.brand,
+          last4: selectedPaymentMethod.last4,
+          bankName: selectedPaymentMethod.bankName,
+        });
+      }
+    } catch (err) {
+      const msg = err.message || 'An error occurred';
+      setErrorMessage(msg);
+      if (onError) onError(msg);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle new card saved
+  const handleNewCardSaved = async (setupIntentId, paymentMethodId, responseData) => {
+    await refreshStripe();
+    if (onCardSaved) {
+      onCardSaved(setupIntentId, paymentMethodId, responseData);
+    }
+  };
+
+  // Determine initial tab based on whether user has saved methods
+  React.useEffect(() => {
+    if (!isLoadingPaymentMethods) {
+      setPaymentTab(hasPaymentMethods ? 0 : 1);
+    }
+  }, [hasPaymentMethods, isLoadingPaymentMethods]);
+
   return (
     <Box sx={{ width: '100%' }}>
       {description && (
         <Typography color="text.secondary" sx={{ mb: 2 }}>
-          {description}
+          {paymentTab === 0 && hasPaymentMethods
+            ? 'Select a saved payment method or add a new one.'
+            : description}
         </Typography>
       )}
 
-      <StripeElementsWrapper
-        stripePromise={stripePromise}
-        clientSecret={clientSecret}
-        isLoading={isLoading}
-        error={error}
-      >
-        <HoldCardForm
+      {/* Payment method tabs - only show if user has saved methods */}
+      {allowSavedPaymentMethods && currentUser && hasPaymentMethods && (
+        <Tabs
+          value={paymentTab}
+          onChange={(e, newValue) => {
+            setPaymentTab(newValue);
+            setSelectedPaymentMethod(null);
+            setErrorMessage(null);
+          }}
+          sx={{ mb: 2 }}
+        >
+          <Tab label="Use Saved Payment" />
+          <Tab label="Add New Payment" />
+        </Tabs>
+      )}
+
+      {/* Tab 0: Saved Payment Methods */}
+      {paymentTab === 0 && hasPaymentMethods && (
+        <Box>
+          <PaymentMethodSelector
+            currentUser={currentUser}
+            paymentMethodType={null} // null = all types (cards + ACH)
+            onSelect={setSelectedPaymentMethod}
+            onAddNew={() => setPaymentTab(1)}
+            showAddNewOption={false}
+            onError={onError}
+            title={null}
+          />
+          <Button
+            startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : <CheckCircleRoundedIcon />}
+            fullWidth
+            variant="contained"
+            disabled={!selectedPaymentMethod || isProcessing}
+            onClick={handleSelectExistingPaymentMethod}
+            sx={{ marginTop: 2, padding: 2 }}
+          >
+            {buttonText || 'Use Selected Payment Method'}
+          </Button>
+          {errorMessage && (
+            <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
+              {errorMessage}
+            </Typography>
+          )}
+        </Box>
+      )}
+
+      {/* Tab 1: Add New Payment Method */}
+      {(paymentTab === 1 || !hasPaymentMethods) && (
+        <StripeElementsWrapper
+          stripePromise={stripePromise}
           clientSecret={clientSecret}
-          walletId={walletId}
-          paymentMethodType={paymentMethodType}
-          onCardSaved={onCardSaved}
-          onError={onError}
-          buttonText={buttonText}
-        />
-      </StripeElementsWrapper>
+          isLoading={isLoading}
+          error={error}
+        >
+          <HoldCardForm
+            clientSecret={clientSecret}
+            walletId={walletId}
+            paymentMethodType={paymentMethodType}
+            onCardSaved={handleNewCardSaved}
+            onError={onError}
+            buttonText={paymentTab === 1 && hasPaymentMethods ? 'Save New Payment Method' : buttonText}
+          />
+        </StripeElementsWrapper>
+      )}
     </Box>
   );
 }
