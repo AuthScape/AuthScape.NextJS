@@ -54,8 +54,16 @@ export default function AchVerificationDialog({
   };
 
   const handleVerify = async () => {
+    console.log('Verifying ACH - clientSecret:', clientSecret);
+    console.log('Verifying ACH - paymentMethod:', paymentMethod);
+
     if (!clientSecret) {
       setError('Missing verification token. Please try adding the bank account again.');
+      return;
+    }
+
+    if (!stripePromise) {
+      setError('Stripe not initialized. Please refresh the page.');
       return;
     }
 
@@ -64,6 +72,13 @@ export default function AchVerificationDialog({
 
     try {
       const stripe = await stripePromise;
+
+      if (!stripe) {
+        setError('Failed to load Stripe. Please refresh the page.');
+        setIsVerifying(false);
+        return;
+      }
+
       let result;
 
       if (tabValue === 0) {
@@ -73,6 +88,7 @@ export default function AchVerificationDialog({
           setIsVerifying(false);
           return;
         }
+        console.log('Verifying with amounts:', [parseInt(amount1), parseInt(amount2)]);
         result = await stripe.verifyMicrodepositsForSetup(clientSecret, {
           amounts: [parseInt(amount1), parseInt(amount2)],
         });
@@ -83,12 +99,16 @@ export default function AchVerificationDialog({
           setIsVerifying(false);
           return;
         }
+        console.log('Verifying with descriptor code:', descriptorCode.toUpperCase());
         result = await stripe.verifyMicrodepositsForSetup(clientSecret, {
           descriptor_code: descriptorCode.toUpperCase(),
         });
       }
 
+      console.log('Verification result:', result);
+
       if (result.error) {
+        console.error('Verification error:', result.error);
         setError(result.error.message);
         if (onError) onError(result.error.message);
       } else if (result.setupIntent?.status === 'succeeded') {
@@ -101,6 +121,7 @@ export default function AchVerificationDialog({
         setError('Verification incomplete. Status: ' + result.setupIntent?.status);
       }
     } catch (err) {
+      console.error('Verification exception:', err);
       setError(err.message || 'Verification failed');
       if (onError) onError(err.message);
     } finally {

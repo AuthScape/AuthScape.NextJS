@@ -1,31 +1,13 @@
 import React from 'react';
-import { Box, Typography, IconButton, Chip, Grid, Button } from '@mui/material';
+import { Box, Typography, IconButton, Chip, Button } from '@mui/material';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import CreditCardRoundedIcon from '@mui/icons-material/CreditCardRounded';
 import AccountBalanceRoundedIcon from '@mui/icons-material/AccountBalanceRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
-import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 
 /**
  * Displays a saved payment method as a styled card
  * Supports both credit cards and bank accounts (ACH)
- *
- * @param {Object} props
- * @param {Object} props.paymentMethod - Payment method data
- * @param {string} props.paymentMethod.id - Payment method ID
- * @param {string} props.paymentMethod.last4 - Last 4 digits
- * @param {string} props.paymentMethod.brand - Card brand (Visa, Mastercard, etc.)
- * @param {string} props.paymentMethod.bankName - Bank name for ACH
- * @param {number} props.paymentMethod.expMonth - Expiration month (cards only)
- * @param {number} props.paymentMethod.expYear - Expiration year (cards only)
- * @param {string} props.paymentMethod.accountType - Account type for ACH (checking/savings)
- * @param {string} props.paymentMethod.status - Payment method status (e.g., 'requires_action' for unverified ACH)
- * @param {function} props.onRemove - Callback when remove button is clicked: (id) => void
- * @param {function} props.onSetDefault - Callback when set default is clicked: (id) => void
- * @param {function} props.onVerify - Callback when verify button is clicked: (paymentMethod) => void
- * @param {boolean} props.isDefault - Whether this is the default payment method
- * @param {boolean} props.allowRemove - Whether to show remove button (default: true)
- * @param {boolean} props.allowSetDefault - Whether to show set default button (default: true)
  */
 export default function PaymentMethodCard({
   paymentMethod,
@@ -41,31 +23,45 @@ export default function PaymentMethodCard({
     paymentMethod.status === 'pending' ||
     paymentMethod.requiresVerification;
 
+  const showVerifyButton = needsVerification && isACH && onVerify;
+
   return (
     <Box
       sx={{
-        height: 160,
+        height: 180,
         marginTop: 2,
         backgroundColor: isDefault ? '#5D87FF' : '#2196F3',
         position: 'relative',
         border: '1px solid #2196F3',
         borderRadius: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        textAlign: 'center',
-        cursor: allowSetDefault && !isDefault && onSetDefault ? 'pointer' : 'default',
+        overflow: 'hidden',
+        cursor: allowSetDefault && !isDefault && onSetDefault && !needsVerification ? 'pointer' : 'default',
       }}
       onClick={() => {
-        if (allowSetDefault && !isDefault && onSetDefault) {
+        if (allowSetDefault && !isDefault && onSetDefault && !needsVerification) {
           onSetDefault(paymentMethod.id);
         }
       }}
     >
-      {/* Default Badge */}
+      {/* Delete Button - top right */}
+      {allowRemove && onRemove && (
+        <IconButton
+          aria-label="delete"
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(paymentMethod.id);
+          }}
+          sx={{ position: 'absolute', top: 8, right: 8 }}
+        >
+          <DeleteRoundedIcon sx={{ color: 'white' }} />
+        </IconButton>
+      )}
+
+      {/* Default Badge - top left */}
       {isDefault && (
         <Chip
-          icon={<StarRoundedIcon sx={{ color: 'white !important' }} />}
+          icon={<StarRoundedIcon sx={{ color: 'white !important', fontSize: 16 }} />}
           label="Default"
           size="small"
           sx={{
@@ -74,125 +70,99 @@ export default function PaymentMethodCard({
             left: 8,
             backgroundColor: 'rgba(255,255,255,0.2)',
             color: 'white',
+            height: 24,
             '& .MuiChip-icon': { color: 'white' },
           }}
         />
       )}
 
-      {/* Needs Verification Badge */}
-      {needsVerification && isACH && (
-        <Chip
-          icon={<WarningAmberRoundedIcon sx={{ color: '#FFA726 !important' }} />}
-          label="Needs Verification"
-          size="small"
-          sx={{
-            position: 'absolute',
-            top: isDefault ? 40 : 8,
-            left: 8,
-            backgroundColor: 'rgba(255,167,38,0.3)',
-            color: 'white',
-            '& .MuiChip-icon': { color: '#FFA726' },
-          }}
-        />
-      )}
-
-      {/* Delete Button */}
-      {allowRemove && onRemove && (
-        <Box sx={{ position: 'absolute', top: 5, right: 5 }}>
-          <IconButton
-            aria-label="delete"
-            size="large"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(paymentMethod.id);
-            }}
-          >
-            <DeleteRoundedIcon sx={{ color: 'white' }} />
-          </IconButton>
-        </Box>
-      )}
-
-      {/* Card/Bank Type */}
-      <Typography
-        variant="body1"
+      {/* Card/Bank Icon and Name */}
+      <Box
         sx={{
-          fontSize: 18,
           position: 'absolute',
-          left: 15,
-          top: isDefault ? 40 : 10,
-          color: 'white',
+          top: isDefault ? 40 : 12,
+          left: 12,
           display: 'flex',
           alignItems: 'center',
           gap: 1,
         }}
       >
         {isACH ? (
-          <AccountBalanceRoundedIcon />
+          <AccountBalanceRoundedIcon sx={{ color: 'white', fontSize: 20 }} />
         ) : (
-          <CreditCardRoundedIcon />
+          <CreditCardRoundedIcon sx={{ color: 'white', fontSize: 20 }} />
         )}
-        {paymentMethod.brand || paymentMethod.bankName}
-      </Typography>
+        <Typography variant="body2" sx={{ color: 'white', fontWeight: 500 }}>
+          {paymentMethod.brand || paymentMethod.bankName}
+        </Typography>
+      </Box>
 
-      {/* Card Number */}
-      <Typography
-        variant="body1"
-        sx={{ verticalAlign: 'middle', fontSize: 18, color: 'white' }}
+      {/* Card Number - centered */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: 0,
+          right: 0,
+          transform: needsVerification && isACH ? 'translateY(-60%)' : 'translateY(-50%)',
+          textAlign: 'center',
+        }}
       >
-        * * * * &nbsp; * * * * &nbsp; * * * * &nbsp; {paymentMethod.last4}
-      </Typography>
+        <Typography variant="body1" sx={{ color: 'white', fontSize: 16, letterSpacing: 2 }}>
+          **** **** **** {paymentMethod.last4}
+        </Typography>
+      </Box>
 
-      {/* Expiry / Account Type */}
-      <Grid
-        container
-        spacing={1}
-        sx={{ position: 'absolute', bottom: needsVerification && isACH ? 45 : 8, marginLeft: 0, width: '100%' }}
-      >
-        <Grid item xs={12} sx={{ textAlign: 'right', paddingRight: 2 }}>
-          <Typography
-            variant="body2"
-            sx={{ fontSize: 12, marginLeft: 2, marginTop: 1, color: '#e9e9e9' }}
-          >
+      {/* Expiry / Account Type - bottom right */}
+      {!(needsVerification && isACH && onVerify) && (
+        <Box sx={{ position: 'absolute', bottom: 12, right: 12, textAlign: 'right' }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', display: 'block' }}>
             {isACH ? 'Account Type' : 'EXPIRES'}
           </Typography>
-
-          <Typography
-            variant="body2"
-            sx={{ fontSize: 12, marginLeft: 2, marginTop: '-9px', color: 'white' }}
-          >
-            {isACH ? (
-              paymentMethod.accountType
-            ) : (
-              `${paymentMethod.expMonth}/${paymentMethod.expYear}`
-            )}
+          <Typography variant="body2" sx={{ color: 'white' }}>
+            {isACH ? paymentMethod.accountType : `${paymentMethod.expMonth}/${paymentMethod.expYear}`}
           </Typography>
-        </Grid>
-      </Grid>
+        </Box>
+      )}
 
-      {/* Verify Button for unverified ACH */}
+      {/* Account Type shown above verify button when verification needed */}
+      {needsVerification && isACH && onVerify && (
+        <Box sx={{ position: 'absolute', bottom: 60, right: 12, textAlign: 'right' }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', display: 'block' }}>
+            Account Type
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'white' }}>
+            {paymentMethod.accountType}
+          </Typography>
+        </Box>
+      )}
+
+      {/* Full-width Verify Button at bottom */}
       {needsVerification && isACH && onVerify && (
         <Button
           variant="contained"
-          size="small"
+          fullWidth
           onClick={(e) => {
             e.stopPropagation();
             onVerify(paymentMethod);
           }}
           sx={{
             position: 'absolute',
-            bottom: 8,
-            left: '50%',
-            transform: 'translateX(-50%)',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            borderRadius: 0,
             backgroundColor: '#FFA726',
             color: 'white',
+            py: 1.5,
+            fontSize: 14,
+            fontWeight: 600,
             '&:hover': {
               backgroundColor: '#FB8C00',
             },
-            fontSize: 12,
-            px: 3,
           }}
         >
-          Verify Bank Account
+          VERIFY BANK ACCOUNT
         </Button>
       )}
     </Box>
