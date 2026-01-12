@@ -226,6 +226,7 @@ export default function PaymentComponent({
   const checkAchVerificationStatus = async () => {
     try {
       const response = await apiService().get('/Payment/GetUnverifiedACHPaymentMethods');
+      console.log('ACH verification check response:', response?.data);
       if (response != null && response.status === 200 && response.data) {
         setAchVerificationData(response.data);
       }
@@ -255,22 +256,15 @@ export default function PaymentComponent({
     await fetchPaymentMethods();
     await refreshStripe();
 
-    // Check if this was an ACH that needs verification
-    if (result?.requiresVerification) {
-      // Store the client secret for verification
-      setAchVerificationData({
-        needsVerification: true,
-        clientSecret: result.clientSecret,
-        hostedVerificationUrl: result.hostedVerificationUrl,
-        microdepositType: result.microdepositType,
-      });
+    // Always check for unverified ACH methods after adding a payment method
+    await checkAchVerificationStatus();
 
+    // Show message if this was an ACH that needs verification
+    if (result?.requiresVerification) {
       setPendingVerificationMessage(
         result.message || 'Bank account saved. Please verify with micro-deposits to use it for payments.'
       );
       setTimeout(() => setPendingVerificationMessage(null), 10000);
-    } else {
-      await checkAchVerificationStatus();
     }
 
     if (onPaymentMethodAdded) {
@@ -368,6 +362,18 @@ export default function PaymentComponent({
             );
             const needsVerification = isACH && unverifiedMethod != null;
 
+            // Debug logging
+            if (isACH) {
+              console.log('ACH Payment Method:', {
+                id: pm.id,
+                paymentMethodId: pm.paymentMethodId,
+                isACH,
+                unverifiedMethod,
+                needsVerification,
+                achVerificationData
+              });
+            }
+
             return (
               <Grid item xs={12} sm={6} md={4} lg={3} key={pm.id}>
                 <PaymentMethodCard
@@ -392,7 +398,7 @@ export default function PaymentComponent({
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <Box
               sx={{
-                height: 160,
+                height: 180,
                 marginTop: 2,
                 backgroundColor: '#1E6FB1',
                 position: 'relative',
@@ -410,8 +416,7 @@ export default function PaymentComponent({
               onClick={() => setShowAddDialog(true)}
             >
               <Typography variant="body1" sx={{ fontSize: 18, color: 'white' }}>
-                <AddRoundedIcon sx={{ position: 'relative', top: 6 }} /> ADD NEW{' '}
-                {paymentMethodType === 1 ? 'BANK ACCOUNT' : 'CARD'}
+                <AddRoundedIcon sx={{ position: 'relative', top: 6 }} /> ADD NEW PAYMENT METHOD
               </Typography>
             </Box>
           </Grid>
