@@ -161,6 +161,9 @@ export default function PortalLayout({children, currentUser, pageProps}) {
           {name: "Tickets", icon: <ConfirmationNumberRoundedIcon/>, href: "/tickets" , disabled: false},
           {name: "Calendar", icon: <CalendarMonthRoundedIcon/>, href: "/calendar" , disabled: false},
           {name: "Toasts", icon: <NotificationsRoundedIcon/>, href: "/toasts" , disabled: false},
+          {name: "Notifications", icon: <NotificationsRoundedIcon/>, subnav: [
+            {name: "Sandbox", href:"/notifications/sandbox" },
+          ]},
 
           {name: "Mapping", icon: <MapRoundedIcon/>, subnav: [
             {name: "Upload", href:"/mapping" },

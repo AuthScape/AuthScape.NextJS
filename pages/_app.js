@@ -15,20 +15,23 @@ import "react-image-crop/dist/ReactCrop.css";
 import "@measured/puck/puck.css";
 import Head from "next/head";
 import { ThemeProvider } from "../contexts/ThemeContext";
+import { NotificationProvider } from "../contexts/NotificationContext";
 
 function MyApp({ Component, pageProps }) {
   const layout = ({ children, currentUser }) => {
     return (
       <ThemeProvider>
-        <Box sx={{ height: "100vh", overflow: "hidden" }}>
-          <Layout
-            currentUser={currentUser}
-            loadedUser={true}
-            pageProps={pageProps}
-          >
-            {children}
-          </Layout>
-        </Box>
+        <NotificationProvider currentUser={currentUser}>
+          <Box sx={{ height: "100vh", overflow: "hidden" }}>
+            <Layout
+              currentUser={currentUser}
+              loadedUser={true}
+              pageProps={pageProps}
+            >
+              {children}
+            </Layout>
+          </Box>
+        </NotificationProvider>
       </ThemeProvider>
     );
   };
