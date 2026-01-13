@@ -55,6 +55,7 @@ import PublicRoundedIcon from '@mui/icons-material/PublicRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import ExtensionRoundedIcon from '@mui/icons-material/ExtensionRounded';
 import SupportRoundedIcon from '@mui/icons-material/SupportRounded';
+import BugReportRoundedIcon from '@mui/icons-material/BugReportRounded';
 import { useRouter } from 'next/navigation'
 import AppBar from '@mui/material/AppBar';
 
@@ -161,6 +162,7 @@ export default function PortalLayout({children, currentUser, pageProps}) {
           {name: "Tickets", icon: <ConfirmationNumberRoundedIcon/>, href: "/tickets" , disabled: false},
           {name: "Calendar", icon: <CalendarMonthRoundedIcon/>, href: "/calendar" , disabled: false},
           {name: "Toasts", icon: <NotificationsRoundedIcon/>, href: "/toasts" , disabled: false},
+          {name: "Error Simulator", icon: <BugReportRoundedIcon/>, href: "/errorSimulator" , disabled: false},
           {name: "Notifications", icon: <NotificationsRoundedIcon/>, subnav: [
             {name: "Sandbox", href:"/notifications/sandbox" },
           ]},
