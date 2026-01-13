@@ -14,46 +14,22 @@ import {
   Button,
   Chip,
   useTheme,
+  IconButton as MuiIconButton,
 } from '@mui/material';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import CircleIcon from '@mui/icons-material/Circle';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoIcon from '@mui/icons-material/Info';
 import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useNotifications } from '../../contexts/NotificationContext';
+import { formatDistanceToNow } from 'date-fns';
 
 const NotificationCenter = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const theme = useTheme();
-
-  // Mock notifications - replace with actual data from your API
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'info',
-      title: 'New user registered',
-      message: 'John Doe has joined your company',
-      time: '5 minutes ago',
-      read: false,
-    },
-    {
-      id: 2,
-      type: 'success',
-      title: 'Company updated',
-      message: 'Company profile has been successfully updated',
-      time: '1 hour ago',
-      read: false,
-    },
-    {
-      id: 3,
-      type: 'warning',
-      title: 'Action required',
-      message: 'Please verify your email address',
-      time: '2 hours ago',
-      read: true,
-    },
-  ]);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -63,19 +39,40 @@ const NotificationCenter = () => {
     setAnchorEl(null);
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+  const handleNotificationClick = async (notification) => {
+    if (!notification.isRead) {
+      await markAsRead(notification.id);
+    }
+
+    if (notification.linkUrl) {
+      window.location.href = notification.linkUrl;
+    }
   };
 
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'success':
+  const handleDeleteClick = async (e, notificationId) => {
+    e.stopPropagation();
+    await deleteNotification(notificationId);
+  };
+
+  const getSeverityIcon = (severity) => {
+    switch (severity) {
+      case 'Success':
         return <CheckCircleIcon sx={{ color: '#10b981' }} />;
-      case 'warning':
+      case 'Warning':
         return <WarningIcon sx={{ color: '#f59e0b' }} />;
-      case 'info':
+      case 'Error':
+        return <ErrorIcon sx={{ color: '#ef4444' }} />;
+      case 'Info':
       default:
         return <InfoIcon sx={{ color: theme.palette.primary.main }} />;
+    }
+  };
+
+  const formatNotificationTime = (dateString) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+    } catch {
+      return 'Recently';
     }
   };
 
@@ -144,10 +141,11 @@ const NotificationCenter = () => {
             notifications.map((notification, index) => (
               <React.Fragment key={notification.id}>
                 <ListItem
+                  onClick={() => handleNotificationClick(notification)}
                   sx={{
                     py: 2,
                     px: 2,
-                    backgroundColor: notification.read ? 'transparent' : theme.palette.mode === 'dark' ? 'rgba(33, 150, 243, 0.15)' : 'rgba(33, 150, 243, 0.08)',
+                    backgroundColor: notification.isRead ? 'transparent' : theme.palette.mode === 'dark' ? 'rgba(33, 150, 243, 0.15)' : 'rgba(33, 150, 243, 0.08)',
                     '&:hover': {
                       backgroundColor: theme.palette.action.hover,
                     },
@@ -155,7 +153,7 @@ const NotificationCenter = () => {
                     position: 'relative',
                   }}
                 >
-                  {!notification.read && (
+                  {!notification.isRead && (
                     <CircleIcon
                       sx={{
                         position: 'absolute',
@@ -167,14 +165,14 @@ const NotificationCenter = () => {
                       }}
                     />
                   )}
-                  <ListItemAvatar sx={{ ml: notification.read ? 0 : 1.5 }}>
+                  <ListItemAvatar sx={{ ml: notification.isRead ? 0 : 1.5 }}>
                     <Avatar sx={{ bgcolor: 'transparent' }}>
-                      {getNotificationIcon(notification.type)}
+                      {getSeverityIcon(notification.severity)}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
                     primary={
-                      <Typography variant="body2" fontWeight={notification.read ? 400 : 600}>
+                      <Typography variant="body2" fontWeight={notification.isRead ? 400 : 600}>
                         {notification.title}
                       </Typography>
                     }
@@ -184,11 +182,18 @@ const NotificationCenter = () => {
                           {notification.message}
                         </Typography>
                         <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                          {notification.time}
+                          {formatNotificationTime(notification.created)}
                         </Typography>
                       </>
                     }
                   />
+                  <MuiIconButton
+                    size="small"
+                    onClick={(e) => handleDeleteClick(e, notification.id)}
+                    sx={{ ml: 1 }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </MuiIconButton>
                 </ListItem>
                 {index < notifications.length - 1 && <Divider />}
               </React.Fragment>
