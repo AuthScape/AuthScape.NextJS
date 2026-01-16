@@ -17,8 +17,7 @@ import {
   FormHelperText,
   CircularProgress
 } from '@mui/material';
-import { apiService } from 'authscape';
-import { toast } from 'react-toastify';
+import { apiService, toast } from 'authscape';
 
 export default function NotificationSandbox({ currentUser }) {
   const [customTitle, setCustomTitle] = useState('Custom Notification');

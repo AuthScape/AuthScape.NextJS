@@ -25,6 +25,7 @@ import CloudOffIcon from '@mui/icons-material/CloudOff';
 import StorageIcon from '@mui/icons-material/Storage';
 import JavascriptIcon from '@mui/icons-material/Javascript';
 import { apiService } from 'authscape';
+import { logError } from '../../services/errorTrackingService';
 
 // Frontend error types
 const frontendErrors = [
@@ -77,8 +78,25 @@ const frontendErrors = [
     description: 'Reject a promise without catching it',
     category: 'Async',
     severity: 'warning',
-    trigger: () => {
-      Promise.reject(new Error('Simulated unhandled promise rejection'));
+    isAsync: true,
+    trigger: async () => {
+      const error = new Error('Simulated unhandled promise rejection');
+      // Log before rejecting since this won't be caught by try/catch
+      await logError({
+        message: error.message,
+        errorType: 'UnhandledPromiseRejection',
+        stackTrace: error.stack || '',
+        url: window.location.href,
+        componentName: 'ErrorSimulator',
+        metadata: JSON.stringify({
+          errorId: 'promise-unhandled',
+          category: 'Async',
+          severity: 'warning',
+          simulatedError: true
+        })
+      });
+      // Still reject to demonstrate the behavior
+      Promise.reject(error);
     },
   },
   {
@@ -87,9 +105,26 @@ const frontendErrors = [
     description: 'Simulate an async operation that fails after delay',
     category: 'Async',
     severity: 'error',
-    trigger: () => {
+    isAsync: true,
+    trigger: async () => {
+      const error = new Error('Simulated async timeout error');
+      // Log before the timeout since the error won't be caught
+      await logError({
+        message: error.message,
+        errorType: 'AsyncTimeoutError',
+        stackTrace: error.stack || '',
+        url: window.location.href,
+        componentName: 'ErrorSimulator',
+        metadata: JSON.stringify({
+          errorId: 'promise-timeout',
+          category: 'Async',
+          severity: 'error',
+          simulatedError: true
+        })
+      });
+      // Still throw in timeout to demonstrate the behavior
       setTimeout(() => {
-        throw new Error('Simulated async timeout error');
+        throw error;
       }, 100);
     },
   },
@@ -246,13 +281,33 @@ export default function ErrorSimulator({ currentUser }) {
   const [customErrorMessage, setCustomErrorMessage] = useState('Custom error message');
   const [selectedExceptionType, setSelectedExceptionType] = useState('NullReference');
 
-  const triggerFrontendError = (error) => {
+  const triggerFrontendError = async (error) => {
     setLastError({ type: 'frontend', name: error.name, timestamp: new Date().toISOString() });
+
+    // For async errors, they handle their own logging
+    if (error.isAsync) {
+      await error.trigger();
+      return;
+    }
+
     try {
       error.trigger();
     } catch (e) {
       console.error('Triggered error:', e);
-      // Error will be caught by global error handler
+      // Send to error tracking service
+      await logError({
+        message: e.message || error.name,
+        errorType: e.name || error.category,
+        stackTrace: e.stack || '',
+        url: window.location.href,
+        componentName: 'ErrorSimulator',
+        metadata: JSON.stringify({
+          errorId: error.id,
+          category: error.category,
+          severity: error.severity,
+          simulatedError: true
+        })
+      });
     }
   };
 

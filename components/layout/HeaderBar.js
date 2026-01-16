@@ -21,12 +21,12 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import NotificationCenter from './NotificationCenter';
-import { authService } from 'authscape';
-import { useTheme } from '../../contexts/ThemeContext';
+import { authService, useAppTheme } from 'authscape';
+import { themeConfig } from '../ThemeConfig';
 
 const HeaderBar = ({ currentUser, onMenuClick, isMobile }) => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const { mode, toggleTheme } = useTheme();
+  const { mode, toggleTheme } = useAppTheme();
   const muiTheme = useMuiTheme();
   const open = Boolean(anchorEl);
 
@@ -78,10 +78,17 @@ const HeaderBar = ({ currentUser, onMenuClick, isMobile }) => {
       position="sticky"
       elevation={0}
       sx={{
-        backgroundColor: muiTheme.palette.background.paper,
-        borderBottom: `1px solid ${muiTheme.palette.divider}`,
+        backgroundColor: mode === 'dark'
+          ? themeConfig.dark.header.background
+          : themeConfig.light.header.background,
+        borderBottom: `1px solid ${mode === 'dark'
+          ? themeConfig.dark.header.borderBottom
+          : themeConfig.light.header.borderBottom}`,
+        borderTop: `3px solid ${themeConfig.brand.primary}`,
         color: muiTheme.palette.text.primary,
-        boxShadow: muiTheme.palette.mode === 'dark' ? '0 1px 3px rgba(0, 0, 0, 0.5)' : '0 1px 3px rgba(0, 0, 0, 0.05)',
+        boxShadow: mode === 'dark'
+          ? themeConfig.dark.header.shadowColor
+          : themeConfig.light.header.shadowColor,
       }}
     >
       <Toolbar>
@@ -91,7 +98,14 @@ const HeaderBar = ({ currentUser, onMenuClick, isMobile }) => {
             color="inherit"
             aria-label="menu"
             onClick={onMenuClick}
-            sx={{ mr: 2 }}
+            sx={{
+              mr: 2,
+              '&:hover': {
+                backgroundColor: mode === 'dark'
+                  ? `rgba(139, 92, 246, 0.1)`
+                  : `rgba(79, 70, 229, 0.08)`,
+              },
+            }}
           >
             <MenuRoundedIcon />
           </IconButton>
@@ -101,12 +115,32 @@ const HeaderBar = ({ currentUser, onMenuClick, isMobile }) => {
 
         <NotificationCenter />
 
-        <IconButton onClick={handleClick} sx={{ ml: 1 }}>
+        <IconButton
+          onClick={handleClick}
+          sx={{
+            ml: 1,
+            '&:hover': {
+              backgroundColor: mode === 'dark'
+                ? `rgba(139, 92, 246, 0.1)`
+                : `rgba(79, 70, 229, 0.08)`,
+            },
+          }}
+        >
           {currentUser && (
             <Avatar
               {...stringAvatar(`${currentUser.firstName} ${currentUser.lastName}`)}
               alt={`${currentUser.firstName} ${currentUser.lastName}`}
-              sx={{ width: 40, height: 40 }}
+              sx={{
+                width: 40,
+                height: 40,
+                background: `linear-gradient(135deg, ${themeConfig.brand.primary} 0%, ${themeConfig.brand.secondary} 100%)`,
+                border: '2px solid',
+                borderColor: mode === 'dark'
+                  ? `rgba(139, 92, 246, 0.3)`
+                  : `rgba(79, 70, 229, 0.15)`,
+                boxShadow: `0 2px 8px rgba(79, 70, 229, 0.2)`,
+                fontWeight: 600,
+              }}
             />
           )}
         </IconButton>
@@ -117,12 +151,17 @@ const HeaderBar = ({ currentUser, onMenuClick, isMobile }) => {
           onClose={handleClose}
           onClick={handleClose}
           PaperProps={{
-            elevation: 3,
+            elevation: 0,
             sx: {
               overflow: 'visible',
-              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.12))',
               mt: 1.5,
-              minWidth: 240,
+              minWidth: 260,
+              borderRadius: '12px',
+              border: `1px solid ${mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb'}`,
+              boxShadow: mode === 'dark'
+                ? '0 10px 40px rgba(0, 0, 0, 0.5)'
+                : '0 10px 40px rgba(0, 0, 0, 0.12)',
+              backgroundColor: mode === 'dark' ? '#1a1a2e' : '#ffffff',
               '&:before': {
                 content: '""',
                 display: 'block',
@@ -131,46 +170,89 @@ const HeaderBar = ({ currentUser, onMenuClick, isMobile }) => {
                 right: 14,
                 width: 10,
                 height: 10,
-                bgcolor: 'background.paper',
+                bgcolor: mode === 'dark' ? '#1a1a2e' : '#ffffff',
                 transform: 'translateY(-50%) rotate(45deg)',
                 zIndex: 0,
+                borderTop: `1px solid ${mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb'}`,
+                borderLeft: `1px solid ${mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb'}`,
               },
             },
           }}
           transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
-          <Box sx={{ px: 2, py: 1.5 }}>
+          <Box sx={{ px: 2.5, py: 2 }}>
             <Typography variant="subtitle1" fontWeight={600}>
               {currentUser && `${currentUser.firstName} ${currentUser.lastName}`}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ opacity: 0.8 }}>
               {currentUser && currentUser.email}
             </Typography>
           </Box>
 
-          <Divider />
+          <Divider sx={{ borderColor: mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb' }} />
 
-          <MenuItem onClick={handleClose}>
+          <MenuItem
+            onClick={handleClose}
+            sx={{
+              mx: 1,
+              my: 0.5,
+              borderRadius: '8px',
+              '&:hover': {
+                backgroundColor: mode === 'dark'
+                  ? 'rgba(139, 92, 246, 0.15)'
+                  : 'rgba(79, 70, 229, 0.06)',
+              },
+            }}
+          >
             <ListItemIcon>
-              <AccountCircleIcon fontSize="small" />
+              <AccountCircleIcon fontSize="small" sx={{ color: themeConfig.brand.primary }} />
             </ListItemIcon>
             My Profile
           </MenuItem>
 
-          <MenuItem onClick={handleClose}>
+          <MenuItem
+            onClick={handleClose}
+            sx={{
+              mx: 1,
+              my: 0.5,
+              borderRadius: '8px',
+              '&:hover': {
+                backgroundColor: mode === 'dark'
+                  ? 'rgba(139, 92, 246, 0.15)'
+                  : 'rgba(79, 70, 229, 0.06)',
+              },
+            }}
+          >
             <ListItemIcon>
-              <SettingsIcon fontSize="small" />
+              <SettingsIcon fontSize="small" sx={{ color: themeConfig.brand.secondary }} />
             </ListItemIcon>
             Settings
           </MenuItem>
 
-          <Divider />
+          <Divider sx={{ borderColor: mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb' }} />
 
-          <MenuItem onClick={toggleTheme} sx={{ justifyContent: 'space-between' }}>
+          <MenuItem
+            onClick={toggleTheme}
+            sx={{
+              mx: 1,
+              my: 0.5,
+              borderRadius: '8px',
+              justifyContent: 'space-between',
+              '&:hover': {
+                backgroundColor: mode === 'dark'
+                  ? 'rgba(139, 92, 246, 0.15)'
+                  : 'rgba(79, 70, 229, 0.06)',
+              },
+            }}
+          >
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <ListItemIcon>
-                {mode === 'light' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+                {mode === 'light' ? (
+                  <LightModeIcon fontSize="small" sx={{ color: themeConfig.status.warning }} />
+                ) : (
+                  <DarkModeIcon fontSize="small" sx={{ color: '#a5b4fc' }} />
+                )}
               </ListItemIcon>
               <Typography>Dark Mode</Typography>
             </Box>
@@ -179,16 +261,41 @@ const HeaderBar = ({ currentUser, onMenuClick, isMobile }) => {
               size="small"
               onClick={(e) => e.stopPropagation()}
               onChange={toggleTheme}
+              sx={{
+                '& .MuiSwitch-switchBase.Mui-checked': {
+                  color: themeConfig.brand.secondary,
+                },
+                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                  backgroundColor: themeConfig.brand.secondary,
+                },
+              }}
             />
           </MenuItem>
 
-          <Divider />
+          <Divider sx={{ borderColor: mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb' }} />
 
-          <MenuItem onClick={handleLogout}>
+          <MenuItem
+            onClick={handleLogout}
+            sx={{
+              mx: 1,
+              my: 0.5,
+              mb: 1,
+              borderRadius: '8px',
+              '&:hover': {
+                backgroundColor: `rgba(239, 68, 68, 0.08)`,
+                '& .MuiListItemIcon-root': {
+                  color: themeConfig.status.error,
+                },
+                '& .MuiTypography-root': {
+                  color: themeConfig.status.error,
+                },
+              },
+            }}
+          >
             <ListItemIcon>
-              <LogoutIcon fontSize="small" />
+              <LogoutIcon fontSize="small" sx={{ color: themeConfig.status.error }} />
             </ListItemIcon>
-            Logout
+            <Typography sx={{ color: themeConfig.status.error }}>Logout</Typography>
           </MenuItem>
         </Menu>
       </Toolbar>

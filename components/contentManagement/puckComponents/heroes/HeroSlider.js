@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography, Button, Stack, IconButton } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { ImageAssetPicker } from '../../customFields/imageAssetPicker';
 
 export const HeroSlider = {
   label: 'Hero Slider',
@@ -11,7 +12,7 @@ export const HeroSlider = {
       type: 'array',
       label: 'Slides',
       arrayFields: {
-        image: { type: 'text', label: 'Background Image URL' },
+        image: { type: 'text', label: 'Background Image', render: ImageAssetPicker },
         title: { type: 'text', label: 'Title' },
         subtitle: { type: 'textarea', label: 'Subtitle' },
         ctaText: { type: 'text', label: 'CTA Text' },

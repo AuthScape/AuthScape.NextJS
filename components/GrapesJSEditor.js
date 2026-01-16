@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from 'react';
 import grapesjs from 'grapesjs';
-import 'grapesjs/dist/css/grapes.min.css';
 import { apiService } from 'authscape';
 
 // blocks

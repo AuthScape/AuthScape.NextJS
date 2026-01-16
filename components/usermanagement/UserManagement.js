@@ -12,6 +12,9 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
 import Autocomplete from '@mui/material/Autocomplete';
 import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
+import SyncRoundedIcon from '@mui/icons-material/SyncRounded';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 
 // comment this out when done
 import UserEditor from './UserEditor'; // remove when done
@@ -19,14 +22,24 @@ import CompanyEditor from './CompanyEditor' // remove when done
 import { CSVUsersUpload } from './CSVUsersUpload'; // remove when done
 import { CustomFields } from './CustomFields'; // remove when done
 import LocationEditor from './LocationsEditor';
+import { CrmConnections } from './CrmConnections';
+import { CrmEntityMappings } from './CrmEntityMappings';
+import { CrmFieldMappings } from './CrmFieldMappings';
+import { CrmRelationshipMappings } from './CrmRelationshipMappings';
 
 
 export const UserManagement = ({height = "50vh", platformType = 1, defaultIdentifier = null, companyId = null, onUploadCompleted = null, onAccountCreated = null, onSaved = null, onCustomTabs = null}) => {
 
     const theme = useTheme();
     const [showUserDetails, setShowUserDetails] = useState(null);
-    
+
     const [showCustomSettings, setShowCustomSettings] = useState(false);
+    const [settingsTab, setSettingsTab] = useState(0);
+
+    // CRM Integration state
+    const [selectedCrmConnection, setSelectedCrmConnection] = useState(null);
+    const [selectedCrmEntityMapping, setSelectedCrmEntityMapping] = useState(null);
+    const [crmViewMode, setCrmViewMode] = useState('fields'); // 'fields' or 'relationships'
 
     const [showArchiveUserDialog, setShowArchiveUserDialog] = useState(null);
     const [showContactDialog, setShowContactDialog] = useState(false);
@@ -520,10 +533,13 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                     <>
                         <Box sx={{paddingRight:2}}>
                             <KeyboardBackspaceRoundedIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, cursor:"pointer" }} onClick={async () => {
-                                
+
                                 await getAllCustomFields();
                                 setDataGridRefreshKey(dataGridRefreshKey + 1);
                                 setShowCustomSettings(false);
+                                setSettingsTab(0);
+                                setSelectedCrmConnection(null);
+                                setSelectedCrmEntityMapping(null);
                             }} />
                         </Box>
                         <Divider orientation="vertical" flexItem />
@@ -606,7 +622,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                     </Box>
                     <Box sx={{ flexGrow: 0 }}>
-                        <Tooltip title="Custom Fields">
+                        <Tooltip title="Settings">
                         <IconButton sx={{ p: 0 }} onClick={() => {
                             setShowCustomSettings(true);
                         }}>
@@ -1330,7 +1346,76 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
 
 
                     {showCustomSettings &&
-                        <CustomFields platformType={platformType} />
+                        <Box>
+                            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+                                <Tabs value={settingsTab} onChange={(e, newValue) => {
+                                    setSettingsTab(newValue);
+                                    // Reset CRM navigation when switching tabs
+                                    if (newValue !== 1) {
+                                        setSelectedCrmConnection(null);
+                                        setSelectedCrmEntityMapping(null);
+                                        setCrmViewMode('fields');
+                                    }
+                                }}>
+                                    <Tab label="Custom Fields" />
+                                    <Tab icon={<SyncRoundedIcon />} iconPosition="start" label="CRM Integration" />
+                                </Tabs>
+                            </Box>
+
+                            {settingsTab === 0 && (
+                                <CustomFields platformType={platformType} />
+                            )}
+
+                            {settingsTab === 1 && (
+                                <Box>
+                                    {!selectedCrmConnection && (
+                                        <CrmConnections onSelectConnection={(connection) => {
+                                            setSelectedCrmConnection(connection);
+                                            setSelectedCrmEntityMapping(null);
+                                        }} />
+                                    )}
+
+                                    {selectedCrmConnection && !selectedCrmEntityMapping && (
+                                        <CrmEntityMappings
+                                            connection={selectedCrmConnection}
+                                            onBack={() => {
+                                                setSelectedCrmConnection(null);
+                                                setSelectedCrmEntityMapping(null);
+                                                setCrmViewMode('fields');
+                                            }}
+                                            onSelectEntityMapping={(mapping) => {
+                                                setSelectedCrmEntityMapping(mapping);
+                                                setCrmViewMode('fields');
+                                            }}
+                                        />
+                                    )}
+
+                                    {selectedCrmConnection && selectedCrmEntityMapping && crmViewMode === 'fields' && (
+                                        <CrmFieldMappings
+                                            connection={selectedCrmConnection}
+                                            entityMapping={selectedCrmEntityMapping}
+                                            onBack={() => {
+                                                setSelectedCrmEntityMapping(null);
+                                                setCrmViewMode('fields');
+                                            }}
+                                            onOpenRelationships={() => {
+                                                setCrmViewMode('relationships');
+                                            }}
+                                        />
+                                    )}
+
+                                    {selectedCrmConnection && selectedCrmEntityMapping && crmViewMode === 'relationships' && (
+                                        <CrmRelationshipMappings
+                                            connection={selectedCrmConnection}
+                                            entityMapping={selectedCrmEntityMapping}
+                                            onBack={() => {
+                                                setCrmViewMode('fields');
+                                            }}
+                                        />
+                                    )}
+                                </Box>
+                            )}
+                        </Box>
                     }
 
                     <CSVUsersUpload showDialog={uploadUsersShowDialog} platformType={platformType} onClose={() => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { ImageAssetPicker } from '../../customFields/imageAssetPicker';
 
 export const Carousel = {
   label: 'Carousel',
@@ -11,7 +12,7 @@ export const Carousel = {
       type: 'array',
       label: 'Slides',
       arrayFields: {
-        image: { type: 'text', label: 'Image URL' },
+        image: { type: 'text', label: 'Image', render: ImageAssetPicker },
         title: { type: 'text', label: 'Title (optional)' },
         subtitle: { type: 'text', label: 'Subtitle (optional)' },
         link: { type: 'text', label: 'Link (optional)' },

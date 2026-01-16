@@ -4,7 +4,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { ContentManagementProvider, useContentManagement } from './hooks/useContentManagement';
 import ContentSidebar from './ContentSidebar';
 import ContentBreadcrumb from './shared/ContentBreadcrumb';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useAppTheme } from 'authscape';
 
 // Content sections
 import PagesSection from './pages/PagesSection';
@@ -17,7 +17,7 @@ import CustomCSSSection from './settings/CustomCSSSection';
 import ScriptImportsSection from './settings/ScriptImportsSection';
 
 function ContentManagementContent() {
-  const { mode } = useTheme();
+  const { mode } = useAppTheme();
   const isMobile = useMediaQuery('(max-width:900px)');
   const [toggled, setToggled] = useState(false);
   const [broken, setBroken] = useState(false);

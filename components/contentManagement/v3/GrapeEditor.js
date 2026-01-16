@@ -16,7 +16,6 @@ import LayersIcon from '@mui/icons-material/Layers';
 import BrushIcon from '@mui/icons-material/Brush';
 import SettingsIcon from '@mui/icons-material/Settings';
 import grapesjs from 'grapesjs';
-import 'grapesjs/dist/css/grapes.min.css';
 import { apiService } from 'authscape';
 import * as signalR from '@microsoft/signalr';
 
@@ -272,6 +271,39 @@ export default function GrapeEditor({
   const [aiBuildingMessage, setAiBuildingMessage] = useState('');
   const signalRConnectionRef = useRef(null);
 
+  // Inject global CSS to hide URL input in GrapeJS asset manager
+  useEffect(() => {
+    const styleId = 'grapejs-asset-manager-custom-styles';
+    let styleEl = document.getElementById(styleId);
+
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleId;
+      styleEl.textContent = `
+        /* Hide the URL input section in GrapeJS Asset Manager */
+        .gjs-am-add-asset,
+        .gjs-am-file-uploader form > div:last-child,
+        .gjs-am-assets-header form input[type="text"],
+        .gjs-am-assets-header form button {
+          display: none !important;
+        }
+        /* Make the dropzone full width when URL input is hidden */
+        .gjs-am-file-uploader {
+          width: 100% !important;
+        }
+        .gjs-am-file-uploader #gjs-am-uploadFile {
+          width: 100% !important;
+          min-height: 200px !important;
+        }
+      `;
+      document.head.appendChild(styleEl);
+    }
+
+    return () => {
+      // Don't remove on unmount as other editors might use it
+    };
+  }, []);
+
   // SignalR connection for real-time updates from AI Designer
   useEffect(() => {
     if (!pageId) return;
@@ -469,6 +501,10 @@ export default function GrapeEditor({
         // Asset Manager - for image uploads and selection
         assetManager: {
           assets: [],
+          // Disable the URL input - only allow selecting from uploaded assets or uploading new ones
+          embedAsBase64: false,
+          // Custom upload handler
+          upload: false, // Disable default upload, we handle it manually
           uploadFile: async (e) => {
             const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
             if (!files || files.length === 0) return;
@@ -494,6 +530,8 @@ export default function GrapeEditor({
             }
           },
           autoAdd: true,
+          dropzone: true,
+          dropzoneContent: 'Drop files here or click to upload new images',
         },
 
         // Style manager

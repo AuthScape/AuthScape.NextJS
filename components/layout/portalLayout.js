@@ -3,12 +3,11 @@ import { Avatar, Box, Button, IconButton, Stack, Toolbar, Tooltip, Typography, u
 import Image from 'next/image';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
-import {apiService, authService, StripeConnect, ReactDraft} from 'authscape';
+import {apiService, authService, StripeConnect, ReactDraft, useAppTheme} from 'authscape';
 
 import {Menu as MMenu} from '@mui/material';
 import {MenuItem as MMenuItem} from '@mui/material';
 import dynamic from 'next/dynamic';
-import { useTheme } from '../../contexts/ThemeContext';
 import HeaderBar from './HeaderBar';
 
 
@@ -56,8 +55,10 @@ import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import ExtensionRoundedIcon from '@mui/icons-material/ExtensionRounded';
 import SupportRoundedIcon from '@mui/icons-material/SupportRounded';
 import BugReportRoundedIcon from '@mui/icons-material/BugReportRounded';
+import SyncRoundedIcon from '@mui/icons-material/SyncRounded';
 import { useRouter } from 'next/navigation'
 import AppBar from '@mui/material/AppBar';
+import { themeConfig, getTheme } from '../ThemeConfig';
 
 
 const Sidebar = dynamic(
@@ -82,7 +83,7 @@ const SubMenu = dynamic(
 export default function PortalLayout({children, currentUser, pageProps}) {
 
   const router = useRouter()
-  const { mode } = useTheme();
+  const { mode } = useAppTheme();
   const isMobile = useMediaQuery('(max-width:900px)');
 
   const [collapsed, setCollapsed] = useState(false);
@@ -115,6 +116,7 @@ export default function PortalLayout({children, currentUser, pageProps}) {
           {name: "Users", icon: <PeopleRoundedIcon/>, href: "/usermanagement/users", disabled: false},
           {name: "Companies", icon: <BusinessRoundedIcon/>, href: "/usermanagement/companies", disabled: false},
           {name: "Locations", icon: <LocationOnRoundedIcon/>, href: "/usermanagement/locations", disabled: false},
+          {name: "CRM Integration", icon: <SyncRoundedIcon/>, href: "/usermanagement/crm", disabled: false},
           {name: "Examples", icon: <CodeRoundedIcon/>, href: "/usermanagement/sandbox", disabled: false},
         ]
       },
@@ -124,18 +126,7 @@ export default function PortalLayout({children, currentUser, pageProps}) {
           {name: "Profile", icon: <AccountCircleRoundedIcon />, href: "/profile", disabled: true},
           {name: "Analytics", icon: <BarChartRoundedIcon/>, href: "/analytics", disabled: false},
           {name: "Kanban", icon: <ViewKanbanRoundedIcon/>, href: "/kanban", disabled: false},
-          {name: "FAQ", icon: <HelpRoundedIcon/>, href: "/faq", disabled: false},
-
-          {name: "Pricing", icon: <AttachMoneyRoundedIcon/>, subnav: [
-            {name: "Plans", href:"/pricing/plans" },
-            {name: "Products", href:"/pricing/product" },
-          ]},
-
           {name: "Error", icon: <ErrorRoundedIcon/>, href: "/404"},
-          {name: "Coming Soon", icon: <AccessTimeRoundedIcon/>, href: "/comingsoon", disabled: true},
-          {name: "Not Authorized", icon: <BlockRoundedIcon/>, href: "/NA", disabled: true},
-
-          {name: "Products", icon: <InventoryRoundedIcon/>, href: "/products", disabled: true},
           {name: "Mail", icon: <EmailRoundedIcon/>, href: "/mail", disabled: false},
         ]
       },
@@ -144,9 +135,6 @@ export default function PortalLayout({children, currentUser, pageProps}) {
         nav: [
           {name: "Login", icon: <LoginRoundedIcon />, href: "/login"},
           {name: "Register", icon: <PersonAddRoundedIcon/>, href: "/signup"},
-          {name: "Verify Email", icon: <VerifiedRoundedIcon/>, href: "/verify", disabled: true},
-          {name: "Reset Password", icon: <LockResetRoundedIcon/>, href: "/resetpassword", disabled: true},
-          {name: "Forgot Password", icon: <LockRoundedIcon/>, href: "/forgotpassword", disabled: true},
           {name: "Invite User", icon: <GroupAddRoundedIcon/>, href: "/authentication/invite", disabled: false},
         ]
       },
@@ -157,7 +145,6 @@ export default function PortalLayout({children, currentUser, pageProps}) {
             {name: "Default", href:"/marketplace", disabled: false },
             {name: "Styled Example", href:"/marketplace-example", disabled: false },
           ]},
-          {name: "Pricing", icon: <AttachMoneyRoundedIcon />, href: "/pricing", disabled: true},
           {name: "Spreadsheet", icon: <TableChartRoundedIcon/>, href: "/spreadsheet" , disabled: false},
           {name: "Tickets", icon: <ConfirmationNumberRoundedIcon/>, href: "/tickets" , disabled: false},
           {name: "Calendar", icon: <CalendarMonthRoundedIcon/>, href: "/calendar" , disabled: false},
@@ -193,10 +180,6 @@ export default function PortalLayout({children, currentUser, pageProps}) {
           {name: "Color Picker", icon: <PaletteRoundedIcon/>, href: "/components/colorpicker" , disabled: false},
           {name: "Drop Zone", icon: <CloudUploadRoundedIcon/>, href: "/dropzone" , disabled: false},
 
-          {name: "Add New Address", icon: <LocationOnRoundedIcon/>, href: "/address" , disabled: true},
-          {name: "Refer and Earn", icon: <AttachMoneyRoundedIcon/>, href: "/refer", disabled: true},
-          {name: "Edit User", icon: <AccountCircleRoundedIcon/>, href: "/profile", disabled: true},
-          {name: "Enable One Time Password", icon: <LockRoundedIcon/>, href: "/otp", disabled: true},
           {name: "Enable Two Factor", icon: <SecurityRoundedIcon/>, href: "/enabletwofactor", disabled: true},
         ]
       },
@@ -230,11 +213,6 @@ export default function PortalLayout({children, currentUser, pageProps}) {
           ]},
           {name: "Maps", icon: <PublicRoundedIcon/>, href: "/maps", disabled: false},
           {name: "Themes", icon: <DarkModeRoundedIcon/>, href: "/themes", disabled: true},
-          {name: "Components", icon: <ExtensionRoundedIcon/>, href:"/components", disabled: true},
-          {name: "E-commerce", icon: <ShoppingCartRoundedIcon/>, href:"/ecommerce", disabled: true},
-          {name: "Calendar", icon: <CalendarMonthRoundedIcon/>, href: "/calendar", disabled: true},
-          {name: "Invoice", icon: <ArticleRoundedIcon/>, href: "/invoices", disabled: true},
-          {name: "Support", icon: <SupportRoundedIcon/>, href: "/support", disabled: true}
         ]
       },
     ]
@@ -265,38 +243,57 @@ export default function PortalLayout({children, currentUser, pageProps}) {
     open: 'ps-open',
   };
 
+  // Get theme configuration based on current mode
+  const currentTheme = getTheme(mode);
+
+  // Theme configuration using centralized ThemeConfig
+  // Edit ThemeConfig.js to customize colors for your brand
   const themes = {
     light: {
       sidebar: {
         backgroundColor: '#ffffff',
-        color: '#475569',
+        backgroundGradient: themeConfig.light.sidebar.background,
+        color: themeConfig.light.sidebar.textColor,
+        borderColor: themeConfig.light.sidebar.borderColor,
+        shadow: themeConfig.light.sidebar.shadowColor,
       },
       menu: {
         menuContent: '#f8fafc',
-        icon: '#2196f3',
+        icon: themeConfig.light.menu.iconColor,  // Neutral gray for light mode
         hover: {
-          backgroundColor: '#1976d2',
-          color: '#ffffff',
+          backgroundColor: themeConfig.light.menu.hoverBackground,
+          color: themeConfig.light.menu.hoverColor,
+        },
+        active: {
+          background: themeConfig.light.menu.activeBackground,
+          color: themeConfig.light.menu.activeColor,
         },
         disabled: {
-          color: '#cbd5e1',
+          color: themeConfig.light.menu.disabledColor,
         },
       },
     },
     dark: {
       sidebar: {
-        backgroundColor: '#1e1e1e',
-        color: '#e0e0e0',
+        backgroundColor: '#1a1a2e',
+        backgroundGradient: themeConfig.dark.sidebar.background,
+        color: themeConfig.dark.sidebar.textColor,
+        borderColor: themeConfig.dark.sidebar.borderColor,
+        shadow: themeConfig.dark.sidebar.shadowColor,
       },
       menu: {
-        menuContent: '#1e1e1e',
-        icon: '#42a5f5',
+        menuContent: '#252542',
+        icon: '#a5b4fc', // Light indigo for dark mode
         hover: {
-          backgroundColor: '#1976d2',
-          color: '#ffffff',
+          backgroundColor: themeConfig.dark.menu.hoverBackground,
+          color: themeConfig.dark.menu.hoverColor,
+        },
+        active: {
+          background: themeConfig.dark.menu.activeBackground,
+          color: themeConfig.dark.menu.activeColor,
         },
         disabled: {
-          color: '#757575',
+          color: themeConfig.dark.menu.disabledColor,
         },
       },
     },
@@ -305,44 +302,56 @@ export default function PortalLayout({children, currentUser, pageProps}) {
   const menuItemStyles = {
     root: {
       fontSize: '13px',
-      fontWeight: 400,
+      fontWeight: 500,
     },
     icon: {
       color: themes[navigationLayout.theme].menu.icon,
+      transition: 'all 0.2s ease',
       [`&.${menuClasses.disabled}`]: {
         color: themes[navigationLayout.theme].menu.disabled.color,
       },
     },
     SubMenuExpandIcon: {
-      color: '#b6b7b9',
+      color: navigationLayout.theme === 'dark' ? '#6b7280' : '#9ca3af',
     },
     subMenuContent: ({ level }) => ({
       backgroundColor:
         level === 0
           ? hexToRgba(themes[navigationLayout.theme].menu.menuContent, navigationLayout.image != null && !collapsed ? 0.4 : 1)
           : 'transparent',
+      borderRadius: '8px',
     }),
     button: {
       [`&.${menuClasses.disabled}`]: {
         color: themes[navigationLayout.theme].menu.disabled.color,
       },
       '&:hover': {
-        backgroundColor: hexToRgba(themes[navigationLayout.theme].menu.hover.backgroundColor, navigationLayout.image != null ? 0.8 : 1),
+        backgroundColor: themes[navigationLayout.theme].menu.hover.backgroundColor,
         color: themes[navigationLayout.theme].menu.hover.color,
-        borderRadius: '8px',
-        transition: 'all 0.2s ease-in-out',
+        borderRadius: '10px',
+        transition: 'all 0.2s ease',
+        '& .ps-menu-icon': {
+          color: navigationLayout.theme === 'dark' ? '#ffffff' : '#1f2937',
+        },
       },
       '&.ps-active': {
-        backgroundColor: hexToRgba(themes[navigationLayout.theme].menu.hover.backgroundColor, 1),
-        color: themes[navigationLayout.theme].menu.hover.color,
-        borderRadius: '8px',
+        background: themes[navigationLayout.theme].menu.active.background,
+        color: themes[navigationLayout.theme].menu.active.color,
+        borderRadius: '10px',
+        boxShadow: navigationLayout.theme === 'dark'
+          ? '0 4px 15px rgba(79, 70, 229, 0.25)'
+          : '0 2px 8px rgba(0, 0, 0, 0.15)',
+        '& .ps-menu-icon': {
+          color: '#ffffff',
+        },
       },
-      margin: '4px 8px',
-      padding: '8px 12px',
-      borderRadius: '8px',
+      margin: '4px 12px',
+      padding: '10px 14px',
+      borderRadius: '10px',
+      transition: 'all 0.2s ease',
     },
     label: ({ open }) => ({
-      fontWeight: open ? 600 : undefined,
+      fontWeight: open ? 600 : 500,
     }),
   };
 
@@ -358,9 +367,12 @@ export default function PortalLayout({children, currentUser, pageProps}) {
         image={navigationLayout.image}
         rtl={(navigationLayout.rtl != null && navigationLayout.rtl)}
         breakPoint="md"
-        backgroundColor={hexToRgba(themes[navigationLayout.theme].sidebar.backgroundColor, navigationLayout.image != null ? 0.9 : 1)}
+        backgroundColor={themes[navigationLayout.theme].sidebar.backgroundColor}
         rootStyles={{
           color: themes[navigationLayout.theme].sidebar.color,
+          background: themes[navigationLayout.theme].sidebar.backgroundGradient,
+          borderRight: `1px solid ${themes[navigationLayout.theme].sidebar.borderColor}`,
+          boxShadow: `1px 0 8px ${themes[navigationLayout.theme].sidebar.shadow}`,
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -384,11 +396,17 @@ export default function PortalLayout({children, currentUser, pageProps}) {
 
               return (
                 <>
-                <div key={index} style={{ padding: '0 24px', marginBottom: '8px', marginTop: '32px' }}>
+                <div key={index} style={{ padding: '0 24px', marginBottom: '8px', marginTop: '28px' }}>
                   <Typography
                     variant="body2"
-                    fontWeight={600}
-                    style={{ opacity: collapsed ? 0 : 0.7, letterSpacing: '0.5px', fontSize:12 }}>
+                    fontWeight={700}
+                    style={{
+                      opacity: collapsed ? 0 : 1,
+                      letterSpacing: '0.8px',
+                      fontSize: 11,
+                      textTransform: 'uppercase',
+                      color: navigationLayout.theme === 'dark' ? themeConfig.brand.secondary : '#6b7280',
+                    }}>
                     {menu.title}
                   </Typography>
                 </div>

@@ -16,7 +16,7 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
-import { toast, Bounce, Slide, Zoom, Flip } from 'react-toastify';
+import { toast, Bounce, Slide, Zoom, Flip } from 'authscape';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
