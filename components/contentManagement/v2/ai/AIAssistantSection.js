@@ -29,10 +29,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import WidgetsIcon from '@mui/icons-material/Widgets';
-import { useTheme } from '../../../../contexts/ThemeContext';
+import { useAppTheme } from 'authscape';
 
 const CodeBlock = ({ children, language = 'text' }) => {
-  const { mode } = useTheme();
+  const { mode } = useAppTheme();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Box, Typography } from '@mui/material';
+import { ImageAssetPicker } from '../../customFields/imageAssetPicker';
 
 export const ImageCompare = {
   label: 'Image Compare',
@@ -7,11 +8,13 @@ export const ImageCompare = {
     // Images
     beforeImage: {
       type: 'text',
-      label: 'Before Image URL',
+      label: 'Before Image',
+      render: ImageAssetPicker,
     },
     afterImage: {
       type: 'text',
-      label: 'After Image URL',
+      label: 'After Image',
+      render: ImageAssetPicker,
     },
     beforeLabel: {
       type: 'text',

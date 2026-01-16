@@ -1,7 +1,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { Box, Typography, Divider, useMediaQuery } from '@mui/material';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useAppTheme } from 'authscape';
 import { useContentManagement } from './hooks/useContentManagement';
 
 // Icons
@@ -94,7 +94,7 @@ const menuClasses = {
 };
 
 export default function ContentSidebar({ toggled, setToggled, broken, setBroken }) {
-  const { mode } = useTheme();
+  const { mode } = useAppTheme();
   const { activeSection, navigateTo, sidebarCollapsed, setSidebarCollapsed } = useContentManagement();
 
   const currentTheme = themes[mode] || themes.light;

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Container, Typography, Button, Stack } from '@mui/material';
+import { ImageAssetPicker } from '../../customFields/imageAssetPicker';
 
 export const HeroImage = {
   label: 'Hero Image',
@@ -7,7 +8,8 @@ export const HeroImage = {
     // Image
     backgroundImage: {
       type: 'text',
-      label: 'Background Image URL',
+      label: 'Background Image',
+      render: ImageAssetPicker,
     },
     backgroundPosition: {
       type: 'select',

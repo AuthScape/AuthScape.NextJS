@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
+import { ImageAssetPicker } from '../../customFields/imageAssetPicker';
 
 export const ClientLogos = {
   label: 'Client Logos',
@@ -9,7 +10,7 @@ export const ClientLogos = {
       type: 'array',
       label: 'Logos',
       arrayFields: {
-        image: { type: 'text', label: 'Logo Image URL' },
+        image: { type: 'text', label: 'Logo Image', render: ImageAssetPicker },
         alt: { type: 'text', label: 'Alt Text' },
         link: { type: 'text', label: 'Link (optional)' },
       },

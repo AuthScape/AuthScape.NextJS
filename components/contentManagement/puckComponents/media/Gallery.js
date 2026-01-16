@@ -6,6 +6,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import {
   borderRadiusField,
 } from '../shared/fieldTypes';
+import { ImageAssetPicker } from '../../customFields/imageAssetPicker';
 
 export const Gallery = {
   label: 'Gallery',
@@ -15,7 +16,7 @@ export const Gallery = {
       type: 'array',
       label: 'Images',
       arrayFields: {
-        src: { type: 'text', label: 'Image URL' },
+        src: { type: 'text', label: 'Image', render: ImageAssetPicker },
         alt: { type: 'text', label: 'Alt Text' },
         caption: { type: 'text', label: 'Caption' },
       },

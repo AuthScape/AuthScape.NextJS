@@ -17,6 +17,7 @@ import { apiService } from "authscape";
 
 // fields
 import {ColorPickerField} from "./customFields/colorpickerField";
+import {ImageAssetPicker} from "./customFields/imageAssetPicker";
 import { Box, Typography } from "@mui/material";
 
 // Import new Puck components
@@ -50,9 +51,9 @@ const createConfig = (oemCompanyId, setIsLoading) => {
             ],
           },
           backgroundImage: {
-            type: "select",
+            type: "text",
             label: "Background Image",
-            options: imageOptions,
+            render: ImageAssetPicker,
           },
           backgroundSize: {
             label: "Background Size",
@@ -177,9 +178,9 @@ const createConfig = (oemCompanyId, setIsLoading) => {
             default: "left",
           },
           imageUrl: {
-            type: "select",
-            label: "Select Image URL",
-            options: imageOptions,
+            type: "text",
+            label: "Select Image",
+            render: ImageAssetPicker,
           },
         },
         render: (imageSettings) => {

@@ -1,14 +1,28 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { apiService } from 'authscape';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { apiService, toast } from 'authscape';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
-import { toast } from 'react-toastify';
 
 const NotificationContext = createContext();
+
+// Module-level state to persist across component remounts
+let globalConnection = null;
+let globalUserId = null;
+let globalIsInitialized = false;
 
 export function useNotifications() {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useNotifications must be used within NotificationProvider');
+    // Return a fallback object when provider is not available (for testing)
+    return {
+      notifications: [],
+      unreadCount: 0,
+      isConnected: false,
+      markAsRead: () => {},
+      markAllAsRead: () => {},
+      deleteNotification: () => {},
+      clearAll: () => {},
+      refresh: () => {}
+    };
   }
   return context;
 }
@@ -16,36 +30,7 @@ export function useNotifications() {
 export function NotificationProvider({ children, currentUser }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [connection, setConnection] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-
-  // Fetch notifications from API
-  const fetchNotifications = useCallback(async () => {
-    if (!currentUser) return;
-
-    try {
-      const response = await apiService().get('/Notification/GetNotifications?unreadOnly=false&take=50');
-      if (response.status === 200) {
-        setNotifications(response.data);
-      }
-    } catch (err) {
-      console.error('Failed to fetch notifications:', err);
-    }
-  }, [currentUser]);
-
-  // Fetch unread count
-  const fetchUnreadCount = useCallback(async () => {
-    if (!currentUser) return;
-
-    try {
-      const response = await apiService().get('/Notification/GetUnreadCount');
-      if (response.status === 200) {
-        setUnreadCount(response.data.count);
-      }
-    } catch (err) {
-      console.error('Failed to fetch unread count:', err);
-    }
-  }, [currentUser]);
 
   // Mark notification as read
   const markAsRead = useCallback(async (notificationId) => {
@@ -75,15 +60,17 @@ export function NotificationProvider({ children, currentUser }) {
   const deleteNotification = useCallback(async (notificationId) => {
     try {
       await apiService().delete(`/Notification/DeleteNotification?id=${notificationId}`);
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      const notification = notifications.find(n => n.id === notificationId);
-      if (notification && !notification.isRead) {
-        setUnreadCount(prev => Math.max(0, prev - 1));
-      }
+      setNotifications(prev => {
+        const notification = prev.find(n => n.id === notificationId);
+        if (notification && !notification.isRead) {
+          setUnreadCount(count => Math.max(0, count - 1));
+        }
+        return prev.filter(n => n.id !== notificationId);
+      });
     } catch (err) {
       console.error('Failed to delete notification:', err);
     }
-  }, [notifications]);
+  }, []);
 
   // Clear all notifications
   const clearAll = useCallback(async () => {
@@ -96,94 +83,85 @@ export function NotificationProvider({ children, currentUser }) {
     }
   }, []);
 
-  // SignalR connection setup
+  // Fetch notifications
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const [notifResponse, countResponse] = await Promise.all([
+        apiService().get('/Notification/GetNotifications?unreadOnly=false&take=50'),
+        apiService().get('/Notification/GetUnreadCount')
+      ]);
+      if (notifResponse.status === 200) {
+        setNotifications(notifResponse.data);
+      }
+      if (countResponse.status === 200) {
+        setUnreadCount(countResponse.data.count);
+      }
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+    }
+  }, []);
+
+  // Single useEffect for SignalR - uses module-level state to persist across remounts
   useEffect(() => {
-    if (!currentUser) return;
+    const userId = currentUser?.id;
 
-    // Get the API base URL from environment variable
-    const apiBaseUrl = process.env.apiUri || 'http://localhost:54218';
+    // Skip if no user
+    if (!userId) {
+      return;
+    }
 
-    const hubUrl = `${apiBaseUrl}/notifications`;
-    console.log('NotificationHub URL:', hubUrl);
-
-    const newConnection = new HubConnectionBuilder()
-      .withUrl(hubUrl)
-      .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
-      .configureLogging(LogLevel.Information)
-      .build();
-
-    setConnection(newConnection);
-  }, [currentUser]);
-
-  // SignalR connection lifecycle
-  useEffect(() => {
-    if (!connection || !currentUser) return;
-
-    const startConnection = async () => {
+    // Local fetch function
+    const fetchData = async () => {
       try {
-        await connection.start();
-        console.log('NotificationHub connected successfully');
-        setIsConnected(true);
-
-        // Join user notification group
-        await connection.invoke('JoinUserNotifications', currentUser.id);
-
-        // Join company notification group if applicable
-        if (currentUser.companyId) {
-          await connection.invoke('JoinCompanyNotifications', currentUser.companyId);
+        const [notifResponse, countResponse] = await Promise.all([
+          apiService().get('/Notification/GetNotifications?unreadOnly=false&take=50'),
+          apiService().get('/Notification/GetUnreadCount')
+        ]);
+        if (notifResponse.status === 200) {
+          setNotifications(notifResponse.data);
         }
-
-        // Join location notification group if applicable
-        if (currentUser.locationId) {
-          await connection.invoke('JoinLocationNotifications', currentUser.locationId);
+        if (countResponse.status === 200) {
+          setUnreadCount(countResponse.data.count);
         }
-
-        // Fetch initial data
-        await fetchNotifications();
-        await fetchUnreadCount();
       } catch (err) {
-        console.error('Failed to connect to NotificationHub:', err);
-        console.error('Error details:', {
-          message: err.message,
-          stack: err.stack,
-          name: err.name,
-          statusCode: err.statusCode
-        });
-
-        // Still fetch notifications from API even if SignalR fails
-        try {
-          await fetchNotifications();
-          await fetchUnreadCount();
-        } catch (apiErr) {
-          console.error('Failed to fetch notifications from API:', apiErr);
-        }
-
-        // Don't retry if it's a negotiate/auth error
-        const shouldRetry = !err.message?.includes('negotiate') &&
-                           !err.message?.includes('401') &&
-                           !err.message?.includes('Unauthorized');
-
-        if (shouldRetry) {
-          console.log('Will retry connection in 5 seconds...');
-          setTimeout(startConnection, 5000);
-        } else {
-          console.log('Not retrying - negotiate or auth error detected');
-        }
+        console.error('Failed to fetch notifications:', err);
       }
     };
 
+    // If already initialized for this user with an active connection, just sync state
+    if (globalIsInitialized && globalUserId === userId && globalConnection) {
+      setIsConnected(globalConnection.state === 'Connected');
+      fetchData();
+      return;
+    }
+
+    // If user changed, clean up old connection
+    if (globalConnection && globalUserId !== userId) {
+      globalConnection.stop();
+      globalConnection = null;
+      globalIsInitialized = false;
+    }
+
+    globalUserId = userId;
+    globalIsInitialized = true;
+
+    const apiBaseUrl = process.env.apiUri || 'http://localhost:54218';
+    const hubUrl = `${apiBaseUrl}/notifications`;
+
+    const connection = new HubConnectionBuilder()
+      .withUrl(hubUrl)
+      .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+      .configureLogging(LogLevel.Warning)
+      .build();
+
+    globalConnection = connection;
+
     // Handle incoming notifications
     connection.on('OnNotificationReceived', (notification) => {
-      console.log('Received notification:', notification);
-
-      // Add to state
       setNotifications(prev => [notification, ...prev]);
       setUnreadCount(prev => prev + 1);
 
-      // Determine the description to show (prioritize message, fallback to categoryName)
       const description = notification.message || notification.categoryName || '';
-
-      // Show toast with description
       toast.info(
         <div>
           <strong>{notification.title}</strong>
@@ -200,30 +178,47 @@ export function NotificationProvider({ children, currentUser }) {
     });
 
     connection.onreconnecting(() => {
-      console.log('NotificationHub reconnecting...');
       setIsConnected(false);
     });
 
     connection.onreconnected(() => {
-      console.log('NotificationHub reconnected');
       setIsConnected(true);
-      fetchNotifications();
-      fetchUnreadCount();
+      fetchData();
     });
 
     connection.onclose(() => {
-      console.log('NotificationHub disconnected');
       setIsConnected(false);
     });
 
-    startConnection();
+    // Start connection
+    const startConnection = async () => {
+      try {
+        await connection.start();
+        setIsConnected(true);
 
-    return () => {
-      if (connection) {
-        connection.stop();
+        // Join groups
+        await connection.invoke('JoinUserNotifications', userId);
+        if (currentUser?.companyId) {
+          await connection.invoke('JoinCompanyNotifications', currentUser.companyId);
+        }
+        if (currentUser?.locationId) {
+          await connection.invoke('JoinLocationNotifications', currentUser.locationId);
+        }
+
+        // Fetch initial data
+        await fetchData();
+      } catch (err) {
+        console.error('Failed to connect to NotificationHub:', err.message);
+        // Still fetch notifications even if SignalR fails
+        await fetchData();
       }
     };
-  }, [connection, currentUser, fetchNotifications, fetchUnreadCount]);
+
+    startConnection();
+
+    // No cleanup - we want the connection to persist across remounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.id]);
 
   const value = {
     notifications,

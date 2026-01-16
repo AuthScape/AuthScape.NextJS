@@ -1,38 +1,28 @@
-import React, { useEffect, useState } from "react";
 import "../styles/globals.css";
 import Layout from "../components/layout/portalLayout";
-import { AuthScapeApp } from "authscape";
-import { ToastContainer } from "react-toastify";
+import { AuthScapeApp, useNotifications, useAppTheme } from "authscape";
 import "react-toastify/dist/ReactToastify.css";
 import "reactflow/dist/style.css";
-import { Backdrop, Box, CircularProgress, Typography } from "@mui/material";
+import { Backdrop, Box } from "@mui/material";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
-import { baselightTheme } from "../components/theme";
 import "react-querybuilder/dist/query-builder.css";
-// spreadsheet
 import "../styles/reactGrid.scss";
 import "react-image-crop/dist/ReactCrop.css";
 import "@measured/puck/puck.css";
-import Head from "next/head";
-import { ThemeProvider } from "../contexts/ThemeContext";
-import { NotificationProvider } from "../contexts/NotificationContext";
+import "grapesjs/dist/css/grapes.min.css";
 
 function MyApp({ Component, pageProps }) {
   const layout = ({ children, currentUser }) => {
     return (
-      <ThemeProvider>
-        <NotificationProvider currentUser={currentUser}>
-          <Box sx={{ height: "100vh", overflow: "hidden" }}>
-            <Layout
-              currentUser={currentUser}
-              loadedUser={true}
-              pageProps={pageProps}
-            >
-              {children}
-            </Layout>
-          </Box>
-        </NotificationProvider>
-      </ThemeProvider>
+      <Box sx={{ height: "100vh", overflow: "hidden" }}>
+        <Layout
+          currentUser={currentUser}
+          loadedUser={true}
+          pageProps={pageProps}
+        >
+          {children}
+        </Layout>
+      </Box>
     );
   };
 
@@ -69,30 +59,19 @@ function MyApp({ Component, pageProps }) {
   };
 
   return (
-    <>
-      <AuthScapeApp
-        Component={Component}
-        layout={layout}
-        loadingLayout={loadingLayout}
-        muiTheme={baselightTheme}
-        enforceLoggedIn={true}
-        enableConsentDialog={true}
-        pageProps={pageProps}
-      />
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
-    </>
+    <AuthScapeApp
+      Component={Component}
+      layout={layout}
+      loadingLayout={loadingLayout}
+      enforceLoggedIn={true}
+      enableNotifications={true}
+      enableErrorTracking={true}
+      pageProps={pageProps}
+    />
   );
 }
 
 export default MyApp;
+
+// Re-export hooks for convenience
+export { useNotifications, useAppTheme };

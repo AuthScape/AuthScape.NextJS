@@ -30,8 +30,7 @@ import Column from './Column';
 import Card from './Card';
 import ProjectSelector from './ProjectSelector';
 import CardModal from './CardModal';
-import { apiService } from 'authscape';
-import { toast } from 'react-toastify';
+import { apiService, toast } from 'authscape';
 
 const KanbanBoard = () => {
   const theme = useTheme();
