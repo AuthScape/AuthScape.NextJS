@@ -1,7 +1,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { Box, Typography, Divider, useMediaQuery } from '@mui/material';
-import { useAppTheme } from 'authscape';
+import { useAppTheme } from '../../../contexts/ThemeContext';
 import { useContentManagement } from './hooks/useContentManagement';
 
 // Icons

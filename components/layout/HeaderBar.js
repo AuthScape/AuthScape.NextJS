@@ -21,7 +21,8 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import NotificationCenter from './NotificationCenter';
-import { authService, useAppTheme } from 'authscape';
+import { authService } from 'authscape';
+import { useAppTheme } from '../../contexts/ThemeContext';
 import { themeConfig } from '../ThemeConfig';
 
 const HeaderBar = ({ currentUser, onMenuClick, isMobile }) => {
