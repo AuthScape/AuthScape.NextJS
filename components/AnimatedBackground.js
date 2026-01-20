@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, memo } from 'react';
-import { useAppTheme } from 'authscape';
+import { useAppTheme } from '../contexts/ThemeContext';
 
 /**
  * AnimatedBackground Component

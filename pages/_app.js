@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import Layout from "../components/layout/portalLayout";
-import { AuthScapeApp, useNotifications, useAppTheme } from "authscape";
+import { AuthScapeApp, useNotifications } from "authscape";
+import { ThemeProvider, useAppTheme } from "../contexts/ThemeContext";
 import "react-toastify/dist/ReactToastify.css";
 import "reactflow/dist/style.css";
 import { Backdrop, Box } from "@mui/material";
@@ -59,15 +60,17 @@ function MyApp({ Component, pageProps }) {
   };
 
   return (
-    <AuthScapeApp
-      Component={Component}
-      layout={layout}
-      loadingLayout={loadingLayout}
-      enforceLoggedIn={true}
-      enableNotifications={true}
-      enableErrorTracking={true}
-      pageProps={pageProps}
-    />
+    <ThemeProvider>
+      <AuthScapeApp
+        Component={Component}
+        layout={layout}
+        loadingLayout={loadingLayout}
+        enforceLoggedIn={true}
+        enableNotifications={true}
+        enableErrorTracking={true}
+        pageProps={pageProps}
+      />
+    </ThemeProvider>
   );
 }
 

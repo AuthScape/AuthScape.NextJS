@@ -29,7 +29,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import WidgetsIcon from '@mui/icons-material/Widgets';
-import { useAppTheme } from 'authscape';
+import { useAppTheme } from '../../../../contexts/ThemeContext';
 
 const CodeBlock = ({ children, language = 'text' }) => {
   const { mode } = useAppTheme();

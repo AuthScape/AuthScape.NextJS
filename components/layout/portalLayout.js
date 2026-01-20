@@ -3,7 +3,8 @@ import { Avatar, Box, Button, IconButton, Stack, Toolbar, Tooltip, Typography, u
 import Image from 'next/image';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
-import {apiService, authService, StripeConnect, ReactDraft, useAppTheme} from 'authscape';
+import {apiService, authService, StripeConnect, ReactDraft} from 'authscape';
+import { useAppTheme } from '../../contexts/ThemeContext';
 
 import {Menu as MMenu} from '@mui/material';
 import {MenuItem as MMenuItem} from '@mui/material';
