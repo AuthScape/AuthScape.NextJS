@@ -1,13 +1,19 @@
-import { apiService } from 'authscape';
+import axios from 'axios';
 
 /**
  * Error Tracking Service
  *
- * Sends errors immediately to the backend error tracking system.
+ * Sends errors immediately to the IDP (Identity Provider) error tracking system.
+ * Error tracking is centralized in IDP so that if the API fails, errors can still be reported.
  */
 
 let sessionId = null;
 let userId = null;
+
+// Get IDP URL - error tracking is centralized in IDP
+const getIdpUrl = () => {
+  return process.env.authorityUri || 'https://localhost:44303';
+};
 
 /**
  * Initialize the error tracking service
@@ -21,12 +27,12 @@ export function initializeErrorTracking(currentUser = null) {
   sessionId = getOrCreateSessionId();
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('Error tracking initialized with session:', sessionId, 'userId:', userId);
+    console.log('Error tracking initialized with session:', sessionId, 'userId:', userId, 'IDP URL:', getIdpUrl());
   }
 }
 
 /**
- * Log an error to the tracking system
+ * Log an error to the tracking system (IDP)
  * @param {Object} errorData - Error information
  */
 export async function logError(errorData) {
@@ -53,12 +59,18 @@ export async function logError(errorData) {
     console.warn('Error tracked:', error, 'userId being sent:', error.userId);
   }
 
-  // Send immediately using apiService to hit the backend
+  // Send to IDP (not API) - error tracking is centralized in IDP
   try {
-    const response = await apiService().post('/ErrorTracking/LogError', error);
+    const idpUrl = getIdpUrl();
+    const response = await axios.post(`${idpUrl}/api/ErrorTracking/LogError`, error, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      withCredentials: true // Include cookies for session tracking
+    });
     if (response) {
       if (response.status === 200) {
-        console.log('Error successfully logged to tracking system');
+        console.log('Error successfully logged to tracking system (IDP)');
       } else {
         console.error('Error tracking API returned:', response.status, JSON.stringify(response.data, null, 2));
       }

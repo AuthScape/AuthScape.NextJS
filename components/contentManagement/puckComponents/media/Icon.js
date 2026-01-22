@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box } from '@mui/material';
+import dynamic from 'next/dynamic';
 
 const iconCategories = {
   general: ['home', 'settings', 'search', 'menu', 'close', 'add', 'remove', 'check', 'arrow_forward', 'arrow_back'],
@@ -177,6 +178,13 @@ export const Icon = {
     hoverEffect,
     link,
   }) => {
+    // Use state to ensure client-side only rendering to prevent hydration mismatch
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+      setIsMounted(true);
+    }, []);
+
     const finalColor = color === 'custom' ? customColor : color;
     const finalBgColor = backgroundColor === 'custom' ? customBackgroundColor : backgroundColor;
 
@@ -213,6 +221,27 @@ export const Icon = {
       }
     };
 
+    // Don't render anything until client-side mount to prevent hydration issues
+    if (!isMounted) {
+      return (
+        <Box
+          sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: size,
+            height: size,
+            ...(showBackground && {
+              backgroundColor: finalBgColor,
+              borderRadius: getBorderRadius(),
+              padding: `${backgroundPadding}px`,
+            }),
+          }}
+        />
+      );
+    }
+
+    // Use a simple span with inline styles to ensure the font-family is applied
     const iconElement = (
       <Box
         sx={{
@@ -228,16 +257,15 @@ export const Icon = {
           ...getHoverStyles(),
         }}
       >
-        <Box
-          component="span"
+        <span
           className="material-icons"
-          sx={{
+          style={{
             fontSize: size,
             color: finalColor,
           }}
         >
           {icon}
-        </Box>
+        </span>
       </Box>
     );
 

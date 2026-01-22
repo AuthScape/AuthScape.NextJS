@@ -5,9 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import LinkIcon from '@mui/icons-material/Link';
-import SyncIcon from '@mui/icons-material/Sync';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-import InfoIcon from '@mui/icons-material/Info';
 import TextField from '@mui/material/TextField';
 import { IconButton, Button, Chip, Tooltip, Snackbar, LinearProgress } from '@mui/material';
 import Stack from '@mui/material/Stack';
@@ -70,12 +68,10 @@ export function CrmRelationshipMappings({ connection, entityMapping, onBack }) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(null);
     const [editingMapping, setEditingMapping] = useState(null);
     const [crmFieldsLoading, setCrmFieldsLoading] = useState(false);
-    const [syncing, setSyncing] = useState(false);
     const [syncingUserLocations, setSyncingUserLocations] = useState(false);
+    const [autoCreateCompany, setAutoCreateCompany] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
     const [syncProgress, setSyncProgress] = useState(null);
-    const [diagnostics, setDiagnostics] = useState(null);
-    const [loadingDiagnostics, setLoadingDiagnostics] = useState(false);
     const hubConnectionRef = useRef(null);
 
     // Form state
@@ -185,7 +181,7 @@ export function CrmRelationshipMappings({ connection, entityMapping, onBack }) {
                         // Clear progress after a short delay
                         setTimeout(() => {
                             setSyncProgress(null);
-                            setSyncing(false);
+                            setSyncingUserLocations(false);
                         }, 2000);
                     }
                 });
@@ -293,71 +289,6 @@ export function CrmRelationshipMappings({ connection, entityMapping, onBack }) {
         }
     };
 
-    const handleSyncRelationships = async () => {
-        setSyncing(true);
-        setSyncProgress({ percentComplete: 0, currentOperation: 'Starting relationship sync...', totalRecords: 0, currentRecord: 0 });
-
-        try {
-            // Join the entity mapping group for progress updates
-            if (hubConnectionRef.current) {
-                await hubConnectionRef.current.invoke('JoinSyncProgress', `entityMapping_${entityMapping.id}`);
-            }
-
-            const response = await apiService().post(`/UserManagement/TriggerCrmRelationshipSync?entityMappingId=${entityMapping.id}`);
-            if (response && response.status === 200) {
-                const result = response.data;
-
-                // Join the sync-specific group if we got a syncId
-                if (result.syncId && hubConnectionRef.current) {
-                    await hubConnectionRef.current.invoke('JoinSyncProgress', result.syncId);
-                }
-
-                if (result.success) {
-                    setSnackbar({
-                        open: true,
-                        message: result.message || `Sync completed: ${result.stats?.updatedCount || 0} records updated`,
-                        severity: 'success'
-                    });
-                } else {
-                    setSnackbar({
-                        open: true,
-                        message: result.message || 'Sync completed with errors',
-                        severity: 'warning'
-                    });
-                }
-            }
-        } catch (error) {
-            console.error("Error syncing relationships:", error);
-            setSnackbar({
-                open: true,
-                message: error.response?.data?.message || 'Sync failed',
-                severity: 'error'
-            });
-            setSyncProgress(null);
-            setSyncing(false);
-        }
-    };
-
-    const fetchDiagnostics = async () => {
-        setLoadingDiagnostics(true);
-        setDiagnostics(null);
-        try {
-            const response = await apiService().get(`/UserManagement/GetCrmSyncDiagnostics?connectionId=${connection.id}`);
-            if (response && response.status === 200) {
-                setDiagnostics(response.data);
-            }
-        } catch (error) {
-            console.error("Error fetching diagnostics:", error);
-            setSnackbar({
-                open: true,
-                message: 'Failed to fetch diagnostics',
-                severity: 'error'
-            });
-        } finally {
-            setLoadingDiagnostics(false);
-        }
-    };
-
     const handleSyncUserLocationsFromCrm = async () => {
         setSyncingUserLocations(true);
         setSyncProgress({ percentComplete: 0, currentOperation: 'Syncing user locations from CRM...', totalRecords: 0, currentRecord: 0 });
@@ -368,7 +299,7 @@ export function CrmRelationshipMappings({ connection, entityMapping, onBack }) {
                 await hubConnectionRef.current.invoke('JoinConnectionProgress', connection.id);
             }
 
-            const response = await apiService().post(`/UserManagement/SyncCrmUserLocations?connectionId=${connection.id}`);
+            const response = await apiService().post(`/UserManagement/SyncCrmUserLocations?connectionId=${connection.id}&autoCreateCompany=${autoCreateCompany}`);
             if (response && response.status === 200) {
                 const result = response.data;
 
@@ -445,41 +376,26 @@ export function CrmRelationshipMappings({ connection, entityMapping, onBack }) {
                         {entityMapping.crmEntityDisplayName || entityMapping.crmEntityName} &rarr; {authScapeEntityLabels[entityMapping.authScapeEntityType]}
                     </Typography>
                 </Box>
-                <Tooltip title="Check CRM sync mappings and diagnose issues">
-                    <span>
-                        <Button
-                            variant="outlined"
-                            color="info"
-                            startIcon={loadingDiagnostics ? <CircularProgress size={16} /> : <InfoIcon />}
-                            onClick={fetchDiagnostics}
-                            disabled={loadingDiagnostics}
-                        >
-                            Diagnostics
-                        </Button>
-                    </span>
-                </Tooltip>
-                <Tooltip title="Pull bcbi_companyid from CRM Contacts to assign LocationId to AuthScape users">
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={autoCreateCompany}
+                            onChange={(e) => setAutoCreateCompany(e.target.checked)}
+                            size="small"
+                        />
+                    }
+                    label={<Typography variant="body2">Auto-create Company</Typography>}
+                />
+                <Tooltip title="Pull location assignments from CRM Contacts based on relationship mapping">
                     <span>
                         <Button
                             variant="outlined"
                             color="secondary"
                             startIcon={syncingUserLocations ? <CircularProgress size={16} /> : <CloudDownloadIcon />}
                             onClick={handleSyncUserLocationsFromCrm}
-                            disabled={syncingUserLocations || syncing}
+                            disabled={syncingUserLocations}
                         >
                             Sync User Locations from CRM
-                        </Button>
-                    </span>
-                </Tooltip>
-                <Tooltip title="Sync only relationship fields (faster than full sync)">
-                    <span>
-                        <Button
-                            variant="outlined"
-                            startIcon={syncing ? <CircularProgress size={16} /> : <SyncIcon />}
-                            onClick={handleSyncRelationships}
-                            disabled={syncing || syncingUserLocations || relationshipMappings.length === 0}
-                        >
-                            Sync Relationships
                         </Button>
                     </span>
                 </Tooltip>
@@ -495,58 +411,8 @@ export function CrmRelationshipMappings({ connection, entityMapping, onBack }) {
                 </Typography>
             </Alert>
 
-            {/* Diagnostics Panel */}
-            {diagnostics && (
-                <Paper sx={{ p: 2, mb: 2 }}>
-                    <Typography variant="h6" sx={{ mb: 2 }}>Sync Diagnostics</Typography>
-                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2, mb: 2 }}>
-                        <Box>
-                            <Typography variant="subtitle2" color="text.secondary">AuthScape Entities</Typography>
-                            <Typography>Users: {diagnostics.totalUsers}</Typography>
-                            <Typography>Locations: {diagnostics.totalLocations}</Typography>
-                            <Typography>Companies: {diagnostics.totalCompanies}</Typography>
-                        </Box>
-                        <Box>
-                            <Typography variant="subtitle2" color="text.secondary">CRM Mappings</Typography>
-                            <Typography>User &rarr; Contact: {diagnostics.userToContactMappings}</Typography>
-                            <Typography>Location &rarr; Account: {diagnostics.locationToAccountMappings}</Typography>
-                            <Typography>Company &rarr; Account: {diagnostics.companyToAccountMappings}</Typography>
-                        </Box>
-                        <Box>
-                            <Typography variant="subtitle2" color="text.secondary">Connection Status</Typography>
-                            <Typography>{diagnostics.connectionStatus}</Typography>
-                            <Typography>Contacts with CompanyId: {diagnostics.contactsWithCompanyId}</Typography>
-                        </Box>
-                    </Box>
-                    {diagnostics.sampleUserMappings?.length > 0 && (
-                        <Box sx={{ mb: 1 }}>
-                            <Typography variant="subtitle2" color="text.secondary">Sample User Mappings:</Typography>
-                            {diagnostics.sampleUserMappings.map((m, i) => (
-                                <Typography key={i} variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{m}</Typography>
-                            ))}
-                        </Box>
-                    )}
-                    {diagnostics.sampleAccountMappings?.length > 0 && (
-                        <Box sx={{ mb: 1 }}>
-                            <Typography variant="subtitle2" color="text.secondary">Sample Account Mappings:</Typography>
-                            {diagnostics.sampleAccountMappings.map((m, i) => (
-                                <Typography key={i} variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{m}</Typography>
-                            ))}
-                        </Box>
-                    )}
-                    {diagnostics.recommendation && (
-                        <Alert severity={diagnostics.userToContactMappings > 0 && (diagnostics.locationToAccountMappings > 0 || diagnostics.companyToAccountMappings > 0) ? 'success' : 'warning'} sx={{ mt: 2 }}>
-                            <Typography variant="body2">{diagnostics.recommendation}</Typography>
-                        </Alert>
-                    )}
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                        <Button size="small" onClick={() => setDiagnostics(null)}>Close</Button>
-                    </Box>
-                </Paper>
-            )}
-
             {/* Progress bar for sync */}
-            {(syncing || syncingUserLocations) && syncProgress && (
+            {syncingUserLocations && syncProgress && (
                 <Paper sx={{ p: 2, mb: 2 }}>
                     <Box sx={{ width: '100%' }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
