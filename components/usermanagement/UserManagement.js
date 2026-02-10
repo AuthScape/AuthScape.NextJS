@@ -1310,31 +1310,76 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                             }
                             else if (platformType == 2) // company
                             {
-                                newId = await onAccountCreated({
-                                    companyName: newCompanyName.current.value
-                                });
+                                const companyName = newCompanyName.current.value;
 
-                                setShowContactDialog(false);
+                                if (!companyName || companyName.trim().length === 0) {
+                                    alert("Please enter a company name.");
+                                    return;
+                                }
 
-                                if (newId != null) {
-                                    setShowUserDetails(newId);
+                                try {
+                                    await apiService().post('/UserManagement/UpdateCompany', {
+                                        id: -1,
+                                        title: companyName.trim(),
+                                        isDeactivated: false,
+                                        locations: [],
+                                        customFields: [],
+                                        domains: []
+                                    });
+
+                                    setShowContactDialog(false);
+                                    setDataGridRefreshKey(dataGridRefreshKey + 1);
+
+                                    if (onAccountCreated) {
+                                        onAccountCreated({
+                                            companyName: companyName.trim()
+                                        });
+                                    }
+                                } catch (error) {
+                                    console.error('Error creating company:', error);
+                                    alert('Error creating company: ' + (error.message || 'Unknown error'));
+                                    return;
                                 }
                             }
                             else if (platformType == 3) // location
                             {
-                                newId = await onAccountCreated({
-                                    Name: newLocationName.current.value,
-                                    address: newLocationAddress.current.value,
-                                    city: newLocationCity.current.value,
-                                    state: newLocationState.current.value,
-                                    postalCode: newLocationPostalCode.current.value,
-                                    companyId: company.id
-                                });
+                                const locationName = newLocationName.current.value;
 
-                                setShowContactDialog(false);
+                                if (!locationName || locationName.trim().length === 0) {
+                                    alert("Please enter a location name.");
+                                    return;
+                                }
 
-                                if (newId != null) {
-                                    setShowUserDetails(newId);
+                                try {
+                                    await apiService().post('/UserManagement/UpdateLocation', {
+                                        id: -1,
+                                        title: locationName.trim(),
+                                        address: newLocationAddress.current.value || null,
+                                        city: newLocationCity.current.value || null,
+                                        state: newLocationState.current.value || null,
+                                        postalCode: newLocationPostalCode.current.value || null,
+                                        companyId: company?.id || null,
+                                        isDeactivated: false,
+                                        customFields: []
+                                    });
+
+                                    setShowContactDialog(false);
+                                    setDataGridRefreshKey(dataGridRefreshKey + 1);
+
+                                    if (onAccountCreated) {
+                                        onAccountCreated({
+                                            name: locationName.trim(),
+                                            address: newLocationAddress.current.value,
+                                            city: newLocationCity.current.value,
+                                            state: newLocationState.current.value,
+                                            postalCode: newLocationPostalCode.current.value,
+                                            companyId: company?.id
+                                        });
+                                    }
+                                } catch (error) {
+                                    console.error('Error creating location:', error);
+                                    alert('Error creating location: ' + (error.message || 'Unknown error'));
+                                    return;
                                 }
                             }
 

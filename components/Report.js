@@ -141,8 +141,32 @@ const getOptionsForChart = (chartId, chartTitle, apiOptions) => {
     return getChartOptions(chartType, chartTitle, customOptions);
 };
 
+// Text Widget Component (for TextReport type 12)
+const WidgetText = ({ widget, width, height }) => {
+    const text = widget.content && widget.content.length > 0 ? widget.content[0] : '';
+    const textTitle = widget.options?.title;
+
+    return (
+        <Box sx={{ width, minHeight: height, p: 2 }}>
+            {textTitle && (
+                <Typography variant="h6" gutterBottom>
+                    {textTitle}
+                </Typography>
+            )}
+            <Typography variant="body1" component="div" sx={{ whiteSpace: 'pre-wrap' }}>
+                {text}
+            </Typography>
+        </Box>
+    );
+};
+
 // Single Widget Chart Component
 const WidgetChart = ({ widget, width, height, title }) => {
+    // Handle TextReport separately (not a Google Chart)
+    if (widget.reportType === 12) {
+        return <WidgetText widget={widget} width={width} height={height} />;
+    }
+
     const reportData = processWidgetData(widget);
     const chartTitle = widget.name || title;
 
@@ -326,6 +350,23 @@ export default function Report({ chartMethod, title = "", payload = null, width 
                             })}
                     </Grid>
                 ))}
+            </Box>
+        );
+    }
+
+    // Legacy single widget - TextReport
+    if (responseChartId === 12 && reportData != null) {
+        const text = reportData.length > 1 ? reportData[1] : '';
+        return (
+            <Box sx={{ width, minHeight: height, p: 2 }}>
+                {title && (
+                    <Typography variant="h6" gutterBottom>
+                        {title}
+                    </Typography>
+                )}
+                <Typography variant="body1" component="div" sx={{ whiteSpace: 'pre-wrap' }}>
+                    {text}
+                </Typography>
             </Box>
         );
     }
