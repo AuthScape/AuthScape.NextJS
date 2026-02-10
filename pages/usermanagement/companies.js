@@ -24,10 +24,7 @@ export default function Companies({}) {
                     alert("uploaded user");
                 }}
                 onAccountCreated={(company) => {
-
-                    alert(company.companyName);
-
-                    return null;
+                    // Company was created successfully
                 }}
                 onCustomTabs={(platformId, identifier) => {
 

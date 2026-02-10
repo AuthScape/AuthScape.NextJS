@@ -190,6 +190,8 @@ export default function PortalLayout({children, currentUser, pageProps}) {
           {name: "Private Label", icon: <BrandingWatermarkRoundedIcon />, subnav: [{name: "Manage", href:"/privateLabel", disabled: false }]},
           {name: "Charts", icon: <PieChartRoundedIcon />, subnav: [
             {name: "Dashboard Report", href:"/charts/dashboardReport", disabled: false },
+            {name: "Text Report", href:"/charts/textReport", disabled: false },
+            {name: "Table Report", href:"/charts/tableReport", disabled: false },
             {name: "Area Chart", href:"/charts/areaChart", disabled: false },
             {name: "Bar Chart", href:"/charts/barChart", disabled: false },
             {name: "Bubble Chart", href:"/charts/bubbleChart", disabled: false },

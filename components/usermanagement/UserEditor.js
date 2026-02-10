@@ -498,8 +498,7 @@ const UserEditor = forwardRef(({userId = null, platformType, onSaved = null, onC
                     }
                   }}
                   onInputChange={(event, newInputValue) => {
-                    // Optional: Update input handling logic
-                    setInputCompanyValue(newInputValue);
+                    setInputLocationValue(newInputValue);
                   }}
                   renderInput={(params) => (
                     <TextField {...params} label="Location" fullWidth />

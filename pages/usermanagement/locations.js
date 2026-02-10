@@ -24,10 +24,7 @@ export default function Companies({}) {
                     alert("uploaded user");
                 }}
                 onAccountCreated={(location) => {
-
-                    alert(JSON.stringify(location));
-
-                    return null;
+                    // Location was created successfully
                 }}
 
                 onCustomTabs={(platformId, identifier) => {
