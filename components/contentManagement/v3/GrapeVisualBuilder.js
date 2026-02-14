@@ -26,12 +26,12 @@ const GrapeEditor = dynamic(() => import('./GrapeEditor'), {
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#f0f0f0',
         gap: 2,
       }}
     >
       <CircularProgress sx={{ color: '#1976d2' }} />
-      <Typography sx={{ color: '#e0e0e0' }}>Loading editor...</Typography>
+      <Typography sx={{ color: '#6d7882' }}>Loading editor...</Typography>
     </Box>
   ),
 });
@@ -160,7 +160,7 @@ export default function GrapeVisualBuilder() {
         right: 0,
         bottom: 0,
         zIndex: 1300,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#f0f0f0',
       }}
     >
       {loading ? (
@@ -175,7 +175,7 @@ export default function GrapeVisualBuilder() {
           }}
         >
           <CircularProgress sx={{ color: '#1976d2' }} />
-          <Typography sx={{ color: '#e0e0e0' }}>Loading page content...</Typography>
+          <Typography sx={{ color: '#6d7882' }}>Loading page content...</Typography>
         </Box>
       ) : (
         <GrapeEditor
@@ -185,6 +185,7 @@ export default function GrapeVisualBuilder() {
           oemCompanyId={oemCompanyId}
           onSave={handleSave}
           onClose={handleClose}
+          enableAIPrompt
         />
       )}
     </Box>,

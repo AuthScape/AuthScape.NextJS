@@ -3,20 +3,33 @@ import { Box, Paper, alpha, Divider } from '@mui/material';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import QuestionAnswerOutlinedIcon from '@mui/icons-material/QuestionAnswerOutlined';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
+import Tooltip from '@mui/material/Tooltip';
 import scrollIntoView from 'scroll-into-view-if-needed'
 import Stack from '@mui/material/Stack';
 import { apiService } from 'authscape';
 import { useTheme } from '@mui/material';
+import { formatDistanceToNow } from 'date-fns';
 
-export function Comments({ticketId, isNote, isDisabled, currentUser}) {
+export function Comments({ticketId, isNote, isDisabled, currentUser, onCountChange}) {
 
     const theme = useTheme();
     const [comments, setComments] = useState([]);
     const [message, setMessage] = useState("");
     const messagesEndRef = useRef(null);
+
+    const formatRelativeTime = (dateStr) => {
+        try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            return formatDistanceToNow(date, { addSuffix: true });
+        } catch {
+            return dateStr;
+        }
+    };
 
     const reloadMessages = async () => {
 
@@ -24,6 +37,9 @@ export function Comments({ticketId, isNote, isDisabled, currentUser}) {
         if (response != null && response.status == 200)
         {
             setComments(response.data);
+            if (onCountChange) {
+                onCountChange(response.data.length);
+            }
         }
 
         setTimeout(() => {
@@ -50,12 +66,12 @@ export function Comments({ticketId, isNote, isDisabled, currentUser}) {
 
     const SendMessage = async () => {
 
-        if (message !== "")
+        if (message.trim() !== "")
         {
             let response = await apiService().post("/Ticket/CreateMessage", {
                 ticketId: ticketId,
                 name: currentUser.firstName,
-                message: message,
+                message: message.trim(),
                 createdByUserId: currentUser.id,
                 isNote: isNote
             });
@@ -81,6 +97,25 @@ export function Comments({ticketId, isNote, isDisabled, currentUser}) {
             borderRadius: 2,
             overflow: 'hidden'
         }}>
+            {/* Internal notes banner */}
+            {isNote && (
+                <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    px: 2,
+                    py: 1,
+                    bgcolor: alpha(theme.palette.warning.main, 0.08),
+                    borderBottom: `1px solid ${alpha(theme.palette.warning.main, 0.15)}`,
+                    color: theme.palette.mode === 'dark' ? 'warning.light' : 'warning.dark'
+                }}>
+                    <LockRoundedIcon sx={{ fontSize: 14 }} />
+                    <Typography variant="caption" fontWeight={500}>
+                        Internal notes — not visible to customers
+                    </Typography>
+                </Box>
+            )}
+
             <Box sx={{
                 flex: "1 1 auto",
                 overflow:"auto",
@@ -136,9 +171,11 @@ export function Comments({ticketId, isNote, isDisabled, currentUser}) {
                                             <Typography variant="body2" fontWeight={600}>
                                                 {comment.firstName}
                                             </Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {comment.created}
-                                            </Typography>
+                                            <Tooltip title={comment.created} arrow>
+                                                <Typography variant="caption" color="text.secondary" sx={{ cursor: 'default' }}>
+                                                    {formatRelativeTime(comment.created)}
+                                                </Typography>
+                                            </Tooltip>
                                         </Box>
                                         <Paper
                                             elevation={0}
@@ -193,7 +230,7 @@ export function Comments({ticketId, isNote, isDisabled, currentUser}) {
                         disabled={isDisabled}
                         multiline
                         maxRows={4}
-                        onKeyUp={(event) => {
+                        onKeyDown={(event) => {
                             if (event.key === "Enter" && !event.shiftKey)
                             {
                                 event.preventDefault();

@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Box, Button, CircularProgress, Typography, IconButton, Tooltip, Tabs, Tab } from '@mui/material';
+import { Box, Button, CircularProgress, Typography, IconButton, Tooltip, Tabs, Tab, TextField, InputAdornment } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SaveIcon from '@mui/icons-material/Save';
 import UndoIcon from '@mui/icons-material/Undo';
@@ -15,6 +15,9 @@ import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import LayersIcon from '@mui/icons-material/Layers';
 import BrushIcon from '@mui/icons-material/Brush';
 import SettingsIcon from '@mui/icons-material/Settings';
+import SearchIcon from '@mui/icons-material/Search';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import grapesjs from 'grapesjs';
 import { apiService } from 'authscape';
 import * as signalR from '@microsoft/signalr';
@@ -254,6 +257,8 @@ export default function GrapeEditor({
   // User-defined custom blocks and components
   userBlocks = [],
   userComponents = null,
+  // AI prompt integration
+  enableAIPrompt = false,
 }) {
   const editorRef = useRef(null);
   const containerRef = useRef(null);
@@ -269,9 +274,12 @@ export default function GrapeEditor({
   const [device, setDevice] = useState('Desktop');
   const [isAIBuilding, setIsAIBuilding] = useState(false);
   const [aiBuildingMessage, setAiBuildingMessage] = useState('');
+  const [blockSearchQuery, setBlockSearchQuery] = useState('');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiGenerating, setAiGenerating] = useState(false);
   const signalRConnectionRef = useRef(null);
 
-  // Inject global CSS to hide URL input in GrapeJS asset manager
+  // Inject global CSS to hide URL input in GrapeJS asset manager + light theme overrides
   useEffect(() => {
     const styleId = 'grapejs-asset-manager-custom-styles';
     let styleEl = document.getElementById(styleId);
@@ -295,6 +303,260 @@ export default function GrapeEditor({
           width: 100% !important;
           min-height: 200px !important;
         }
+
+        /* ===== Light Theme - Asset Manager Modal ===== */
+        .gjs-mdl-dialog {
+          background-color: #ffffff !important;
+          color: #333333 !important;
+          border-radius: 8px !important;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+        }
+        .gjs-mdl-header {
+          background-color: #fafafa !important;
+          border-bottom: 1px solid #e0e0e0 !important;
+          color: #333333 !important;
+        }
+        .gjs-mdl-title {
+          color: #333333 !important;
+          font-weight: 600 !important;
+        }
+        .gjs-mdl-btn-close {
+          color: #6d7882 !important;
+        }
+        .gjs-mdl-content {
+          background-color: #ffffff !important;
+        }
+        .gjs-am-file-uploader #gjs-am-uploadFile {
+          background-color: #f8f9fa !important;
+          border: 2px dashed #d5d8dc !important;
+          border-radius: 8px !important;
+          color: #6d7882 !important;
+          transition: all 0.2s !important;
+        }
+        .gjs-am-file-uploader #gjs-am-uploadFile:hover {
+          border-color: #1976d2 !important;
+          background-color: #f0f7ff !important;
+        }
+        .gjs-am-assets-cont {
+          background-color: #ffffff !important;
+        }
+        .gjs-am-asset-image .gjs-am-preview-cont {
+          background-color: #ffffff !important;
+          border: 1px solid #e0e0e0 !important;
+          border-radius: 4px !important;
+        }
+        .gjs-am-meta {
+          color: #333333 !important;
+        }
+        .gjs-am-close {
+          color: #6d7882 !important;
+        }
+
+        /* ===== Light Theme - Scrollbar Styling ===== */
+        .gjs-editor-cont ::-webkit-scrollbar,
+        .gjs-blocks-c::-webkit-scrollbar,
+        .gjs-sm-sectors::-webkit-scrollbar,
+        .gjs-layers::-webkit-scrollbar {
+          width: 6px !important;
+        }
+        .gjs-editor-cont ::-webkit-scrollbar-track,
+        .gjs-blocks-c::-webkit-scrollbar-track,
+        .gjs-sm-sectors::-webkit-scrollbar-track,
+        .gjs-layers::-webkit-scrollbar-track {
+          background: transparent !important;
+        }
+        .gjs-editor-cont ::-webkit-scrollbar-thumb,
+        .gjs-blocks-c::-webkit-scrollbar-thumb,
+        .gjs-sm-sectors::-webkit-scrollbar-thumb,
+        .gjs-layers::-webkit-scrollbar-thumb {
+          background-color: #d5d8dc !important;
+          border-radius: 3px !important;
+        }
+        .gjs-editor-cont ::-webkit-scrollbar-thumb:hover,
+        .gjs-blocks-c::-webkit-scrollbar-thumb:hover,
+        .gjs-sm-sectors::-webkit-scrollbar-thumb:hover,
+        .gjs-layers::-webkit-scrollbar-thumb:hover {
+          background-color: #bbb !important;
+        }
+
+        /* ===== Light Theme - RTE Toolbar ===== */
+        .gjs-rte-toolbar {
+          background-color: #ffffff !important;
+          border: 1px solid #e0e0e0 !important;
+          border-radius: 6px !important;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+        }
+        .gjs-rte-action {
+          color: #333333 !important;
+          border-right: 1px solid #e0e0e0 !important;
+        }
+        .gjs-rte-action:hover {
+          background-color: rgba(0,0,0,0.04) !important;
+        }
+        .gjs-rte-active {
+          background-color: #e3f2fd !important;
+          color: #1976d2 !important;
+        }
+
+        /* ===== Light Theme - Selector Manager ===== */
+        .gjs-clm-tags {
+          background-color: #ffffff !important;
+          color: #333333 !important;
+        }
+        .gjs-clm-tag {
+          background-color: #e3f2fd !important;
+          color: #1976d2 !important;
+        }
+
+        /* ===== Light Theme - Block Cards ===== */
+        .gjs-block {
+          background-color: #ffffff !important;
+          border: 1px solid #e8e8e8 !important;
+          border-radius: 8px !important;
+          color: #6d7882 !important;
+        }
+        .gjs-block:hover {
+          border-color: #1976d2 !important;
+          background-color: #f8fbff !important;
+          box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08) !important;
+        }
+        .gjs-block svg,
+        .gjs-block svg path {
+          color: #6d7882 !important;
+          fill: currentColor !important;
+        }
+        .gjs-block-label {
+          color: #6d7882 !important;
+          font-weight: 500 !important;
+        }
+
+        /* ===== Light Theme - Block Categories ===== */
+        .gjs-block-category {
+          background-color: #ffffff !important;
+        }
+        .gjs-block-category .gjs-title {
+          background-color: #ffffff !important;
+          color: #6d7882 !important;
+          border-bottom: 1px solid #e8e8e8 !important;
+          font-weight: 600 !important;
+          font-size: 11px !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.5px !important;
+        }
+        .gjs-blocks-c {
+          background-color: #ffffff !important;
+        }
+
+        /* ===== Light Theme - Style Manager ===== */
+        .gjs-sm-sector {
+          background-color: #ffffff !important;
+          border-bottom: 1px solid #e0e0e0 !important;
+        }
+        .gjs-sm-sector-title {
+          background-color: #f8f9fa !important;
+          color: #333333 !important;
+          font-weight: 600 !important;
+        }
+        .gjs-sm-sector-title:hover {
+          background-color: #f0f0f0 !important;
+        }
+        .gjs-sm-label {
+          color: #6d7882 !important;
+          font-weight: 500 !important;
+        }
+        .gjs-sm-properties {
+          background-color: #ffffff !important;
+        }
+        .gjs-field {
+          background-color: #ffffff !important;
+          border: 1px solid #d5d8dc !important;
+          border-radius: 4px !important;
+          color: #333333 !important;
+        }
+        .gjs-field:focus-within {
+          border-color: #1976d2 !important;
+        }
+        .gjs-field input,
+        .gjs-field textarea {
+          color: #333333 !important;
+          background-color: transparent !important;
+        }
+        .gjs-field select {
+          color: #333333 !important;
+          background-color: #ffffff !important;
+        }
+        .gjs-field-arrows {
+          color: #93989c !important;
+        }
+        .gjs-radio-item {
+          color: #93989c !important;
+        }
+        .gjs-radio-item-label {
+          color: #93989c !important;
+          border: 1px solid #d5d8dc !important;
+          background-color: #ffffff !important;
+        }
+        .gjs-radio-item input:checked + .gjs-radio-item-label {
+          color: #1976d2 !important;
+          background-color: rgba(25, 118, 210, 0.08) !important;
+          border-color: #1976d2 !important;
+        }
+
+        /* ===== Light Theme - Traits Panel ===== */
+        .gjs-trt-traits {
+          background-color: #ffffff !important;
+        }
+        .gjs-trt-trait {
+          background-color: #ffffff !important;
+        }
+        .gjs-trt-trait .gjs-label {
+          color: #6d7882 !important;
+          font-weight: 500 !important;
+        }
+
+        /* ===== Light Theme - Layers Panel ===== */
+        .gjs-layer {
+          background-color: #ffffff !important;
+          color: #333333 !important;
+          border-bottom: 1px solid #e8e8e8 !important;
+        }
+        .gjs-layer:hover {
+          background-color: #f0f3f5 !important;
+        }
+        .gjs-layer.gjs-selected {
+          background-color: #e3f2fd !important;
+          color: #1976d2 !important;
+        }
+        .gjs-layer-title {
+          background-color: transparent !important;
+        }
+        .gjs-layer-name {
+          color: inherit !important;
+        }
+        .gjs-layer-caret {
+          color: #93989c !important;
+        }
+        .gjs-layer-vis {
+          color: #93989c !important;
+        }
+        .gjs-layers {
+          background-color: #ffffff !important;
+        }
+
+        /* ===== Light Theme - Editor Container ===== */
+        .gjs-one-bg {
+          background-color: #ffffff !important;
+        }
+        .gjs-two-color {
+          color: #333333 !important;
+        }
+        .gjs-three-bg {
+          background-color: #f8f9fa !important;
+        }
+        .gjs-four-color,
+        .gjs-four-color-h:hover {
+          color: #1976d2 !important;
+        }
       `;
       document.head.appendChild(styleEl);
     }
@@ -303,6 +565,27 @@ export default function GrapeEditor({
       // Don't remove on unmount as other editors might use it
     };
   }, []);
+
+  // Block search filter
+  useEffect(() => {
+    if (!blocksContainerRef.current) return;
+
+    const query = blockSearchQuery.toLowerCase().trim();
+    const blocks = blocksContainerRef.current.querySelectorAll('.gjs-block');
+    const categories = blocksContainerRef.current.querySelectorAll('.gjs-block-category');
+
+    blocks.forEach((block) => {
+      const label = block.querySelector('.gjs-block-label');
+      const text = label ? label.textContent.toLowerCase() : '';
+      block.style.display = !query || text.includes(query) ? '' : 'none';
+    });
+
+    categories.forEach((cat) => {
+      const catBlocks = cat.querySelectorAll('.gjs-block');
+      const allHidden = Array.from(catBlocks).every((b) => b.style.display === 'none');
+      cat.style.display = allHidden ? 'none' : '';
+    });
+  }, [blockSearchQuery]);
 
   // SignalR connection for real-time updates from AI Designer
   useEffect(() => {
@@ -746,8 +1029,38 @@ export default function GrapeEditor({
     }
   }, [hasChanges, onClose]);
 
+  // AI prompt submit handler
+  const handleAIPrompt = useCallback(async () => {
+    if (!editor || !aiPrompt.trim() || aiGenerating) return;
+
+    setAiGenerating(true);
+    try {
+      const currentHtml = editor.getHtml();
+      const currentCss = editor.getCss();
+
+      await apiService().post('/AIDesigner/GenerateFromPrompt', {
+        pageId,
+        prompt: aiPrompt.trim(),
+        currentHtml,
+        currentCss,
+      });
+
+      // Clear the prompt on success — SignalR handles the content update
+      setAiPrompt('');
+    } catch (error) {
+      console.error('AI generation error:', error);
+      setAiBuildingMessage('Generation failed. Please try again.');
+      setTimeout(() => {
+        setIsAIBuilding(false);
+        setAiBuildingMessage('');
+      }, 3000);
+    } finally {
+      setAiGenerating(false);
+    }
+  }, [editor, aiPrompt, aiGenerating, pageId]);
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#1e1e1e' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f0f0f0' }}>
       {/* Header Toolbar */}
       <Box
         sx={{
@@ -756,8 +1069,10 @@ export default function GrapeEditor({
           justifyContent: 'space-between',
           px: 2,
           py: 1,
-          borderBottom: '1px solid #333',
-          bgcolor: '#252525',
+          borderBottom: '1px solid #e0e0e0',
+          bgcolor: '#ffffff',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+          zIndex: 10,
         }}
       >
         {/* Left section */}
@@ -765,20 +1080,20 @@ export default function GrapeEditor({
           <Button
             startIcon={<ArrowBackIcon />}
             onClick={handleClose}
-            sx={{ color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+            sx={{ color: '#333333', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}
           >
             Back
           </Button>
-          <Typography sx={{ color: '#fff', fontWeight: 500 }}>
+          <Typography sx={{ color: '#333333', fontWeight: 600 }}>
             {pageTitle || 'Untitled Page'}
           </Typography>
           {hasChanges && (
-            <Typography sx={{ color: '#ffa500', fontSize: 12 }}>
+            <Typography sx={{ color: '#e67e22', fontSize: 12, fontWeight: 500 }}>
               (unsaved changes)
             </Typography>
           )}
           {isAIBuilding && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2, px: 2, py: 0.5, bgcolor: 'rgba(102, 126, 234, 0.2)', borderRadius: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2, px: 2, py: 0.5, bgcolor: 'rgba(102, 126, 234, 0.1)', borderRadius: 2 }}>
               <CircularProgress size={14} sx={{ color: '#667eea' }} />
               <Typography sx={{ color: '#667eea', fontSize: 12, fontWeight: 500 }}>
                 {aiBuildingMessage || 'AI is generating...'}
@@ -788,13 +1103,13 @@ export default function GrapeEditor({
         </Box>
 
         {/* Center - Device buttons */}
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
           <Tooltip title="Desktop">
             <IconButton
               onClick={() => handleDeviceChange('Desktop')}
               sx={{
-                color: device === 'Desktop' ? '#1976d2' : '#888',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+                color: device === 'Desktop' ? '#1976d2' : '#93989c',
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
               }}
             >
               <DesktopWindowsIcon />
@@ -804,8 +1119,8 @@ export default function GrapeEditor({
             <IconButton
               onClick={() => handleDeviceChange('Tablet')}
               sx={{
-                color: device === 'Tablet' ? '#1976d2' : '#888',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+                color: device === 'Tablet' ? '#1976d2' : '#93989c',
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
               }}
             >
               <TabletMacIcon />
@@ -815,8 +1130,8 @@ export default function GrapeEditor({
             <IconButton
               onClick={() => handleDeviceChange('Mobile')}
               sx={{
-                color: device === 'Mobile' ? '#1976d2' : '#888',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+                color: device === 'Mobile' ? '#1976d2' : '#93989c',
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
               }}
             >
               <PhoneIphoneIcon />
@@ -825,11 +1140,11 @@ export default function GrapeEditor({
         </Box>
 
         {/* Right section */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <Tooltip title="Undo">
             <IconButton
               onClick={handleUndo}
-              sx={{ color: '#888', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+              sx={{ color: '#93989c', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}
             >
               <UndoIcon />
             </IconButton>
@@ -837,7 +1152,7 @@ export default function GrapeEditor({
           <Tooltip title="Redo">
             <IconButton
               onClick={handleRedo}
-              sx={{ color: '#888', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+              sx={{ color: '#93989c', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}
             >
               <RedoIcon />
             </IconButton>
@@ -847,7 +1162,15 @@ export default function GrapeEditor({
             startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
             onClick={handleSave}
             disabled={saving}
-            sx={{ ml: 1 }}
+            sx={{
+              ml: 1,
+              bgcolor: '#1976d2',
+              textTransform: 'none',
+              fontWeight: 600,
+              borderRadius: 2,
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#1565c0', boxShadow: 'none' },
+            }}
           >
             {saving ? 'Saving...' : 'Save'}
           </Button>
@@ -856,34 +1179,68 @@ export default function GrapeEditor({
 
       {/* Main Editor Area */}
       <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* Left Panel - Blocks */}
+        {/* Left Panel - Elementor-Style Blocks */}
         <Box
           sx={{
             width: 280,
-            bgcolor: '#252525',
-            borderRight: '1px solid #333',
+            bgcolor: '#ffffff',
+            borderRight: '1px solid #e0e0e0',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
           }}
         >
+          {/* Panel Header */}
           <Typography
             sx={{
-              p: 2,
-              color: '#fff',
+              px: 2,
+              py: 1.5,
+              fontSize: 12,
               fontWeight: 600,
-              borderBottom: '1px solid #333',
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase',
+              color: '#6d7882',
+              borderBottom: '1px solid #e0e0e0',
             }}
           >
-            Components
+            Elements
           </Typography>
+
+          {/* Search Input */}
+          <Box sx={{ px: 1.5, py: 1.5, borderBottom: '1px solid #e0e0e0' }}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Search widget..."
+                value={blockSearchQuery}
+                onChange={(e) => setBlockSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ fontSize: 18, color: '#93989c' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    bgcolor: '#f5f5f5',
+                    fontSize: 13,
+                    '& fieldset': { borderColor: '#e0e0e0' },
+                    '&:hover fieldset': { borderColor: '#d5d8dc' },
+                    '&.Mui-focused fieldset': { borderColor: '#1976d2' },
+                  },
+                }}
+              />
+            </Box>
+
+          {/* Block Grid */}
           <Box
             ref={blocksContainerRef}
             sx={{
               flex: 1,
               overflow: 'auto',
               p: 1,
-              // GrapeJS block styles
+              // GrapeJS block styles — Elementor-style light theme
               '& .gjs-blocks-c': {
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -893,20 +1250,23 @@ export default function GrapeEditor({
                 width: '100%',
               },
               '& .gjs-block-category .gjs-title': {
-                bgcolor: '#2a2a2a',
-                color: '#e0e0e0',
+                bgcolor: '#ffffff',
+                color: '#6d7882',
                 p: 1,
-                borderBottom: '1px solid #333',
-                fontWeight: 500,
+                borderBottom: '1px solid #e8e8e8',
+                fontWeight: 600,
+                fontSize: 11,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
               },
               '& .gjs-block': {
                 width: 'calc(50% - 10px)',
                 minHeight: 80,
                 m: '5px',
                 p: 1,
-                bgcolor: '#333',
-                border: '1px solid #444',
-                borderRadius: 1,
+                bgcolor: '#ffffff',
+                border: '1px solid #e8e8e8',
+                borderRadius: 2,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -915,93 +1275,177 @@ export default function GrapeEditor({
                 transition: 'all 0.2s',
                 '&:hover': {
                   borderColor: '#1976d2',
-                  bgcolor: '#3a3a3a',
+                  bgcolor: '#f8fbff',
+                  boxShadow: '0 2px 8px rgba(25, 118, 210, 0.08)',
                 },
               },
               '& .gjs-block svg': {
-                color: '#888',
+                color: '#6d7882',
                 mb: 0.5,
               },
               '& .gjs-block-label': {
                 fontSize: 11,
-                color: '#aaa',
+                color: '#6d7882',
                 textAlign: 'center',
+                fontWeight: 500,
               },
             }}
           />
+
         </Box>
 
         {/* Canvas Area */}
-        <Box
-          ref={containerRef}
-          sx={{
-            flex: 1,
-            overflow: 'hidden',
-            position: 'relative',
-            // GrapeJS editor container styles
-            '& .gjs-editor': {
-              height: '100%',
-            },
-            '& .gjs-cv-canvas': {
+        <Box sx={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          <Box
+            ref={containerRef}
+            sx={{
               width: '100%',
               height: '100%',
-              top: 0,
-              left: 0,
-              backgroundColor: '#f0f0f0',
-            },
-            '& .gjs-frame-wrapper': {
-              backgroundColor: '#fff',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            },
-            // Drag indicator styles
-            '& .gjs-highlighter': {
-              outline: '2px solid #1976d2 !important',
-              outlineOffset: '-2px',
-            },
-            '& .gjs-placeholder': {
-              border: '2px dashed #1976d2 !important',
-              backgroundColor: 'rgba(25, 118, 210, 0.1) !important',
-            },
-            '& .gjs-selected': {
-              outline: '2px solid #1976d2 !important',
-              outlineOffset: '-2px',
-            },
-            '& .gjs-hovered': {
-              outline: '1px dashed #888 !important',
-            },
-            // Component toolbar
-            '& .gjs-toolbar': {
-              backgroundColor: '#1976d2',
-            },
-            '& .gjs-toolbar-item': {
-              color: '#fff',
-            },
-            // RTE toolbar
-            '& .gjs-rte-toolbar': {
-              backgroundColor: '#333',
-              border: '1px solid #444',
-              borderRadius: '4px',
-            },
-            '& .gjs-rte-action': {
-              color: '#e0e0e0',
-              '&:hover': {
-                backgroundColor: '#444',
+              overflow: 'hidden',
+              // GrapeJS editor container styles
+              '& .gjs-editor': {
+                height: '100%',
               },
-            },
-            // Badge
-            '& .gjs-badge': {
-              backgroundColor: '#1976d2',
-              color: '#fff',
-            },
-          }}
-        />
+              '& .gjs-cv-canvas': {
+                width: '100%',
+                height: '100%',
+                top: 0,
+                left: 0,
+                backgroundColor: '#f0f0f0',
+              },
+              '& .gjs-frame-wrapper': {
+                backgroundColor: '#fff',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+              },
+              // Drag indicator styles
+              '& .gjs-highlighter': {
+                outline: '2px solid #1976d2 !important',
+                outlineOffset: '-2px',
+              },
+              '& .gjs-placeholder': {
+                border: '2px dashed #1976d2 !important',
+                backgroundColor: 'rgba(25, 118, 210, 0.1) !important',
+              },
+              '& .gjs-selected': {
+                outline: '2px solid #1976d2 !important',
+                outlineOffset: '-2px',
+              },
+              '& .gjs-hovered': {
+                outline: '1px dashed #888 !important',
+              },
+              // Component toolbar
+              '& .gjs-toolbar': {
+                backgroundColor: '#1976d2',
+              },
+              '& .gjs-toolbar-item': {
+                color: '#fff',
+              },
+              // RTE toolbar
+              '& .gjs-rte-toolbar': {
+                backgroundColor: '#ffffff',
+                border: '1px solid #e0e0e0',
+                borderRadius: '6px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              },
+              '& .gjs-rte-action': {
+                color: '#333333',
+                '&:hover': {
+                  backgroundColor: 'rgba(0,0,0,0.04)',
+                },
+              },
+              // Badge
+              '& .gjs-badge': {
+                backgroundColor: '#1976d2',
+                color: '#fff',
+              },
+            }}
+          />
+
+          {/* AI Prompt Bar */}
+          {enableAIPrompt && (
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 24,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '90%',
+                maxWidth: 640,
+                zIndex: 20,
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  bgcolor: '#ffffff',
+                  borderRadius: '28px',
+                  border: '1px solid #e0e0e0',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                  px: 2,
+                  py: 1,
+                }}
+              >
+                <AutoAwesomeRoundedIcon sx={{ color: '#1976d2', fontSize: 22 }} />
+                <TextField
+                  fullWidth
+                  variant="standard"
+                  placeholder="Describe what you want to build..."
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  disabled={aiGenerating}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleAIPrompt();
+                    }
+                  }}
+                  multiline
+                  maxRows={3}
+                  InputProps={{ disableUnderline: true }}
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      fontSize: 14,
+                      color: '#333333',
+                      '&::placeholder': { color: '#93989c' },
+                    },
+                  }}
+                />
+                <IconButton
+                  onClick={handleAIPrompt}
+                  disabled={!aiPrompt.trim() || aiGenerating}
+                  sx={{
+                    bgcolor: aiPrompt.trim() && !aiGenerating ? '#1976d2' : 'transparent',
+                    color: aiPrompt.trim() && !aiGenerating ? '#ffffff' : '#93989c',
+                    width: 36,
+                    height: 36,
+                    '&:hover': {
+                      bgcolor: aiPrompt.trim() && !aiGenerating ? '#1565c0' : 'rgba(0,0,0,0.04)',
+                    },
+                    '&.Mui-disabled': {
+                      bgcolor: 'transparent',
+                      color: '#d5d8dc',
+                    },
+                  }}
+                >
+                  {aiGenerating ? (
+                    <CircularProgress size={18} sx={{ color: '#1976d2' }} />
+                  ) : (
+                    <SendRoundedIcon fontSize="small" />
+                  )}
+                </IconButton>
+              </Box>
+            </Box>
+          )}
+        </Box>
 
         {/* Right Panel - Styles/Settings/Layers */}
         <Box
           sx={{
             width: 300,
-            bgcolor: '#252525',
-            borderLeft: '1px solid #333',
+            bgcolor: '#ffffff',
+            borderLeft: '1px solid #e0e0e0',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
@@ -1013,14 +1457,18 @@ export default function GrapeEditor({
             onChange={(e, v) => setRightPanelTab(v)}
             variant="fullWidth"
             sx={{
-              borderBottom: '1px solid #333',
+              bgcolor: '#fafafa',
+              borderBottom: '1px solid #e0e0e0',
               minHeight: 48,
               '& .MuiTab-root': {
                 minHeight: 48,
-                color: '#888',
+                color: '#93989c',
+                fontSize: 12,
+                fontWeight: 600,
+                textTransform: 'uppercase',
                 '&.Mui-selected': { color: '#1976d2' },
               },
-              '& .MuiTabs-indicator': { bgcolor: '#1976d2' },
+              '& .MuiTabs-indicator': { bgcolor: '#1976d2', height: 2 },
             }}
           >
             <Tab icon={<BrushIcon fontSize="small" />} label="Style" />
@@ -1035,16 +1483,18 @@ export default function GrapeEditor({
               flex: 1,
               overflow: 'auto',
               display: rightPanelTab === 0 ? 'block' : 'none',
-              // GrapeJS style manager styles
+              // GrapeJS style manager — light theme
               '& .gjs-sm-sector': {
-                borderBottom: '1px solid #333',
+                borderBottom: '1px solid #e0e0e0',
               },
               '& .gjs-sm-sector-title': {
-                bgcolor: '#2a2a2a',
-                color: '#e0e0e0',
+                bgcolor: '#f8f9fa',
+                color: '#333333',
                 p: 1.5,
                 cursor: 'pointer',
-                '&:hover': { bgcolor: '#333' },
+                fontWeight: 600,
+                fontSize: 12,
+                '&:hover': { bgcolor: '#f0f0f0' },
               },
               '& .gjs-sm-properties': {
                 p: 1.5,
@@ -1053,31 +1503,36 @@ export default function GrapeEditor({
                 mb: 1.5,
               },
               '& .gjs-sm-label': {
-                color: '#aaa',
+                color: '#6d7882',
                 fontSize: 12,
                 mb: 0.5,
+                fontWeight: 500,
               },
               '& .gjs-field': {
-                bgcolor: '#333',
-                border: '1px solid #444',
+                bgcolor: '#ffffff',
+                border: '1px solid #d5d8dc',
                 borderRadius: 1,
-                color: '#e0e0e0',
+                color: '#333333',
+                '&:focus-within': {
+                  borderColor: '#1976d2',
+                },
               },
               '& .gjs-field input': {
-                color: '#e0e0e0',
+                color: '#333333',
               },
               '& .gjs-field select': {
-                color: '#e0e0e0',
-                bgcolor: '#333',
+                color: '#333333',
+                bgcolor: '#ffffff',
               },
               '& .gjs-radio-item': {
-                color: '#888',
+                color: '#93989c',
               },
               '& .gjs-radio-item-label': {
-                color: '#888',
+                color: '#93989c',
               },
               '& .gjs-radio-item input:checked + .gjs-radio-item-label': {
                 color: '#1976d2',
+                bgcolor: 'rgba(25, 118, 210, 0.08)',
               },
             }}
           />
@@ -1094,17 +1549,21 @@ export default function GrapeEditor({
                 mb: 2,
               },
               '& .gjs-label': {
-                color: '#aaa',
+                color: '#6d7882',
                 fontSize: 12,
                 mb: 0.5,
+                fontWeight: 500,
               },
               '& .gjs-field': {
-                bgcolor: '#333',
-                border: '1px solid #444',
+                bgcolor: '#ffffff',
+                border: '1px solid #d5d8dc',
                 borderRadius: 1,
+                '&:focus-within': {
+                  borderColor: '#1976d2',
+                },
               },
               '& .gjs-field input': {
-                color: '#e0e0e0',
+                color: '#333333',
               },
             }}
           />
@@ -1117,18 +1576,28 @@ export default function GrapeEditor({
               overflow: 'auto',
               display: rightPanelTab === 2 ? 'block' : 'none',
               '& .gjs-layer': {
-                bgcolor: '#2a2a2a',
-                color: '#e0e0e0',
-                borderBottom: '1px solid #333',
+                bgcolor: '#ffffff',
+                color: '#333333',
+                borderBottom: '1px solid #e8e8e8',
               },
               '& .gjs-layer:hover': {
-                bgcolor: '#333',
+                bgcolor: '#f0f3f5',
               },
               '& .gjs-layer.gjs-selected': {
-                bgcolor: '#1976d2',
+                bgcolor: '#e3f2fd',
+                color: '#1976d2',
               },
               '& .gjs-layer-title': {
                 p: 1,
+              },
+              '& .gjs-layer-name': {
+                color: 'inherit',
+              },
+              '& .gjs-layer-count': {
+                color: '#93989c',
+              },
+              '& .gjs-layer-vis': {
+                color: '#93989c',
               },
             }}
           />
