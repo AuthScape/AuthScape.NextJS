@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react';
 import { Box } from '@mui/system';
-import { AppBar, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, InputLabel, Menu, MenuItem, Select, TextField, Toolbar, Tooltip, Typography, useTheme } from '@mui/material';
+import { AppBar, Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, InputLabel, Menu, MenuItem, Select, TextField, Toolbar, Tooltip, Typography, useTheme } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import UploadRoundedIcon from '@mui/icons-material/UploadRounded';
 import { EditableDatagrid, FileUploader, AutoSaveTextField, apiService } from 'authscape';
@@ -55,6 +55,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
     const [confirmPassword, setConfirmPassword] = useState(null);
 
     const [dataGridRefreshKey, setDataGridRefreshKey] = useState(0);
+    const [isSaving, setIsSaving] = useState(false);
     const [uploadUsersShowDialog, setUploadUsersShowDialog] = useState(false);
 
     const [searchByName, setSearchByName] = useState('');
@@ -567,6 +568,7 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                             <Box sx={{paddingRight:2, paddingLeft:2}}>
                                 <Button variant="text" startIcon={<SaveRoundedIcon />} onClick={async () => {
 
+                                    setIsSaving(true);
                                     userEditorRef.current.saveChanges(true);
                                     setShowUserDetails(null);
 
@@ -871,8 +873,8 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
 
                     {!showCustomSettings &&
                     <Box>
-                        {(showUserDetails == null && defaultIdentifier == null) &&
-                     
+                        {(showUserDetails == null && defaultIdentifier == null && !isSaving) &&
+
                         <EditableDatagrid 
                             key={dataGridRefreshKey}
                             height={height}
@@ -907,7 +909,8 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                             userId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
                                             onSaved={(shouldClose, platformType, userId, fields) => {
 
-                                                setDataGridRefreshKey(dataGridRefreshKey + 1);
+                                                setIsSaving(false);
+                                                setDataGridRefreshKey(prev => prev + 1);
 
                                                 if (onSaved != null)
                                                 {
@@ -918,23 +921,19 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
 
                                                     onSaved(shouldClose, platformType, userId, fields);
                                                 }
-                                                
-                                                if (shouldClose)
-                                                {
-                                                    setShowUserDetails(null);
-                                                }
                                             }}
                                         />
                                     }
                                     {platformType == 2 &&
-                                        <CompanyEditor 
+                                        <CompanyEditor
                                             companyId={defaultIdentifier != null ? defaultIdentifier : showUserDetails}
                                             onCustomTabs={onCustomTabs}
                                             platformType={platformType}
                                             ref={userEditorRef}
                                             onSaved={(shouldClose, platformType, userId, fields) => {
 
-                                                setDataGridRefreshKey(dataGridRefreshKey + 1);
+                                                setIsSaving(false);
+                                                setDataGridRefreshKey(prev => prev + 1);
 
                                                 // need to add a way to close the company editor
                                                 if (onSaved != null)
@@ -957,7 +956,8 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                                             ref={userEditorRef}
                                             onSaved={(shouldClose, platformType, userId, fields) => {
 
-                                                setDataGridRefreshKey(dataGridRefreshKey + 1);
+                                                setIsSaving(false);
+                                                setDataGridRefreshKey(prev => prev + 1);
 
                                                 if (onSaved != null)
                                                 {
@@ -978,6 +978,16 @@ export const UserManagement = ({height = "50vh", platformType = 1, defaultIdenti
                         </Box>
                     </Box>
                     }
+
+                    <Backdrop
+                        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                        open={isSaving}
+                    >
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                            <CircularProgress color="inherit" />
+                            <Typography variant="body1" color="inherit">Saving...</Typography>
+                        </Box>
+                    </Backdrop>
 
                     <Dialog
                         open={showChangePasswordDialog}
