@@ -16,7 +16,7 @@ import {
     DataGrid,
     GridActionsCellItem,
   } from "@mui/x-data-grid";
-import { Fab, FormControlLabel, Grid, Switch } from '@mui/material';
+import { Fab, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, Switch, Alert } from '@mui/material';
 
 const Index = ({currentUser}) => {
 
@@ -24,8 +24,13 @@ const Index = ({currentUser}) => {
     const [pageType, setPageType] = useState(1);
     const [openEditApplication, setOpenEditApplication] = useState(null);
     const [openNewApp, setOpenNewApp] = useState(false);
-    
+
     const [pages, setPages] = React.useState([]);
+
+    // Identity provider being viewed/managed: "openiddict" (AuthScape) or "keycloak"
+    const [provider, setProvider] = React.useState("openiddict");
+    const [keycloakAdminEnabled, setKeycloakAdminEnabled] = React.useState(false);
+    const [keycloakError, setKeycloakError] = React.useState(null);
 
     const handleSaveChanges = async () => {
 
@@ -63,14 +68,56 @@ const Index = ({currentUser}) => {
     }
 
     useEffect(() => {
-        RefreshPages();
+        // Discover whether the Keycloak admin integration is enabled in the API
+        const loadFeatures = async () => {
+            try {
+                const featuresResponse = await apiService().get("/auth-features");
+                if (featuresResponse != null && featuresResponse.status === 200) {
+                    setKeycloakAdminEnabled(!!featuresResponse.data.keycloakAdminEnabled);
+                }
+            } catch {
+                // Older deployments without the auth-features endpoint just keep keycloakAdminEnabled = false.
+            }
+        };
+        loadFeatures();
     }, []);
 
-    const RefreshPages = async () => {
+    useEffect(() => {
+        RefreshPages();
+    }, [provider]);
 
-        let response = await apiService().get("/identityServer/GetApplications");
-        if (response != null)
-        {
+    const RefreshPages = async () => {
+        setKeycloakError(null);
+
+        if (provider === "keycloak") {
+            try {
+                const response = await apiService().get("/keycloak-admin/clients");
+                if (response != null && response.status === 200) {
+                    // Map Keycloak client representation to the shape this DataGrid expects.
+                    const mapped = (response.data || []).map(c => ({
+                        id: c.id,
+                        clientId: c.clientId,
+                        displayName: c.name || c.clientId,
+                        type: c.publicClient ? "public" : "confidential"
+                    }));
+                    setPages(mapped);
+                } else {
+                    setKeycloakError("Could not load Keycloak clients (HTTP " + (response && response.status) + ")");
+                    setPages([]);
+                }
+            } catch (err) {
+                const detail = err && err.response && err.response.data && err.response.data.message
+                    ? err.response.data.message
+                    : (err && err.message) || "Keycloak admin API failed";
+                setKeycloakError(detail);
+                setPages([]);
+            }
+            return;
+        }
+
+        // Default: OpenIddict / AuthScape applications (today's behavior)
+        const response = await apiService().get("/identityServer/GetApplications");
+        if (response != null) {
             setPages(response.data);
         }
     }
@@ -125,8 +172,20 @@ const Index = ({currentUser}) => {
         </Head>
         <div>
             <div className="card shadow mb-4">
-                <div className="card-header py-3">
+                <div className="card-header py-3" style={{display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap"}}>
                     <h1 className="m-0 font-weight-bold text-primary">Applications</h1>
+                    <FormControl size="small" sx={{minWidth: 240}}>
+                        <InputLabel id="identity-provider-label">Identity Provider</InputLabel>
+                        <Select
+                            labelId="identity-provider-label"
+                            id="identity-provider-select"
+                            value={provider}
+                            label="Identity Provider"
+                            onChange={(e) => setProvider(e.target.value)}>
+                            <MenuItem value="openiddict">OpenIddict (AuthScape)</MenuItem>
+                            {keycloakAdminEnabled && <MenuItem value="keycloak">Keycloak</MenuItem>}
+                        </Select>
+                    </FormControl>
                     <div className="text-right">
 
                         <Fab onClick={() => {
@@ -137,6 +196,11 @@ const Index = ({currentUser}) => {
 
                     </div>
                 </div>
+                {provider === "keycloak" && keycloakError && (
+                    <Alert severity="warning" sx={{mx:2, mt:1}}>
+                        Keycloak unavailable: {keycloakError}
+                    </Alert>
+                )}
                 <Box sx={{width:"100%",  height: 300}}>
                     <DataGrid
                     isRowSelectable={false}

@@ -22,10 +22,16 @@ module.exports = withPWA({
     stage: "development",
     googleAnalytics4: "",
     microsoftClarityTrackingCode: "",
-    client_id: "postman",
-    client_secret: "postman-secret",
+    // Identity provider for the browser login flow. Endpoints are resolved from the issuer's
+    // OIDC discovery document, so switching providers is just these values.
+    //   OpenIddict (AuthScape IDP): authorityUri "https://localhost:44303", client_id "postman",
+    //                               client_secret "postman-secret", oauthScope "openid profile email offline_access api1"
+    //   Keycloak: authorityUri "http://localhost:8080/realms/authscape", a PUBLIC client_id, no secret.
+    client_id: "authscape-spa",
+    client_secret: "", // public PKCE client — no secret. (Confidential OpenIddict client would set this.)
+    oauthScope: "openid profile email offline_access",
     apiUri: "http://localhost:54218",
-    authorityUri: "https://localhost:44303",
+    authorityUri: "http://localhost:8080/realms/authscape",
     cookieDomain: "localhost",
     enableOEMClient: "false",
     enableDatabaseAnalytics: "true",

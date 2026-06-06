@@ -84,9 +84,11 @@ export default function Tickets({setIsLoading, currentUser, customTabName = null
       headerName: 'Ticket #',
       width: 100,
       renderCell: (params) => (
-        <Typography variant="body2" fontWeight={600} color="primary">
-          #{params.value}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+          <Typography variant="body2" fontWeight={600} color="primary">
+            #{params.value}
+          </Typography>
+        </Box>
       )
     },
     {
@@ -95,7 +97,7 @@ export default function Tickets({setIsLoading, currentUser, customTabName = null
       headerName: 'Subject',
       minWidth: 250,
       renderCell: (params) => (
-        <Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
           <Typography variant="body2" fontWeight={500} noWrap>
             {params.value}
           </Typography>
@@ -568,12 +570,17 @@ export default function Tickets({setIsLoading, currentUser, customTabName = null
               return;
             }
 
+            if (ticketStatuses.length === 0) {
+              alert('Ticket statuses have not loaded yet. Please try again.');
+              return;
+            }
+
             try {
               const response = await apiService().post("/Ticket/CreateTicket", {
                 message: message,
                 description: description,
                 ticketTypeId: newTicketType,
-                ticketStatusId: ticketStatuses.length > 0 ? ticketStatuses[0].id : 1,
+                ticketStatusId: ticketStatuses[0].id,
                 priorityLevel: newTicketPriority
               });
 
@@ -591,6 +598,10 @@ export default function Tickets({setIsLoading, currentUser, customTabName = null
                 if (response.data) {
                   setSelectedTicketId(response.data);
                 }
+              } else {
+                const errorMessage = response?.data?.message || response?.data || 'Unknown error';
+                console.error('Failed to create ticket:', response?.status, errorMessage);
+                alert('Failed to create ticket: ' + errorMessage);
               }
             } catch (error) {
               console.error('Error creating ticket:', error);
