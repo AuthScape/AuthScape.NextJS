@@ -9,7 +9,6 @@ import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import "react-querybuilder/dist/query-builder.css";
 import "../styles/reactGrid.scss";
 import "react-image-crop/dist/ReactCrop.css";
-import "@measured/puck/puck.css";
 import "grapesjs/dist/css/grapes.min.css";
 
 function MyApp({ Component, pageProps }) {

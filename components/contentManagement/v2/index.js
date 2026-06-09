@@ -14,7 +14,6 @@ export { default as EmptyState } from './shared/EmptyState';
 export { default as PagesSection } from './pages/PagesSection';
 export { default as PageList } from './pages/PageList';
 export { default as PagePropertiesPanel } from './pages/PagePropertiesPanel';
-export { default as PageVisualBuilder } from './pages/PageVisualBuilder';
 export { default as CreatePageDialog } from './pages/CreatePageDialog';
 
 // Assets Section

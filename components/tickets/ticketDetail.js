@@ -634,7 +634,7 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
                 {isEditingDescription ? (
                   <Box>
                     <RichTextEditor
-                      html={ticketDescription || ''}
+                      html={ticketDescription && !ticketDescription.trim().startsWith('<') ? `<p>${ticketDescription}</p>` : (ticketDescription || '')}
                       onSave={async (html) => {
                         setTicketDescription(html);
                         setIsEditingDescription(false);
@@ -655,61 +655,46 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
                   </Box>
                 ) : (
                   <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<EditRoundedIcon sx={{ fontSize: 14 }} />}
+                        onClick={() => setIsEditingDescription(true)}
+                        sx={{ borderRadius: 2, textTransform: 'none' }}
+                      >
+                        Edit
+                      </Button>
+                    </Box>
                     <Box sx={{
                       whiteSpace:"pre-wrap",
                       '& img': {
                         maxWidth: '100%',
                         borderRadius: 1
                       },
+                      '& a': {
+                        color: 'primary.main',
+                        textDecoration: 'underline',
+                        '&:hover': {
+                          textDecoration: 'none'
+                        }
+                      },
                       minHeight: 100,
-                      position: 'relative',
                       p: 2,
                       borderRadius: 2,
                       border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
                       bgcolor: alpha(theme.palette.background.default, 0.5),
-                      transition: 'all 0.2s ease',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        borderColor: theme.palette.primary.main,
-                        bgcolor: alpha(theme.palette.primary.main, 0.02),
-                        '& .edit-overlay': {
-                          opacity: 1
-                        }
-                      }
-                    }}
-                    onClick={() => setIsEditingDescription(true)}
-                    >
-                      <Box
-                        className="edit-overlay"
-                        sx={{
-                          position: 'absolute',
-                          top: 8,
-                          right: 8,
-                          opacity: 0,
-                          transition: 'opacity 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.5,
-                          px: 1.5,
-                          py: 0.5,
-                          borderRadius: 1.5,
-                          bgcolor: alpha(theme.palette.primary.main, 0.1),
-                          color: 'primary.main',
-                          fontSize: '0.75rem',
-                          fontWeight: 500
-                        }}
-                      >
-                        <EditRoundedIcon sx={{ fontSize: 14 }} />
-                        Click to edit
-                      </Box>
+                    }}>
                       {ticketDescription ? (
                         <Box dangerouslySetInnerHTML={{
-                            __html: ticketDescription,
+                            __html: ticketDescription
+                              .replace(/href="(?!https?:\/\/|mailto:|tel:)([^"]+)"/g, 'href="https://$1"')
+                              .replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" '),
                         }}>
                         </Box>
                       ) : (
                         <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                          No description provided. Click to add one...
+                          No description provided.
                         </Typography>
                       )}
                     </Box>
@@ -949,12 +934,22 @@ export const TicketDetail = ({ticketId, setIsLoading, currentUser, GoBackToViewT
                           {ticket.assignedFirstName?.charAt(0)}
                         </Avatar>
                         <Box sx={{ minWidth: 0 }}>
+                          <Typography variant="caption" color="text.secondary" display="block" noWrap>
+                            Assignee
+                          </Typography>
                           <Typography variant="body2" fontWeight={600} noWrap>
                             {ticket.assignedFirstName} {ticket.assignedLastName}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary" noWrap>
-                            Assignee
-                          </Typography>
+                          {ticket.assignedEmail && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Typography variant="caption" color="text.secondary" noWrap>
+                                {ticket.assignedEmail}
+                              </Typography>
+                              <IconButton size="small" onClick={() => { navigator.clipboard.writeText(ticket.assignedEmail); showSnackbar('Email copied to clipboard'); }} sx={{ p: 0.25 }}>
+                                <ContentCopyRoundedIcon sx={{ fontSize: 14 }} />
+                              </IconButton>
+                            </Box>
+                          )}
                         </Box>
                       </Box>
                     </Box>
