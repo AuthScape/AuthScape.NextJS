@@ -45,7 +45,7 @@
     "@stripe/react-stripe-js": "^6.6.0",
     "@stripe/stripe-js": "^9.7.0",
     "@xstyled/styled-components": "^3.8.0",
-    "authscape": "^1.0.782",
+    "authscape": "file:../AuthScape.NextJS_NPM/AuthScapeNPM",
     "authscape-contentmanagement": "^1.0.1",
     "authscape-tickets": "^1.0.14",
     "authscape-usermanagement": "^1.0.80",
